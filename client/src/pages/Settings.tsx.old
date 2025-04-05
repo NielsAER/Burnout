@@ -1,0 +1,458 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ShieldIcon, ServerIcon, KeyIcon } from "lucide-react";
+import { SettingsForm } from "@/components/settings/SettingsForm";
+
+export default function Settings() {
+
+  return (
+    <div className="container py-6 max-w-5xl">
+      <header className="mb-8">
+        <h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1>
+        <p className="text-muted-foreground text-lg">
+          Configure your FlowConnect settings and API keys
+        </p>
+      </header>
+
+      <Tabs defaultValue="api-credentials" className="space-y-8">
+        <TabsList className="grid grid-cols-3 max-w-lg">
+          <TabsTrigger value="api-credentials" className="flex items-center gap-2">
+            <KeyIcon className="h-4 w-4" />
+            API Credentials
+          </TabsTrigger>
+          <TabsTrigger value="account" className="flex items-center gap-2">
+            <ShieldIcon className="h-4 w-4" />
+            Account
+          </TabsTrigger>
+          <TabsTrigger value="general" className="flex items-center gap-2">
+            <ServerIcon className="h-4 w-4" />
+            General
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="api-keys" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>AI Service API Keys</CardTitle>
+              <CardDescription>
+                Add your API keys to enable AI features. Your keys are stored locally and never sent to our servers.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="openai-key" className="font-medium flex items-center gap-2">
+                    OpenAI API Key
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">Required for GPT-4o text analysis, DALL-E image generation</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 gap-1 text-xs"
+                    onClick={() => openDocumentation("openai")}
+                  >
+                    Get Key <ExternalLinkIcon className="h-3 w-3" />
+                  </Button>
+                </div>
+                <Input
+                  id="openai-key"
+                  type="password"
+                  placeholder="sk-..."
+                  value={apiKeys.openai}
+                  onChange={(e) => handleInputChange("openai", e.target.value)}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="anthropic-key" className="font-medium flex items-center gap-2">
+                    Anthropic API Key
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">Required for Claude AI text analysis and entity extraction</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 gap-1 text-xs"
+                    onClick={() => openDocumentation("anthropic")}
+                  >
+                    Get Key <ExternalLinkIcon className="h-3 w-3" />
+                  </Button>
+                </div>
+                <Input
+                  id="anthropic-key"
+                  type="password"
+                  placeholder="sk-ant-..."
+                  value={apiKeys.anthropic}
+                  onChange={(e) => handleInputChange("anthropic", e.target.value)}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="perplexity-key" className="font-medium flex items-center gap-2">
+                    Perplexity API Key
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">Required for web search and research capabilities</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 gap-1 text-xs"
+                    onClick={() => openDocumentation("perplexity")}
+                  >
+                    Get Key <ExternalLinkIcon className="h-3 w-3" />
+                  </Button>
+                </div>
+                <Input
+                  id="perplexity-key"
+                  type="password"
+                  placeholder="pplx-..."
+                  value={apiKeys.perplexity}
+                  onChange={(e) => handleInputChange("perplexity", e.target.value)}
+                />
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="ollama-url" className="font-medium flex items-center gap-2">
+                    Ollama URL
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="max-w-xs">URL for local Ollama instance (default: http://localhost:11434)</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 gap-1 text-xs"
+                    onClick={() => openDocumentation("ollama")}
+                  >
+                    Learn More <ExternalLinkIcon className="h-3 w-3" />
+                  </Button>
+                </div>
+                <Input
+                  id="ollama-url"
+                  type="text"
+                  placeholder="http://localhost:11434"
+                  value={apiKeys.ollama}
+                  onChange={(e) => handleInputChange("ollama", e.target.value)}
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={saveApiKeys} className="ml-auto">
+                Save API Keys
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="oauth" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>OAuth Application Credentials</CardTitle>
+              <CardDescription>
+                Add your OAuth client IDs and secrets to connect to third-party services. These credentials are required to authenticate with services like Google, Twitter, and Instagram.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {/* Google */}
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="text-lg font-medium">Google</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="google_client_id">Google Client ID</Label>
+                    <Input
+                      id="google_client_id"
+                      type="password"
+                      placeholder="Your Google Client ID"
+                      value={oauthCredentials.google_client_id}
+                      onChange={(e) => handleOAuthInputChange("google_client_id", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="google_client_secret">Google Client Secret</Label>
+                    <Input
+                      id="google_client_secret"
+                      type="password"
+                      placeholder="Your Google Client Secret"
+                      value={oauthCredentials.google_client_secret}
+                      onChange={(e) => handleOAuthInputChange("google_client_secret", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  These credentials give access to Gmail, Google Drive, Calendar, and Sheets.{" "}
+                  <a 
+                    href="https://console.cloud.google.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline inline-flex items-center">
+                    Get from Google Cloud Console <ExternalLinkIcon className="h-3 w-3 ml-1" />
+                  </a>
+                </p>
+              </div>
+
+              {/* Slack */}
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="text-lg font-medium">Slack</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="slack_client_id">Slack Client ID</Label>
+                    <Input
+                      id="slack_client_id"
+                      type="password"
+                      placeholder="Your Slack Client ID"
+                      value={oauthCredentials.slack_client_id}
+                      onChange={(e) => handleOAuthInputChange("slack_client_id", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="slack_client_secret">Slack Client Secret</Label>
+                    <Input
+                      id="slack_client_secret"
+                      type="password"
+                      placeholder="Your Slack Client Secret"
+                      value={oauthCredentials.slack_client_secret}
+                      onChange={(e) => handleOAuthInputChange("slack_client_secret", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Required for sending messages and accessing channels in Slack.{" "}
+                  <a 
+                    href="https://api.slack.com/apps" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline inline-flex items-center">
+                    Get from Slack API Dashboard <ExternalLinkIcon className="h-3 w-3 ml-1" />
+                  </a>
+                </p>
+              </div>
+
+              {/* Twitter */}
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="text-lg font-medium">Twitter</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter_client_id">Twitter Client ID</Label>
+                    <Input
+                      id="twitter_client_id"
+                      type="password"
+                      placeholder="Your Twitter Client ID"
+                      value={oauthCredentials.twitter_client_id}
+                      onChange={(e) => handleOAuthInputChange("twitter_client_id", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="twitter_client_secret">Twitter Client Secret</Label>
+                    <Input
+                      id="twitter_client_secret"
+                      type="password"
+                      placeholder="Your Twitter Client Secret"
+                      value={oauthCredentials.twitter_client_secret}
+                      onChange={(e) => handleOAuthInputChange("twitter_client_secret", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Required for reading and posting tweets.{" "}
+                  <a 
+                    href="https://developer.twitter.com/en/portal/dashboard" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline inline-flex items-center">
+                    Get from Twitter Developer Portal <ExternalLinkIcon className="h-3 w-3 ml-1" />
+                  </a>
+                </p>
+              </div>
+
+              {/* Instagram */}
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="text-lg font-medium">Instagram</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram_client_id">Instagram Client ID</Label>
+                    <Input
+                      id="instagram_client_id"
+                      type="password"
+                      placeholder="Your Instagram Client ID"
+                      value={oauthCredentials.instagram_client_id}
+                      onChange={(e) => handleOAuthInputChange("instagram_client_id", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="instagram_client_secret">Instagram Client Secret</Label>
+                    <Input
+                      id="instagram_client_secret"
+                      type="password"
+                      placeholder="Your Instagram Client Secret"
+                      value={oauthCredentials.instagram_client_secret}
+                      onChange={(e) => handleOAuthInputChange("instagram_client_secret", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Required for posting and accessing Instagram data.{" "}
+                  <a 
+                    href="https://developers.facebook.com/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline inline-flex items-center">
+                    Get from Facebook Developer Portal <ExternalLinkIcon className="h-3 w-3 ml-1" />
+                  </a>
+                </p>
+              </div>
+
+              {/* LinkedIn */}
+              <div className="space-y-4 border rounded-lg p-4">
+                <h3 className="text-lg font-medium">LinkedIn</h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin_client_id">LinkedIn Client ID</Label>
+                    <Input
+                      id="linkedin_client_id"
+                      type="password"
+                      placeholder="Your LinkedIn Client ID"
+                      value={oauthCredentials.linkedin_client_id}
+                      onChange={(e) => handleOAuthInputChange("linkedin_client_id", e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="linkedin_client_secret">LinkedIn Client Secret</Label>
+                    <Input
+                      id="linkedin_client_secret"
+                      type="password"
+                      placeholder="Your LinkedIn Client Secret"
+                      value={oauthCredentials.linkedin_client_secret}
+                      onChange={(e) => handleOAuthInputChange("linkedin_client_secret", e.target.value)}
+                    />
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Required for posting updates and accessing LinkedIn profile data.{" "}
+                  <a 
+                    href="https://www.linkedin.com/developers/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline inline-flex items-center">
+                    Get from LinkedIn Developer Portal <ExternalLinkIcon className="h-3 w-3 ml-1" />
+                  </a>
+                </p>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button onClick={saveOAuthCredentials} className="ml-auto">
+                Save OAuth Credentials
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="account" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Account Settings</CardTitle>
+              <CardDescription>
+                Manage your account settings and preferences
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="display-name">Display Name</Label>
+                <Input
+                  id="display-name"
+                  defaultValue="User"
+                  placeholder="Your name"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  defaultValue="user@example.com"
+                  placeholder="Your email"
+                  type="email"
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="ml-auto">Save Account Settings</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="general" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>General Settings</CardTitle>
+              <CardDescription>
+                Configure general application settings
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <select
+                  id="timezone"
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  defaultValue="UTC"
+                >
+                  <option value="UTC">UTC</option>
+                  <option value="America/New_York">Eastern Time (ET)</option>
+                  <option value="America/Chicago">Central Time (CT)</option>
+                  <option value="America/Denver">Mountain Time (MT)</option>
+                  <option value="America/Los_Angeles">Pacific Time (PT)</option>
+                  <option value="Europe/London">Greenwich Mean Time (GMT)</option>
+                  <option value="Europe/Paris">Central European Time (CET)</option>
+                  <option value="Asia/Tokyo">Japan Standard Time (JST)</option>
+                </select>
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button className="ml-auto">Save General Settings</Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}

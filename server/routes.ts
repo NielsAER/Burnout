@@ -306,6 +306,80 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // POST /api/settings/oauth-credentials - Save OAuth credentials
+  app.post("/api/settings/oauth-credentials", (req, res) => {
+    try {
+      // Save the credentials in session storage
+      if (!req.session.oauthCredentials) {
+        req.session.oauthCredentials = {};
+      }
+      
+      // Merge the new credentials with any existing ones
+      req.session.oauthCredentials = {
+        ...req.session.oauthCredentials,
+        ...req.body
+      };
+      
+      res.status(200).json({ message: "OAuth credentials saved successfully" });
+    } catch (error) {
+      console.error("Error saving OAuth credentials:", error);
+      res.status(500).json({ message: "Failed to save OAuth credentials" });
+    }
+  });
+  
+  // POST /api/settings/api-keys - Save API keys
+  app.post("/api/settings/api-keys", (req, res) => {
+    try {
+      // Save the API keys in session storage
+      if (!req.session.apiKeys) {
+        req.session.apiKeys = {};
+      }
+      
+      // Merge the new API keys with any existing ones
+      req.session.apiKeys = {
+        ...req.session.apiKeys,
+        ...req.body
+      };
+      
+      res.status(200).json({ message: "API keys saved successfully" });
+    } catch (error) {
+      console.error("Error saving API keys:", error);
+      res.status(500).json({ message: "Failed to save API keys" });
+    }
+  });
+  
+  // GET /api/settings/api-keys-status - Check API key status
+  app.get("/api/settings/api-keys-status", (req, res) => {
+    try {
+      const apiKeys = req.session.apiKeys || {};
+      
+      // Create a status object for each API service
+      const services = {
+        openai: {
+          hasKey: !!apiKeys.openai || !!process.env.OPENAI_API_KEY,
+          environmentProvided: !!process.env.OPENAI_API_KEY
+        },
+        anthropic: {
+          hasKey: !!apiKeys.anthropic || !!process.env.ANTHROPIC_API_KEY,
+          environmentProvided: !!process.env.ANTHROPIC_API_KEY
+        },
+        perplexity: {
+          hasKey: !!apiKeys.perplexity || !!process.env.PERPLEXITY_API_KEY,
+          environmentProvided: !!process.env.PERPLEXITY_API_KEY
+        },
+        ollama: {
+          hasKey: !!apiKeys.ollama || true, // Ollama is locally hosted, so it doesn't require a key
+          environmentProvided: true
+        }
+      };
+      
+      res.json({ services });
+    } catch (error) {
+      console.error("Error checking API key status:", error);
+      res.status(500).json({ message: "Failed to check API key status" });
+    }
+  });
+  
   // GET /api/app-connections/:appId/auth - Start OAuth flow for an app
   app.get("/api/app-connections/:appId/auth", (req, res) => {
     try {
@@ -316,40 +390,90 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const protocol = req.secure ? 'https' : 'http';
       const baseUrl = `${protocol}://${host}`;
       
-      // In a real app, we would use real client IDs and secrets
-      // These would be stored in environment variables
+      // Get the OAuth credentials from session storage
+      const oauthCredentials = req.session.oauthCredentials || {};
       let oauthUrl = '';
       
       switch (appId) {
         case 'instagram':
-          oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/instagram&response_type=code&scope=user_profile,user_media`;
+          const instagramClientId = oauthCredentials.instagram_client_id || process.env.INSTAGRAM_CLIENT_ID;
+          if (!instagramClientId) {
+            return res.status(400).json({ 
+              message: "Missing Instagram client ID", 
+              missingCredential: true, 
+              service: "instagram" 
+            });
+          }
+          oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${instagramClientId}&redirect_uri=${baseUrl}/api/callback/instagram&response_type=code&scope=user_profile,user_media`;
           break;
+          
         case 'linkedin':
-          oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/linkedin&response_type=code&scope=r_liteprofile,r_emailaddress,w_member_social`;
+          const linkedinClientId = oauthCredentials.linkedin_client_id || process.env.LINKEDIN_CLIENT_ID;
+          if (!linkedinClientId) {
+            return res.status(400).json({ 
+              message: "Missing LinkedIn client ID", 
+              missingCredential: true, 
+              service: "linkedin" 
+            });
+          }
+          oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${linkedinClientId}&redirect_uri=${baseUrl}/api/callback/linkedin&response_type=code&scope=r_liteprofile,r_emailaddress,w_member_social`;
           break;
+          
         case 'google-drive':
         case 'gmail':
         case 'google-sheets':
         case 'google-calendar':
-          oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/google&response_type=code&scope=https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/gmail.readonly`;
+          const googleClientId = oauthCredentials.google_client_id || process.env.GOOGLE_CLIENT_ID;
+          if (!googleClientId) {
+            return res.status(400).json({ 
+              message: "Missing Google client ID", 
+              missingCredential: true, 
+              service: "google" 
+            });
+          }
+          oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${baseUrl}/api/callback/google&response_type=code&scope=https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/gmail.readonly`;
           break;
+          
         case 'slack':
-          oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/slack&scope=channels:read,chat:write`;
+          const slackClientId = oauthCredentials.slack_client_id || process.env.SLACK_CLIENT_ID;
+          if (!slackClientId) {
+            return res.status(400).json({ 
+              message: "Missing Slack client ID", 
+              missingCredential: true, 
+              service: "slack" 
+            });
+          }
+          oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${slackClientId}&redirect_uri=${baseUrl}/api/callback/slack&scope=channels:read,chat:write`;
           break;
+          
         case 'twitter':
-          oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/twitter&response_type=code&scope=tweet.read,tweet.write,users.read`;
+          const twitterClientId = oauthCredentials.twitter_client_id || process.env.TWITTER_CLIENT_ID;
+          if (!twitterClientId) {
+            return res.status(400).json({ 
+              message: "Missing Twitter client ID", 
+              missingCredential: true, 
+              service: "twitter" 
+            });
+          }
+          oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${twitterClientId}&redirect_uri=${baseUrl}/api/callback/twitter&response_type=code&scope=tweet.read,tweet.write,users.read`;
           break;
+          
         case 'openai':
         case 'anthropic':
         case 'perplexity':
         case 'ollama':
         case 'text-processor':
-          // For AI services, we'd typically use API keys not OAuth, but we'll mock it
-          oauthUrl = `${baseUrl}/api/callback/${appId}?code=mock_code&api_integration=true`;
+          // For AI services, we'd typically use API keys not OAuth, so we'll use a custom flow
+          oauthUrl = `${baseUrl}/api/callback/${appId}?code=direct_api_integration&api_integration=true`;
           break;
+          
         default:
-          // For other services, create a generic mock OAuth URL
-          oauthUrl = `https://auth.mockservice.com/oauth?service=${appId}&redirect=${baseUrl}/api/callback/${appId}`;
+          // For other services, create a generic error response
+          return res.status(400).json({ 
+            message: `No OAuth configuration available for ${appId}`, 
+            missingCredential: true,
+            service: appId 
+          });
       }
       
       // Return the OAuth URL to the client so it can redirect
@@ -420,7 +544,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { service } = req.params;
       const { code } = req.query; // Auth code from OAuth provider
-      const { error: oauthError } = req.query;
+      const { error: oauthError, api_integration: apiIntegration } = req.query;
       
       // Check for OAuth errors
       if (oauthError) {
@@ -431,13 +555,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.redirect(`/app-connections?error=no_auth_code`);
       }
       
+      // Get host information for redirect URIs
+      const host = req.headers.host || 'localhost:3000';
+      const protocol = req.secure ? 'https' : 'http';
+      const baseUrl = `${protocol}://${host}`;
+      
+      // Get the OAuth credentials from session
+      const oauthCredentials = req.session.oauthCredentials || {};
+      
+      let accessToken = "mock-token-for-demo";
+      let username = `user@${service}.com`;
+      let permissions = ["read", "write"];
+      
       // In a real application, we would exchange this code for an access token
-      // For demo purposes, we'll create a mock connection
+      // Here we'd use the client secret to make the token exchange
+      if (apiIntegration !== 'true') {
+        try {
+          // Determine which client secret to use
+          let clientId;
+          let clientSecret;
+          
+          switch(service) {
+            case 'instagram':
+              clientId = oauthCredentials.instagram_client_id || process.env.INSTAGRAM_CLIENT_ID;
+              clientSecret = oauthCredentials.instagram_client_secret || process.env.INSTAGRAM_CLIENT_SECRET;
+              break;
+            case 'linkedin':
+              clientId = oauthCredentials.linkedin_client_id || process.env.LINKEDIN_CLIENT_ID;
+              clientSecret = oauthCredentials.linkedin_client_secret || process.env.LINKEDIN_CLIENT_SECRET;
+              break;
+            case 'google':
+              clientId = oauthCredentials.google_client_id || process.env.GOOGLE_CLIENT_ID;
+              clientSecret = oauthCredentials.google_client_secret || process.env.GOOGLE_CLIENT_SECRET;
+              break;
+            case 'slack':
+              clientId = oauthCredentials.slack_client_id || process.env.SLACK_CLIENT_ID;
+              clientSecret = oauthCredentials.slack_client_secret || process.env.SLACK_CLIENT_SECRET;
+              break;
+            case 'twitter':
+              clientId = oauthCredentials.twitter_client_id || process.env.TWITTER_CLIENT_ID;
+              clientSecret = oauthCredentials.twitter_client_secret || process.env.TWITTER_CLIENT_SECRET;
+              break;
+          }
+          
+          // For a real implementation, we would make an API call to exchange the code for a token
+          // For example with fetch:
+          /*
+          const tokenResponse = await fetch(`https://${service}.com/oauth/token`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              client_id: clientId,
+              client_secret: clientSecret,
+              code: code,
+              redirect_uri: `${baseUrl}/api/callback/${service}`,
+              grant_type: 'authorization_code'
+            })
+          });
+          
+          if (!tokenResponse.ok) {
+            throw new Error(`Failed to exchange code for token: ${tokenResponse.statusText}`);
+          }
+          
+          const tokenData = await tokenResponse.json();
+          accessToken = tokenData.access_token;
+          */
+        } catch (tokenError) {
+          console.error("Token exchange error:", tokenError);
+          // In a real app, we'd handle this error and show a specific message
+          // For our demo, we'll continue with the mock token
+        }
+      }
+      
+      // Create the app connection
       const newConnection = await storage.createAppConnection({
         appId: service,
-        username: `user@${service}.com`,
-        permissions: ["read", "write"],
-        credentials: { token: "mock-token-from-oauth" }
+        username,
+        permissions,
+        credentials: { token: accessToken }
       } as any);
       
       // Return successful response with HTML that will close the popup and signal success
