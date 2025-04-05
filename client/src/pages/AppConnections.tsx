@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { APPS, AppId } from "@/lib/constants";
 import AppIconMap from "@/components/automation/AppIconMap";
 import { Button } from "@/components/ui/button";
@@ -11,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
+import { useLocation } from "wouter";
 
 // Categorize apps by type
 type AppCategory = "social" | "productivity" | "communication" | "marketing" | "analytics" | "payments" | "ai";
@@ -67,37 +68,59 @@ export default function AppConnections() {
   const [connectingApp, setConnectingApp] = useState<string | null>(null);
 
   // Fetch connection statuses
-  const { data: connections, isLoading } = useQuery<any[], unknown, Record<string, ConnectionStatus>>({
+  const { data: connections, isLoading } = useQuery<any[]>({
     queryKey: ['/api/app-connections'],
-    onSettled: (data, error) => {
-      if (error) {
-        console.error("Error fetching connections:", error);
-        toast({
-          title: "Error fetching connections",
-          description: "Could not load your app connections",
-          variant: "destructive",
-        });
-      }
-    },
-    select: (data) => {
-      // Convert to a more usable format with appId as key
-      const formatted: Record<string, ConnectionStatus> = {};
-      // If data is available, process it
-      if (Array.isArray(data)) {
-        data.forEach((connection: any) => {
-          formatted[connection.appId] = {
-            connected: true,
-            username: connection.username || 'Connected account',
-            lastConnected: new Date(connection.createdAt).toLocaleDateString(),
-            permissions: connection.permissions || []
-          };
-        });
-      }
-      return formatted;
-    },
     // Default to an empty array if no data exists yet
     initialData: []
   });
+  
+  // Convert to a more usable format with appId as key
+  // Check for OAuth callback response parameters
+  useEffect(() => {
+    // Get URL search params
+    const searchParams = new URLSearchParams(window.location.search);
+    const success = searchParams.get('success');
+    const error = searchParams.get('error');
+    
+    if (success) {
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      toast({
+        title: "Connection Successful",
+        description: `Your ${success} account has been connected successfully!`,
+      });
+      
+      // Refresh the connections data
+      queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+    } else if (error) {
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      toast({
+        title: "Connection Failed",
+        description: "There was an error connecting your account. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, []);
+  
+  const connectionMap = useMemo(() => {
+    const formatted: Record<string, ConnectionStatus> = {};
+    
+    // If data is available, process it
+    if (Array.isArray(connections)) {
+      connections.forEach((connection: any) => {
+        formatted[connection.appId] = {
+          connected: true,
+          username: connection.username || 'Connected account',
+          lastConnected: new Date(connection.createdAt).toLocaleDateString(),
+          permissions: connection.permissions || []
+        };
+      });
+    }
+    return formatted;
+  }, [connections]);
 
   // Mutation for connecting an app
   const connectMutation = useMutation({
@@ -151,9 +174,44 @@ export default function AppConnections() {
     }
   });
 
-  const handleConnect = (appId: string) => {
+  // Auth flow for connecting apps
+  const startOAuthFlow = async (appId: string) => {
     setConnectingApp(appId);
-    connectMutation.mutate(appId);
+    try {
+      // Get OAuth URL from server
+      const response = await apiRequest({
+        method: "GET",
+        url: `/api/app-connections/${appId}/auth`
+      });
+      
+      const data = await response.json();
+      
+      if (data.oauthUrl) {
+        // Open OAuth flow in a new window
+        window.open(data.oauthUrl, "_blank", "width=600,height=700");
+        
+        // After OAuth completes, the callback handler will redirect to our app
+        // The user will need to refresh or we would need server-sent events to detect completion
+        toast({
+          title: "Authorization Started",
+          description: "Please complete the authorization process in the new window",
+        });
+      } else {
+        throw new Error("No OAuth URL provided");
+      }
+    } catch (error) {
+      console.error("OAuth error:", error);
+      toast({
+        title: "Connection failed",
+        description: "Could not start authorization process",
+        variant: "destructive",
+      });
+      setConnectingApp(null);
+    }
+  };
+  
+  const handleConnect = (appId: string) => {
+    startOAuthFlow(appId);
   };
 
   const handleDisconnect = (appId: string) => {
@@ -161,7 +219,7 @@ export default function AppConnections() {
   };
 
   const isConnected = (appId: string): boolean => {
-    return !!connections?.[appId]?.connected;
+    return !!connectionMap[appId]?.connected;
   };
 
   const renderConnectionStatus = (appId: string) => {
@@ -173,7 +231,7 @@ export default function AppConnections() {
       return (
         <div className="flex items-center">
           <Check className="h-4 w-4 text-green-500 mr-2" />
-          <span className="text-sm">{connections?.[appId]?.username || 'Connected'}</span>
+          <span className="text-sm">{connectionMap[appId]?.username || 'Connected'}</span>
         </div>
       );
     }
@@ -230,7 +288,7 @@ export default function AppConnections() {
                         <div>
                           {isConnected(appId) && (
                             <Badge variant="outline" className="ml-2">
-                              {connections?.[appId]?.permissions?.length} permissions
+                              {connectionMap[appId]?.permissions?.length} permissions
                             </Badge>
                           )}
                         </div>

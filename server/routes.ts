@@ -306,13 +306,67 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // GET /api/app-connections/:appId/auth - Start OAuth flow for an app
+  app.get("/api/app-connections/:appId/auth", (req, res) => {
+    try {
+      const { appId } = req.params;
+      
+      // Get the host from the request to create proper redirect URLs
+      const host = req.headers.host || 'localhost:3000';
+      const protocol = req.secure ? 'https' : 'http';
+      const baseUrl = `${protocol}://${host}`;
+      
+      // In a real app, we would use real client IDs and secrets
+      // These would be stored in environment variables
+      let oauthUrl = '';
+      
+      switch (appId) {
+        case 'instagram':
+          oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/instagram&response_type=code&scope=user_profile,user_media`;
+          break;
+        case 'linkedin':
+          oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/linkedin&response_type=code&scope=r_liteprofile,r_emailaddress,w_member_social`;
+          break;
+        case 'google-drive':
+        case 'gmail':
+        case 'google-sheets':
+        case 'google-calendar':
+          oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/google&response_type=code&scope=https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/gmail.readonly`;
+          break;
+        case 'slack':
+          oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/slack&scope=channels:read,chat:write`;
+          break;
+        case 'twitter':
+          oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=MOCK_CLIENT_ID&redirect_uri=${baseUrl}/api/callback/twitter&response_type=code&scope=tweet.read,tweet.write,users.read`;
+          break;
+        case 'openai':
+        case 'anthropic':
+        case 'perplexity':
+        case 'ollama':
+        case 'text-processor':
+          // For AI services, we'd typically use API keys not OAuth, but we'll mock it
+          oauthUrl = `${baseUrl}/api/callback/${appId}?code=mock_code&api_integration=true`;
+          break;
+        default:
+          // For other services, create a generic mock OAuth URL
+          oauthUrl = `https://auth.mockservice.com/oauth?service=${appId}&redirect=${baseUrl}/api/callback/${appId}`;
+      }
+      
+      // Return the OAuth URL to the client so it can redirect
+      res.json({ oauthUrl });
+    } catch (error) {
+      console.error("OAuth URL generation error:", error);
+      res.status(500).json({ message: "Failed to generate auth URL" });
+    }
+  });
+  
   // POST /api/app-connections/:appId/connect - Connect an app
   app.post("/api/app-connections/:appId/connect", async (req, res) => {
     try {
       const { appId } = req.params;
+      const { code } = req.body; // In real OAuth, we'd get an authorization code
       
-      // In a real application, this would handle OAuth flow or API key validation
-      // For now, we'll create a mock connection
+      // For demo purposes, we'll create a mock connection regardless of code
       const newConnection = await storage.createAppConnection({
         appId,
         username: `user@${appId}.com`,
@@ -324,6 +378,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("App connection error:", error);
       res.status(500).json({ message: "Failed to connect app" });
+    }
+  });
+  
+  // GET /api/callback/:service - Handle OAuth callback 
+  app.get("/api/callback/:service", async (req, res) => {
+    try {
+      const { service } = req.params;
+      const { code } = req.query; // Auth code from OAuth provider
+      
+      if (!code) {
+        return res.status(400).send("Authentication failed: No authorization code received");
+      }
+      
+      // In a real application, we would exchange this code for an access token
+      // For demo purposes, we'll create a mock connection
+      const newConnection = await storage.createAppConnection({
+        appId: service,
+        username: `user@${service}.com`,
+        permissions: ["read", "write"],
+        credentials: { token: "mock-token-from-oauth" }
+      } as any);
+      
+      // Redirect back to the app connections page with success message
+      res.redirect(`/app-connections?success=${service}`);
+    } catch (error) {
+      console.error("OAuth callback error:", error);
+      res.redirect(`/app-connections?error=auth_failed`);
     }
   });
   
