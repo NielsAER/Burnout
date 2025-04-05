@@ -21,6 +21,8 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
         return "My Automations";
       case "/builder":
         return "Create Automation";
+      case "/ai-services":
+        return "AI Services";
       default:
         if (location.startsWith("/builder/")) {
           return "Edit Automation";

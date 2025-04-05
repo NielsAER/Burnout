@@ -12,7 +12,13 @@ import {
   Instagram,
   Globe,
   CalendarDays,
-  Bell
+  Bell,
+  Brain,
+  Bot,
+  BookOpenText,
+  Search,
+  SparkleIcon,
+  MessagesSquare
 } from "lucide-react";
 
 interface AppIconMapProps {
@@ -34,6 +40,16 @@ const AppIconMap: FC<AppIconMapProps> = ({ appId, size = "md" }) => {
 
   const renderIcon = () => {
     switch (appId) {
+      case "openai":
+        return <SparkleIcon className={iconColor} />;
+      case "anthropic":
+        return <Brain className={iconColor} />;
+      case "ollama":
+        return <Bot className={iconColor} />;
+      case "perplexity":
+        return <Search className={iconColor} />;
+      case "text-processor":
+        return <BookOpenText className={iconColor} />;
       case "gmail":
         return <Mail className={iconColor} />;
       case "twitter":

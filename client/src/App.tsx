@@ -6,6 +6,8 @@ import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/Dashboard";
 import MyAutomations from "@/pages/MyAutomations";
 import AutomationBuilder from "@/pages/AutomationBuilder";
+import AIServices from "@/pages/AIServices";
+import Settings from "@/pages/Settings";
 import MainLayout from "@/layouts/MainLayout";
 
 function Router() {
@@ -15,6 +17,8 @@ function Router() {
       <Route path="/automations" component={MyAutomations} />
       <Route path="/builder" component={AutomationBuilder} />
       <Route path="/builder/:id" component={AutomationBuilder} />
+      <Route path="/ai-services" component={AIServices} />
+      <Route path="/settings" component={Settings} />
       <Route component={NotFound} />
     </Switch>
   );

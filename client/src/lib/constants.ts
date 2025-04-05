@@ -10,7 +10,12 @@ export type AppId =
   | "instagram" 
   | "wordpress" 
   | "events" 
-  | "notification";
+  | "notification"
+  | "openai"
+  | "anthropic"
+  | "ollama"
+  | "perplexity"
+  | "text-processor";
 
 export interface AppDefinition {
   id: AppId;
@@ -29,6 +34,71 @@ export interface AppDefinition {
 }
 
 export const APPS: Record<AppId, AppDefinition> = {
+  "openai": {
+    id: "openai",
+    name: "OpenAI",
+    description: "Connect to OpenAI API for AI capabilities",
+    iconColor: "text-green-600",
+    bgColor: "bg-green-100",
+    actionOptions: [
+      { name: "Text Generation", description: "Generate text using GPT models" },
+      { name: "Image Generation", description: "Create images with DALL-E models" },
+      { name: "Text Analysis", description: "Analyze sentiment, extract information, or classify text" },
+      { name: "Content Moderation", description: "Filter and moderate content" }
+    ]
+  },
+  "anthropic": {
+    id: "anthropic",
+    name: "Anthropic",
+    description: "Connect to Anthropic's Claude for AI capabilities",
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-100",
+    actionOptions: [
+      { name: "Text Generation", description: "Generate text using Claude models" },
+      { name: "Text Analysis", description: "Analyze sentiment, extract information, or classify text" },
+      { name: "Content Rewriting", description: "Rewrite or edit existing content" }
+    ]
+  },
+  "ollama": {
+    id: "ollama",
+    name: "Ollama",
+    description: "Connect to local Ollama models",
+    iconColor: "text-purple-600",
+    bgColor: "bg-purple-100",
+    actionOptions: [
+      { name: "Text Generation", description: "Generate text using local LLM models" },
+      { name: "Text Completion", description: "Complete text using local LLM models" },
+      { name: "Text Analysis", description: "Analyze text using local LLM models" }
+    ]
+  },
+  "perplexity": {
+    id: "perplexity",
+    name: "Perplexity",
+    description: "Connect to Perplexity for advanced search and AI insights",
+    iconColor: "text-indigo-600", 
+    bgColor: "bg-indigo-100",
+    actionOptions: [
+      { name: "Web Search", description: "Search the web with AI-enhanced results" },
+      { name: "Research Questions", description: "Get detailed answers to complex research questions" },
+      { name: "Topic Analysis", description: "Analyze topics with up-to-date information" }
+    ]
+  },
+  "text-processor": {
+    id: "text-processor",
+    name: "Text Processor",
+    description: "Process and transform text content",
+    iconColor: "text-yellow-600",
+    bgColor: "bg-yellow-100",
+    triggerOptions: [
+      { name: "Text Input", description: "Process when text is provided" }
+    ],
+    actionOptions: [
+      { name: "Summarize", description: "Create a concise summary of text" },
+      { name: "Format", description: "Format text (Markdown, HTML, etc.)" },
+      { name: "Extract", description: "Extract data from text (emails, dates, etc.)" },
+      { name: "Translate", description: "Translate text to another language" }
+    ]
+  },
   "gmail": {
     id: "gmail",
     name: "Gmail",

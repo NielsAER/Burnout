@@ -6,7 +6,8 @@ import {
   AppWindow, 
   History, 
   Settings, 
-  LogOut 
+  LogOut,
+  BrainCircuit
 } from "lucide-react";
 
 interface SidebarProps {
@@ -75,6 +76,16 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             }`}>
               <History className="mr-3 h-5 w-5" />
               Execution History
+            </a>
+          </Link>
+          <Link href="/ai-services" onClick={onClose}>
+            <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
+              isActive("/ai-services") 
+                ? "bg-primary/10 text-primary border-l-3 border-primary" 
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}>
+              <BrainCircuit className="mr-3 h-5 w-5" />
+              AI Services
             </a>
           </Link>
           <Link href="/settings" onClick={onClose}>
