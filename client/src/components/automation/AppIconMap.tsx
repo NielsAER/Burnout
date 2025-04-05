@@ -17,8 +17,20 @@ import {
   Bot,
   BookOpenText,
   Search,
-  SparkleIcon,
-  MessagesSquare
+  Sparkles,
+  MessagesSquare,
+  Linkedin,
+  MessageSquare,
+  CreditCard,
+  FormInput,
+  Facebook,
+  Ship,
+  Building2,
+  LayoutGrid,
+  PanelRight,
+  Video,
+  Play,
+  File
 } from "lucide-react";
 
 interface AppIconMapProps {
@@ -40,8 +52,9 @@ const AppIconMap: FC<AppIconMapProps> = ({ appId, size = "md" }) => {
 
   const renderIcon = () => {
     switch (appId) {
+      // AI services
       case "openai":
-        return <SparkleIcon className={iconColor} />;
+        return <Sparkles className={iconColor} />;
       case "anthropic":
         return <Brain className={iconColor} />;
       case "ollama":
@@ -50,24 +63,62 @@ const AppIconMap: FC<AppIconMapProps> = ({ appId, size = "md" }) => {
         return <Search className={iconColor} />;
       case "text-processor":
         return <BookOpenText className={iconColor} />;
+        
+      // Communication & Social
       case "gmail":
         return <Mail className={iconColor} />;
       case "twitter":
         return <Twitter className={iconColor} />;
-      case "form":
-        return <FileText className={iconColor} />;
       case "slack":
         return <Slack className={iconColor} />;
+      case "instagram":
+        return <Instagram className={iconColor} />;
+      case "linkedin":
+        return <Linkedin className={iconColor} />;
+      case "discord":
+        return <MessageSquare className={iconColor} />;
+      case "teams":
+        return <MessagesSquare className={iconColor} />;
+      
+      // Microsoft & Google services
+      case "microsoft":
+        return <FileText className={iconColor} />;
       case "google-sheets":
         return <FileSpreadsheet className={iconColor} />;
-      case "crm":
-        return <Users className={iconColor} />;
       case "google-drive":
         return <HardDrive className={iconColor} />;
       case "google-calendar":
         return <Calendar className={iconColor} />;
-      case "instagram":
-        return <Instagram className={iconColor} />;
+      case "google-forms":
+        return <FormInput className={iconColor} />;
+      case "google-ads":
+        return <PanelRight className={iconColor} />;
+      
+      // Business services
+      case "crm":
+        return <Users className={iconColor} />;
+      case "stripe":
+        return <CreditCard className={iconColor} />;
+      case "facebook-ads":
+        return <Facebook className={iconColor} />;
+      case "mailchimp":
+        return <Ship className={iconColor} />;
+      case "hubspot":
+        return <Building2 className={iconColor} />;
+      case "trello":
+        return <LayoutGrid className={iconColor} />;
+      
+      // Video & Content
+      case "zoom":
+        return <Video className={iconColor} />;
+      case "youtube":
+        return <Play className={iconColor} />;
+      case "notion":
+        return <File className={iconColor} />;
+        
+      // Others
+      case "form":
+        return <FileText className={iconColor} />;
       case "wordpress":
         return <Globe className={iconColor} />;
       case "events":
