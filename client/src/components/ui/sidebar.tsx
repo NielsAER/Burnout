@@ -7,7 +7,8 @@ import {
   History, 
   Settings, 
   LogOut,
-  BrainCircuit
+  BrainCircuit,
+  ExternalLink
 } from "lucide-react";
 
 interface SidebarProps {
@@ -31,7 +32,7 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
           <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
             <ChartGantt className="h-5 w-5 text-white" />
           </div>
-          <h1 className="ml-2 text-xl font-semibold">FlowConnect</h1>
+          <h1 className="ml-2 text-xl font-semibold">BRNOUT</h1>
         </div>
       </div>
       
@@ -58,13 +59,13 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
               My Automations
             </a>
           </Link>
-          <Link href="/connections" onClick={onClose}>
+          <Link href="/app-connections" onClick={onClose}>
             <a className={`flex items-center px-3 py-2 text-sm font-medium rounded-md ${
-              isActive("/connections") 
+              isActive("/app-connections") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}>
-              <AppWindow className="mr-3 h-5 w-5" />
+              <ExternalLink className="mr-3 h-5 w-5" />
               App Connections
             </a>
           </Link>
