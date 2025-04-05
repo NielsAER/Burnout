@@ -174,11 +174,73 @@ export default function AppConnections() {
     }
   });
 
+  // Event listener for OAuth popup messages
+  useEffect(() => {
+    // Create message event handler
+    const handleOAuthMessage = (event: MessageEvent) => {
+      // Check if this is an OAuth message
+      if (event.data && (event.data.type === 'oauth-success' || event.data.type === 'oauth-error')) {
+        console.log("Received OAuth message:", event.data);
+        
+        if (event.data.type === 'oauth-success') {
+          // Handle successful OAuth
+          toast({
+            title: "Connection Successful",
+            description: `Your ${event.data.service} account has been connected successfully!`,
+          });
+          
+          // Refresh the connections data
+          queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+          setConnectingApp(null);
+        } else {
+          // Handle OAuth error
+          toast({
+            title: "Connection Failed",
+            description: event.data.error || "There was an error connecting your account.",
+            variant: "destructive",
+          });
+          setConnectingApp(null);
+        }
+      }
+    };
+    
+    // Add event listener
+    window.addEventListener('message', handleOAuthMessage);
+    
+    // Cleanup
+    return () => {
+      window.removeEventListener('message', handleOAuthMessage);
+    };
+  }, [toast, queryClient]);
+  
   // Auth flow for connecting apps
   const startOAuthFlow = async (appId: string) => {
     setConnectingApp(appId);
     try {
-      // Get OAuth URL from server
+      // Check if this is an API service that doesn't need OAuth
+      const isApiService = ['openai', 'anthropic', 'perplexity', 'ollama', 'text-processor'].includes(appId);
+      
+      if (isApiService) {
+        // For API services, connect directly without OAuth
+        await apiRequest({
+          method: "POST",
+          url: `/api/app-connections/${appId}/connect`,
+          data: { apiIntegration: true },
+        });
+        
+        // Show success message
+        toast({
+          title: "API Service Connected",
+          description: `${appId.charAt(0).toUpperCase() + appId.slice(1)} API service has been connected successfully.`,
+        });
+        
+        // Refresh the connections data
+        queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+        setConnectingApp(null);
+        return;
+      }
+      
+      // For OAuth services, get OAuth URL from server
       const response = await fetch(`/api/app-connections/${appId}/auth`, {
         method: 'GET',
         headers: {
@@ -200,25 +262,11 @@ export default function AppConnections() {
           throw new Error("Popup blocked! Please allow popups for this site.");
         }
         
-        // After OAuth completes, the callback handler will redirect to our app
+        // Show toast that auth flow has started
         toast({
           title: "Authorization Started",
           description: "Please complete the authorization process in the new window",
         });
-        
-        // For AI services, we can connect them directly since they don't need OAuth
-        if (['openai', 'anthropic', 'perplexity', 'ollama', 'text-processor'].includes(appId)) {
-          // Create the connection without waiting for OAuth
-          await apiRequest({
-            method: "POST",
-            url: `/api/app-connections/${appId}/connect`,
-            data: { apiIntegration: true },
-          });
-          
-          // Refresh the connections data
-          queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
-          setConnectingApp(null);
-        }
       } else {
         throw new Error("No OAuth URL provided");
       }

@@ -420,9 +420,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { service } = req.params;
       const { code } = req.query; // Auth code from OAuth provider
+      const { error: oauthError } = req.query;
+      
+      // Check for OAuth errors
+      if (oauthError) {
+        return res.redirect(`/app-connections?error=${oauthError}`);
+      }
       
       if (!code) {
-        return res.status(400).send("Authentication failed: No authorization code received");
+        return res.redirect(`/app-connections?error=no_auth_code`);
       }
       
       // In a real application, we would exchange this code for an access token
@@ -434,11 +440,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         credentials: { token: "mock-token-from-oauth" }
       } as any);
       
-      // Redirect back to the app connections page with success message
-      res.redirect(`/app-connections?success=${service}`);
+      // Return successful response with HTML that will close the popup and signal success
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Authentication Successful</title>
+          <script>
+            // Signal to opener that auth was successful and close this window
+            if (window.opener) {
+              window.opener.postMessage({ 
+                type: 'oauth-success',
+                service: '${service}'
+              }, '*');
+              window.close();
+            } else {
+              // If the opener is gone, redirect to the app
+              window.location.href = '/app-connections?success=${service}';
+            }
+          </script>
+        </head>
+        <body>
+          <h3>Authentication Successful!</h3>
+          <p>You can close this window and return to the application.</p>
+        </body>
+        </html>
+      `);
     } catch (error) {
       console.error("OAuth callback error:", error);
-      res.redirect(`/app-connections?error=auth_failed`);
+      
+      // Return error page that will close the popup and signal failure
+      res.send(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>Authentication Failed</title>
+          <script>
+            // Signal to opener that auth failed and close this window
+            if (window.opener) {
+              window.opener.postMessage({ 
+                type: 'oauth-error',
+                error: 'Authentication failed'
+              }, '*');
+              window.close();
+            } else {
+              // If the opener is gone, redirect to the app
+              window.location.href = '/app-connections?error=auth_failed';
+            }
+          </script>
+        </head>
+        <body>
+          <h3>Authentication Failed</h3>
+          <p>There was an error during authentication. You can close this window and try again.</p>
+        </body>
+        </html>
+      `);
     }
   });
   
