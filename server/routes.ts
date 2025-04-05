@@ -364,14 +364,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/app-connections/:appId/connect", async (req, res) => {
     try {
       const { appId } = req.params;
-      const { code } = req.body; // In real OAuth, we'd get an authorization code
+      const { code, apiIntegration } = req.body;
       
-      // For demo purposes, we'll create a mock connection regardless of code
+      let username = '';
+      let permissions = ["read", "write"];
+      
+      // For AI services, we set specific usernames and permissions
+      if (apiIntegration) {
+        switch (appId) {
+          case 'openai':
+            username = 'OpenAI API';
+            permissions = ["text-generation", "image-generation", "text-analysis"];
+            break;
+          case 'anthropic':
+            username = 'Anthropic Claude API';
+            permissions = ["text-generation", "text-analysis"];
+            break;
+          case 'perplexity':
+            username = 'Perplexity API';
+            permissions = ["search", "research"];
+            break;
+          case 'ollama':
+            username = 'Ollama API';
+            permissions = ["text-generation", "text-completion"];
+            break;
+          case 'text-processor':
+            username = 'Text Processing Service';
+            permissions = ["summarize", "format", "extract", "translate"];
+            break;
+          default:
+            username = `${appId.charAt(0).toUpperCase() + appId.slice(1)} API`;
+        }
+      } else {
+        // For OAuth services, we'd normally use the profile info from the OAuth provider
+        username = `user@${appId}.com`;
+      }
+      
+      // For demo purposes, we'll create a connection
       const newConnection = await storage.createAppConnection({
         appId,
-        username: `user@${appId}.com`,
-        permissions: ["read", "write"],
-        credentials: { token: "mock-token" }
+        username,
+        permissions,
+        credentials: { token: apiIntegration ? "api-key-integration" : "mock-token" }
       } as any);
       
       res.json(newConnection);
@@ -413,8 +447,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { appId } = req.params;
       
-      // In a real app, we would look up and delete the connection by appId
-      // For now, just return success
+      // Get all connections
+      const connections = await storage.getAllAppConnections();
+      
+      // Find the connection with the matching appId
+      const connectionToDelete = connections.find(conn => conn.appId === appId);
+      
+      if (!connectionToDelete) {
+        return res.status(404).json({ message: "Connection not found" });
+      }
+      
+      // For a real app, we'd also revoke the token with the provider
+      // For now, we'll just remove the connection from our storage
+      await storage.deleteAppConnection(connectionToDelete.id);
+      
       res.json({ success: true, message: "App disconnected successfully" });
     } catch (error) {
       console.error("App disconnection error:", error);

@@ -36,6 +36,7 @@ export interface IStorage {
   getAllAppConnections(): Promise<AppConnection[]>;
   getAppConnection(id: number): Promise<AppConnection | undefined>;
   createAppConnection(connection: InsertAppConnection): Promise<AppConnection>;
+  deleteAppConnection(id: number): Promise<boolean>;
   
   // Template methods
   getAllTemplates(): Promise<Template[]>;
@@ -195,6 +196,10 @@ export class MemStorage implements IStorage {
     };
     this.appConnections.set(id, connection);
     return connection;
+  }
+  
+  async deleteAppConnection(id: number): Promise<boolean> {
+    return this.appConnections.delete(id);
   }
 
   // Template methods

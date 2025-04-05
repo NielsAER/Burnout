@@ -179,23 +179,46 @@ export default function AppConnections() {
     setConnectingApp(appId);
     try {
       // Get OAuth URL from server
-      const response = await apiRequest({
-        method: "GET",
-        url: `/api/app-connections/${appId}/auth`
+      const response = await fetch(`/api/app-connections/${appId}/auth`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
       });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
       
       const data = await response.json();
       
       if (data.oauthUrl) {
         // Open OAuth flow in a new window
-        window.open(data.oauthUrl, "_blank", "width=600,height=700");
+        const authWindow = window.open(data.oauthUrl, "_blank", "width=600,height=700");
+        
+        if (!authWindow) {
+          throw new Error("Popup blocked! Please allow popups for this site.");
+        }
         
         // After OAuth completes, the callback handler will redirect to our app
-        // The user will need to refresh or we would need server-sent events to detect completion
         toast({
           title: "Authorization Started",
           description: "Please complete the authorization process in the new window",
         });
+        
+        // For AI services, we can connect them directly since they don't need OAuth
+        if (['openai', 'anthropic', 'perplexity', 'ollama', 'text-processor'].includes(appId)) {
+          // Create the connection without waiting for OAuth
+          await apiRequest({
+            method: "POST",
+            url: `/api/app-connections/${appId}/connect`,
+            data: { apiIntegration: true },
+          });
+          
+          // Refresh the connections data
+          queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+          setConnectingApp(null);
+        }
       } else {
         throw new Error("No OAuth URL provided");
       }
@@ -203,7 +226,7 @@ export default function AppConnections() {
       console.error("OAuth error:", error);
       toast({
         title: "Connection failed",
-        description: "Could not start authorization process",
+        description: error instanceof Error ? error.message : "Could not start authorization process",
         variant: "destructive",
       });
       setConnectingApp(null);
