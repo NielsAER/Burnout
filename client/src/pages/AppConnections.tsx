@@ -69,6 +69,16 @@ export default function AppConnections() {
   // Fetch connection statuses
   const { data: connections, isLoading } = useQuery<any[], unknown, Record<string, ConnectionStatus>>({
     queryKey: ['/api/app-connections'],
+    onSettled: (data, error) => {
+      if (error) {
+        console.error("Error fetching connections:", error);
+        toast({
+          title: "Error fetching connections",
+          description: "Could not load your app connections",
+          variant: "destructive",
+        });
+      }
+    },
     select: (data) => {
       // Convert to a more usable format with appId as key
       const formatted: Record<string, ConnectionStatus> = {};
@@ -77,9 +87,9 @@ export default function AppConnections() {
         data.forEach((connection: any) => {
           formatted[connection.appId] = {
             connected: true,
-            username: connection.username,
-            lastConnected: connection.lastConnected,
-            permissions: connection.permissions
+            username: connection.username || 'Connected account',
+            lastConnected: new Date(connection.createdAt).toLocaleDateString(),
+            permissions: connection.permissions || []
           };
         });
       }

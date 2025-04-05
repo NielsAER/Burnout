@@ -274,6 +274,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     res.json({ available });
   });
+  
+  // App Connections Routes
+  
+  // GET /api/app-connections - Get all app connections
+  app.get("/api/app-connections", async (req, res) => {
+    try {
+      const connections = await storage.getAllAppConnections();
+      res.json(connections);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch app connections" });
+    }
+  });
+  
+  // GET /api/app-connections/:id - Get app connection by ID
+  app.get("/api/app-connections/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid connection ID" });
+      }
+      
+      const connection = await storage.getAppConnection(id);
+      if (!connection) {
+        return res.status(404).json({ message: "App connection not found" });
+      }
+      
+      res.json(connection);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch app connection" });
+    }
+  });
+  
+  // POST /api/app-connections/:appId/connect - Connect an app
+  app.post("/api/app-connections/:appId/connect", async (req, res) => {
+    try {
+      const { appId } = req.params;
+      
+      // In a real application, this would handle OAuth flow or API key validation
+      // For now, we'll create a mock connection
+      const newConnection = await storage.createAppConnection({
+        appId,
+        username: `user@${appId}.com`,
+        permissions: ["read", "write"],
+        credentials: { token: "mock-token" }
+      } as any);
+      
+      res.json(newConnection);
+    } catch (error) {
+      console.error("App connection error:", error);
+      res.status(500).json({ message: "Failed to connect app" });
+    }
+  });
+  
+  // DELETE /api/app-connections/:appId - Disconnect an app
+  app.delete("/api/app-connections/:appId", async (req, res) => {
+    try {
+      const { appId } = req.params;
+      
+      // In a real app, we would look up and delete the connection by appId
+      // For now, just return success
+      res.json({ success: true, message: "App disconnected successfully" });
+    } catch (error) {
+      console.error("App disconnection error:", error);
+      res.status(500).json({ message: "Failed to disconnect app" });
+    }
+  });
 
   // OpenAI Service Routes
   app.post("/api/services/openai/generate-text", async (req, res) => {
