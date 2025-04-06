@@ -248,33 +248,9 @@ export default function AppConnections() {
         },
       });
       
-      // Handle missing OAuth credentials case
-      if (response.status === 400) {
-        const errorData = await response.json();
-        
-        if (errorData.message && errorData.message.includes("Missing")) {
-          // Specific guidance for missing OAuth credentials
-          toast({
-            title: "OAuth Credentials Required",
-            description: `Please add your ${appId.charAt(0).toUpperCase() + appId.slice(1)} OAuth credentials in Settings before connecting.`,
-            variant: "destructive",
-          });
-          
-          // Offer to redirect to settings page
-          const goToSettings = window.confirm("Would you like to go to the Settings page to add your OAuth credentials?");
-          if (goToSettings) {
-            window.location.href = "/settings";
-          }
-          
-          setConnectingApp(null);
-          return;
-        }
-        
-        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
-      }
-      
       if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
+        const errorData = await response.json();
+        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
       }
       
       const data = await response.json();

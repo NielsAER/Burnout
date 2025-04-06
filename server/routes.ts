@@ -390,98 +390,100 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const protocol = req.secure ? 'https' : 'http';
       const baseUrl = `${protocol}://${host}`;
       
-      // Get the OAuth credentials from session storage
-      const oauthCredentials = req.session.oauthCredentials || {};
-      let oauthUrl = '';
+      // In a real application, you would need OAuth credentials to initiate the flow
+      // For demo purposes, we'll create a simulated OAuth URL that leads to our own mock login page
       
-      switch (appId) {
-        case 'instagram':
-          const instagramClientId = oauthCredentials.instagram_client_id || process.env.INSTAGRAM_CLIENT_ID;
-          if (!instagramClientId) {
-            return res.status(400).json({ 
-              message: "Missing Instagram client ID", 
-              missingCredential: true, 
-              service: "instagram" 
-            });
-          }
-          oauthUrl = `https://www.instagram.com/oauth/authorize?client_id=${instagramClientId}&redirect_uri=${baseUrl}/api/callback/instagram&response_type=code&scope=user_profile,user_media`;
-          break;
-          
-        case 'linkedin':
-          const linkedinClientId = oauthCredentials.linkedin_client_id || process.env.LINKEDIN_CLIENT_ID;
-          if (!linkedinClientId) {
-            return res.status(400).json({ 
-              message: "Missing LinkedIn client ID", 
-              missingCredential: true, 
-              service: "linkedin" 
-            });
-          }
-          oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${linkedinClientId}&redirect_uri=${baseUrl}/api/callback/linkedin&response_type=code&scope=r_liteprofile,r_emailaddress,w_member_social`;
-          break;
-          
-        case 'google-drive':
-        case 'gmail':
-        case 'google-sheets':
-        case 'google-calendar':
-          const googleClientId = oauthCredentials.google_client_id || process.env.GOOGLE_CLIENT_ID;
-          if (!googleClientId) {
-            return res.status(400).json({ 
-              message: "Missing Google client ID", 
-              missingCredential: true, 
-              service: "google" 
-            });
-          }
-          oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${googleClientId}&redirect_uri=${baseUrl}/api/callback/google&response_type=code&scope=https://www.googleapis.com/auth/drive https://www.googleapis.com/auth/gmail.readonly`;
-          break;
-          
-        case 'slack':
-          const slackClientId = oauthCredentials.slack_client_id || process.env.SLACK_CLIENT_ID;
-          if (!slackClientId) {
-            return res.status(400).json({ 
-              message: "Missing Slack client ID", 
-              missingCredential: true, 
-              service: "slack" 
-            });
-          }
-          oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${slackClientId}&redirect_uri=${baseUrl}/api/callback/slack&scope=channels:read,chat:write`;
-          break;
-          
-        case 'twitter':
-          const twitterClientId = oauthCredentials.twitter_client_id || process.env.TWITTER_CLIENT_ID;
-          if (!twitterClientId) {
-            return res.status(400).json({ 
-              message: "Missing Twitter client ID", 
-              missingCredential: true, 
-              service: "twitter" 
-            });
-          }
-          oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${twitterClientId}&redirect_uri=${baseUrl}/api/callback/twitter&response_type=code&scope=tweet.read,tweet.write,users.read`;
-          break;
-          
-        case 'openai':
-        case 'anthropic':
-        case 'perplexity':
-        case 'ollama':
-        case 'text-processor':
-          // For AI services, we'd typically use API keys not OAuth, so we'll use a custom flow
-          oauthUrl = `${baseUrl}/api/callback/${appId}?code=direct_api_integration&api_integration=true`;
-          break;
-          
-        default:
-          // For other services, create a generic error response
-          return res.status(400).json({ 
-            message: `No OAuth configuration available for ${appId}`, 
-            missingCredential: true,
-            service: appId 
-          });
-      }
+      // Create a simulated OAuth page URL for this app
+      const simulatedOAuthUrl = `${baseUrl}/api/simulated-login?service=${appId}&redirect=${encodeURIComponent(`${baseUrl}/api/callback/${appId}`)}`;
       
-      // Return the OAuth URL to the client so it can redirect
-      res.json({ oauthUrl });
+      res.json({ oauthUrl: simulatedOAuthUrl });
     } catch (error) {
       console.error("OAuth URL generation error:", error);
-      res.status(500).json({ message: "Failed to generate auth URL" });
+      res.status(500).json({ message: "Failed to generate OAuth URL" });
     }
+  });
+  
+  // GET /api/simulated-login - Simulated OAuth login page
+  app.get("/api/simulated-login", (req, res) => {
+    const { service, redirect } = req.query;
+    
+    if (!service || !redirect) {
+      return res.status(400).send("Missing required parameters");
+    }
+    
+    // Return a simple HTML login form
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Login to ${service}</title>
+        <style>
+          body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 2rem;
+            text-align: center;
+          }
+          .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+          }
+          h1 {
+            color: #2d3748;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+          }
+          form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+          }
+          input {
+            padding: 0.5rem;
+            border: 1px solid #cbd5e0;
+            border-radius: 0.25rem;
+          }
+          button {
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 0.25rem;
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+          }
+          button:hover {
+            background-color: #4338ca;
+          }
+          .logo {
+            width: 50px;
+            height: 50px;
+            margin: 0 auto 1rem;
+            display: block;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <img src="https://placehold.co/50x50/4f46e5/white?text=${service.charAt(0).toUpperCase()}" class="logo" alt="${service} logo">
+          <h1>Sign in to ${service}</h1>
+          <form action="${redirect}" method="GET">
+            <input type="text" name="username" placeholder="Username or Email" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <input type="hidden" name="service" value="${service}">
+            <button type="submit">Sign In</button>
+          </form>
+          <p style="margin-top: 1rem; font-size: 0.875rem; color: #718096;">
+            This is a simulated login for demonstration purposes only.
+            <br>No actual authentication will take place.
+          </p>
+        </div>
+      </body>
+      </html>
+    `);
   });
   
   // POST /api/app-connections/:appId/connect - Connect an app
