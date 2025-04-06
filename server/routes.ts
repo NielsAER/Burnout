@@ -393,56 +393,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Generate appropriate OAuth URLs for each supported service
       let oauthUrl = '';
+      let useSimulatedLogin = false;
+
+      // Check if we're in development mode or if secrets are missing
+      // This helps avoid API errors when credentials aren't fully set up
+      const inDevelopmentMode = true; // Set to false in production
       
+      // Handle different OAuth providers
       switch (appId) {
         case 'instagram':
-          // Instagram OAuth URL
-          oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile&response_type=code`;
+          if (inDevelopmentMode || !process.env.INSTAGRAM_CLIENT_ID || !process.env.INSTAGRAM_CLIENT_SECRET) {
+            // Use simulated login for development or when credentials aren't available
+            useSimulatedLogin = true;
+          } else {
+            // Instagram OAuth URL
+            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile&response_type=code`;
+          }
           break;
           
         case 'linkedin':
-          // LinkedIn OAuth URL
-          oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code`;
+          if (inDevelopmentMode || !process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+            useSimulatedLogin = true;
+          } else {
+            // LinkedIn OAuth URL
+            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code`;
+          }
           break;
           
         case 'twitter':
-          // Twitter OAuth 2.0 URL
-          oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${process.env.TWITTER_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=tweet.read%20tweet.write%20users.read&response_type=code&state=state&code_challenge=challenge&code_challenge_method=plain`;
+          if (inDevelopmentMode || !process.env.TWITTER_CLIENT_ID || !process.env.TWITTER_CLIENT_SECRET) {
+            useSimulatedLogin = true;
+          } else {
+            // Twitter OAuth 2.0 URL
+            oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${process.env.TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=tweet.read%20tweet.write%20users.read&response_type=code&state=state&code_challenge=challenge&code_challenge_method=plain`;
+          }
           break;
           
         case 'google-drive':
         case 'gmail':
         case 'google-sheets':
         case 'google-calendar':
-          // Google OAuth URL with appropriate scopes
-          let scopes = 'https://www.googleapis.com/auth/userinfo.profile';
-          
-          if (appId === 'gmail') {
-            scopes += ' https://www.googleapis.com/auth/gmail.readonly';
-          } else if (appId === 'google-drive') {
-            scopes += ' https://www.googleapis.com/auth/drive.file';
-          } else if (appId === 'google-sheets') {
-            scopes += ' https://www.googleapis.com/auth/spreadsheets';
-          } else if (appId === 'google-calendar') {
-            scopes += ' https://www.googleapis.com/auth/calendar';
+          if (inDevelopmentMode || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+            useSimulatedLogin = true;
+          } else {
+            // Google OAuth URL with appropriate scopes
+            let scopes = 'https://www.googleapis.com/auth/userinfo.profile';
+            
+            if (appId === 'gmail') {
+              scopes += ' https://www.googleapis.com/auth/gmail.readonly';
+            } else if (appId === 'google-drive') {
+              scopes += ' https://www.googleapis.com/auth/drive.file';
+            } else if (appId === 'google-sheets') {
+              scopes += ' https://www.googleapis.com/auth/spreadsheets';
+            } else if (appId === 'google-calendar') {
+              scopes += ' https://www.googleapis.com/auth/calendar';
+            }
+            
+            oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code&access_type=offline&prompt=consent`;
           }
-          
-          oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code&access_type=offline&prompt=consent`;
           break;
           
         case 'slack':
-          // Slack OAuth URL
-          oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=channels:read,chat:write&user_scope=`;
+          if (inDevelopmentMode || !process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET) {
+            useSimulatedLogin = true;
+          } else {
+            // Slack OAuth URL
+            oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=channels:read,chat:write&user_scope=`;
+          }
           break;
           
         case 'facebook-ads':
-          // Facebook OAuth URL
-          oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=ads_management,ads_read&response_type=code`;
+          if (inDevelopmentMode || !process.env.FACEBOOK_CLIENT_ID || !process.env.FACEBOOK_CLIENT_SECRET) {
+            useSimulatedLogin = true;
+          } else {
+            // Facebook OAuth URL
+            oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=ads_management,ads_read&response_type=code`;
+          }
           break;
           
         case 'trello':
-          // Trello OAuth URL
-          oauthUrl = `https://trello.com/1/authorize?expiration=never&name=FlowConnect&scope=read,write&response_type=code&client_id=${process.env.TRELLO_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+          if (inDevelopmentMode || !process.env.TRELLO_CLIENT_ID || !process.env.TRELLO_CLIENT_SECRET) {
+            useSimulatedLogin = true;
+          } else {
+            // Trello OAuth URL
+            oauthUrl = `https://trello.com/1/authorize?expiration=never&name=FlowConnect&scope=read,write&response_type=code&client_id=${process.env.TRELLO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+          }
           break;
           
         case 'openai':
@@ -458,10 +493,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         default:
           // For services that we don't have specific OAuth implementations for yet
-          // Use a simulated/mock OAuth flow for demonstration
-          return res.json({
-            oauthUrl: `${baseUrl}/api/simulated-login?service=${appId}&redirect=${encodeURIComponent(`${baseUrl}/api/callback/${appId}`)}`
-          });
+          useSimulatedLogin = true;
+      }
+      
+      // Use simulated login for development mode or when credentials are missing
+      if (useSimulatedLogin) {
+        console.log(`Using simulated login for ${appId} as we're in development mode or OAuth credentials are missing`);
+        oauthUrl = `${baseUrl}/api/simulated-login?service=${appId}&redirect=${encodeURIComponent(`${baseUrl}/api/callback/${appId}`)}`;
       }
       
       // Return the OAuth URL to the client for redirect
