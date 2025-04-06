@@ -389,21 +389,91 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const host = req.headers.host || 'localhost:3000';
       const protocol = req.secure ? 'https' : 'http';
       const baseUrl = `${protocol}://${host}`;
+      const redirectUri = `${baseUrl}/api/callback/${appId}`;
       
-      // In a real application, you would need OAuth credentials to initiate the flow
-      // For demo purposes, we'll create a simulated OAuth URL that leads to our own mock login page
+      // Generate appropriate OAuth URLs for each supported service
+      let oauthUrl = '';
       
-      // Create a simulated OAuth page URL for this app
-      const simulatedOAuthUrl = `${baseUrl}/api/simulated-login?service=${appId}&redirect=${encodeURIComponent(`${baseUrl}/api/callback/${appId}`)}`;
+      switch (appId) {
+        case 'instagram':
+          // Instagram OAuth URL
+          oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile&response_type=code`;
+          break;
+          
+        case 'linkedin':
+          // LinkedIn OAuth URL
+          oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code`;
+          break;
+          
+        case 'twitter':
+          // Twitter OAuth 2.0 URL
+          oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${process.env.TWITTER_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=tweet.read%20tweet.write%20users.read&response_type=code&state=state&code_challenge=challenge&code_challenge_method=plain`;
+          break;
+          
+        case 'google-drive':
+        case 'gmail':
+        case 'google-sheets':
+        case 'google-calendar':
+          // Google OAuth URL with appropriate scopes
+          let scopes = 'https://www.googleapis.com/auth/userinfo.profile';
+          
+          if (appId === 'gmail') {
+            scopes += ' https://www.googleapis.com/auth/gmail.readonly';
+          } else if (appId === 'google-drive') {
+            scopes += ' https://www.googleapis.com/auth/drive.file';
+          } else if (appId === 'google-sheets') {
+            scopes += ' https://www.googleapis.com/auth/spreadsheets';
+          } else if (appId === 'google-calendar') {
+            scopes += ' https://www.googleapis.com/auth/calendar';
+          }
+          
+          oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code&access_type=offline&prompt=consent`;
+          break;
+          
+        case 'slack':
+          // Slack OAuth URL
+          oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=channels:read,chat:write&user_scope=`;
+          break;
+          
+        case 'facebook-ads':
+          // Facebook OAuth URL
+          oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=ads_management,ads_read&response_type=code`;
+          break;
+          
+        case 'trello':
+          // Trello OAuth URL
+          oauthUrl = `https://trello.com/1/authorize?expiration=never&name=FlowConnect&scope=read,write&response_type=code&client_id=${process.env.TRELLO_CLIENT_ID || 'YOUR_APP_ID'}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+          break;
+          
+        case 'openai':
+        case 'anthropic':
+        case 'perplexity':
+        case 'ollama':
+        case 'text-processor':
+          // For API services, we'll use API keys directly, no need for OAuth
+          // Call the callback endpoint directly with a special flag
+          return res.json({
+            oauthUrl: `${baseUrl}/api/callback/${appId}?code=direct_api_integration&api_integration=true`
+          });
+          
+        default:
+          // For services that we don't have specific OAuth implementations for yet
+          // Use a simulated/mock OAuth flow for demonstration
+          return res.json({
+            oauthUrl: `${baseUrl}/api/simulated-login?service=${appId}&redirect=${encodeURIComponent(`${baseUrl}/api/callback/${appId}`)}`
+          });
+      }
       
-      res.json({ oauthUrl: simulatedOAuthUrl });
+      // Return the OAuth URL to the client for redirect
+      res.json({ oauthUrl });
+      
     } catch (error) {
       console.error("OAuth URL generation error:", error);
       res.status(500).json({ message: "Failed to generate OAuth URL" });
     }
   });
   
-  // GET /api/simulated-login - Simulated OAuth login page
+  // GET /api/simulated-login - Simulated OAuth login page for services without implemented OAuth
   app.get("/api/simulated-login", (req, res) => {
     const { service, redirect } = req.query;
     
@@ -464,11 +534,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             margin: 0 auto 1rem;
             display: block;
           }
+          .hint {
+            margin-top: 1rem;
+            font-size: 0.875rem;
+            color: #718096;
+          }
         </style>
       </head>
       <body>
         <div class="card">
-          <img src="https://placehold.co/50x50/4f46e5/white?text=${service.charAt(0).toUpperCase()}" class="logo" alt="${service} logo">
+          <img src="https://placehold.co/50x50/4f46e5/white?text=${service as string ? (service as string).charAt(0).toUpperCase() : 'S'}" class="logo" alt="${service} logo">
           <h1>Sign in to ${service}</h1>
           <form action="${redirect}" method="GET">
             <input type="text" name="username" placeholder="Username or Email" required>
@@ -476,7 +551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             <input type="hidden" name="service" value="${service}">
             <button type="submit">Sign In</button>
           </form>
-          <p style="margin-top: 1rem; font-size: 0.875rem; color: #718096;">
+          <p class="hint">
             This is a simulated login for demonstration purposes only.
             <br>No actual authentication will take place.
           </p>
@@ -519,11 +594,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             permissions = ["summarize", "format", "extract", "translate"];
             break;
           default:
-            username = `${appId.charAt(0).toUpperCase() + appId.slice(1)} API`;
+            username = `${typeof appId === 'string' ? appId.charAt(0).toUpperCase() + appId.slice(1) : 'Unknown'} API`;
         }
       } else {
         // For OAuth services, we'd normally use the profile info from the OAuth provider
-        username = `user@${appId}.com`;
+        username = `user@${typeof appId === 'string' ? appId : 'app'}.com`;
       }
       
       // For demo purposes, we'll create a connection
@@ -569,59 +644,228 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let username = `user@${service}.com`;
       let permissions = ["read", "write"];
       
-      // In a real application, we would exchange this code for an access token
-      // Here we'd use the client secret to make the token exchange
+      // Exchange the authorization code for an access token
       if (apiIntegration !== 'true') {
         try {
-          // Determine which client secret to use
-          let clientId;
-          let clientSecret;
+          // Determine which client secret and token endpoint to use
+          let clientId, clientSecret, tokenUrl, requestBody, requestHeaders;
+          const redirectUri = `${baseUrl}/api/callback/${service}`;
           
           switch(service) {
             case 'instagram':
-              clientId = oauthCredentials.instagram_client_id || process.env.INSTAGRAM_CLIENT_ID;
-              clientSecret = oauthCredentials.instagram_client_secret || process.env.INSTAGRAM_CLIENT_SECRET;
+              clientId = process.env.INSTAGRAM_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.INSTAGRAM_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Instagram token exchange via POST to access_token endpoint
+              tokenUrl = 'https://api.instagram.com/oauth/access_token';
+              
+              // Instagram requires form-urlencoded body
+              requestBody = new URLSearchParams({
+                client_id: clientId,
+                client_secret: clientSecret,
+                grant_type: 'authorization_code',
+                redirect_uri: redirectUri,
+                code: code.toString()
+              });
+              
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              };
               break;
+              
             case 'linkedin':
-              clientId = oauthCredentials.linkedin_client_id || process.env.LINKEDIN_CLIENT_ID;
-              clientSecret = oauthCredentials.linkedin_client_secret || process.env.LINKEDIN_CLIENT_SECRET;
+              clientId = process.env.LINKEDIN_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.LINKEDIN_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // LinkedIn token exchange
+              tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
+              
+              // LinkedIn also requires form-urlencoded
+              requestBody = new URLSearchParams({
+                grant_type: 'authorization_code',
+                code: code.toString(),
+                redirect_uri: redirectUri,
+                client_id: clientId,
+                client_secret: clientSecret
+              });
+              
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              };
               break;
-            case 'google':
-              clientId = oauthCredentials.google_client_id || process.env.GOOGLE_CLIENT_ID;
-              clientSecret = oauthCredentials.google_client_secret || process.env.GOOGLE_CLIENT_SECRET;
+              
+            case 'google-drive':
+            case 'gmail':
+            case 'google-sheets':
+            case 'google-calendar':
+              clientId = process.env.GOOGLE_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.GOOGLE_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Google token exchange
+              tokenUrl = 'https://oauth2.googleapis.com/token';
+              
+              // Google requires form-urlencoded
+              requestBody = new URLSearchParams({
+                code: code.toString(),
+                client_id: clientId,
+                client_secret: clientSecret,
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+              });
+              
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              };
               break;
+              
             case 'slack':
-              clientId = oauthCredentials.slack_client_id || process.env.SLACK_CLIENT_ID;
-              clientSecret = oauthCredentials.slack_client_secret || process.env.SLACK_CLIENT_SECRET;
+              clientId = process.env.SLACK_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.SLACK_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Slack token exchange
+              tokenUrl = 'https://slack.com/api/oauth.v2.access';
+              
+              // Slack requires form-urlencoded
+              requestBody = new URLSearchParams({
+                code: code.toString(),
+                client_id: clientId,
+                client_secret: clientSecret,
+                redirect_uri: redirectUri
+              });
+              
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              };
               break;
+              
             case 'twitter':
-              clientId = oauthCredentials.twitter_client_id || process.env.TWITTER_CLIENT_ID;
-              clientSecret = oauthCredentials.twitter_client_secret || process.env.TWITTER_CLIENT_SECRET;
+              clientId = process.env.TWITTER_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.TWITTER_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Twitter token exchange
+              tokenUrl = 'https://api.twitter.com/2/oauth2/token';
+              
+              // Twitter requires form-urlencoded with basic auth
+              requestBody = new URLSearchParams({
+                code: code.toString(),
+                grant_type: 'authorization_code',
+                redirect_uri: redirectUri,
+                code_verifier: 'challenge'  // This should be the original code verifier used in the request
+              });
+              
+              // Twitter uses Basic auth with client ID and secret
+              const basicAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Basic ${basicAuth}`
+              };
+              break;
+              
+            case 'facebook-ads':
+              clientId = process.env.FACEBOOK_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.FACEBOOK_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Facebook token exchange
+              tokenUrl = 'https://graph.facebook.com/v16.0/oauth/access_token';
+              
+              // Facebook can accept query parameters
+              tokenUrl += `?client_id=${clientId}&client_secret=${clientSecret}&redirect_uri=${encodeURIComponent(redirectUri)}&code=${code}`;
+              
+              // This will be a GET request, so body is empty
+              requestBody = null;
+              requestHeaders = {};
+              break;
+              
+            default:
+              // For other services where we don't have specific code, use a mock token
+              console.log(`Using mock token for ${service} as no token exchange implementation exists`);
               break;
           }
           
-          // For a real implementation, we would make an API call to exchange the code for a token
-          // For example with fetch:
-          /*
-          const tokenResponse = await fetch(`https://${service}.com/oauth/token`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              client_id: clientId,
-              client_secret: clientSecret,
-              code: code,
-              redirect_uri: `${baseUrl}/api/callback/${service}`,
-              grant_type: 'authorization_code'
-            })
-          });
-          
-          if (!tokenResponse.ok) {
-            throw new Error(`Failed to exchange code for token: ${tokenResponse.statusText}`);
+          // If we have token URL and headers set up, make the token exchange request
+          if (tokenUrl && requestHeaders) {
+            try {
+              console.log(`Exchanging code for token with ${service}...`);
+              
+              // Make the token request
+              const method = requestBody ? 'POST' : 'GET';
+              const tokenResponse = await fetch(tokenUrl, {
+                method,
+                headers: requestHeaders,
+                body: requestBody
+              });
+              
+              if (!tokenResponse.ok) {
+                console.error(`Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
+                throw new Error(`Failed to exchange code for token: ${tokenResponse.statusText}`);
+              }
+              
+              const tokenData = await tokenResponse.json();
+              console.log(`Token received for ${service}:`, tokenData);
+              
+              // Store the token
+              accessToken = tokenData.access_token;
+              
+              // If we have a user info endpoint, fetch the user profile
+              if (accessToken) {
+                let userEndpoint;
+                let userHeaders = { 'Authorization': `Bearer ${accessToken}` };
+                
+                switch(service) {
+                  case 'instagram':
+                    userEndpoint = 'https://graph.instagram.com/me?fields=id,username';
+                    break;
+                  case 'linkedin':
+                    userEndpoint = 'https://api.linkedin.com/v2/me';
+                    break;
+                  case 'google-drive':
+                  case 'gmail':
+                  case 'google-sheets':
+                  case 'google-calendar':
+                    userEndpoint = 'https://www.googleapis.com/oauth2/v2/userinfo';
+                    break;
+                  case 'slack':
+                    userEndpoint = 'https://slack.com/api/users.identity';
+                    break;
+                  case 'twitter':
+                    userEndpoint = 'https://api.twitter.com/2/users/me';
+                    break;
+                }
+                
+                // If we have a user endpoint, make the request
+                if (userEndpoint) {
+                  const userResponse = await fetch(userEndpoint, {
+                    headers: userHeaders
+                  });
+                  
+                  if (userResponse.ok) {
+                    const userData = await userResponse.json();
+                    console.log(`User data received for ${service}:`, userData);
+                    
+                    // Extract the username based on the service
+                    if (userData) {
+                      if (service === 'instagram' && userData.username) {
+                        username = userData.username;
+                      } else if (service === 'linkedin' && userData.localizedFirstName) {
+                        username = `${userData.localizedFirstName} ${userData.localizedLastName || ''}`;
+                      } else if ((service.startsWith('google') || service === 'gmail') && userData.email) {
+                        username = userData.email;
+                      } else if (service === 'slack' && userData.user && userData.user.name) {
+                        username = userData.user.name;
+                      } else if (service === 'twitter' && userData.data && userData.data.username) {
+                        username = userData.data.username;
+                      }
+                    }
+                  } else {
+                    console.error(`Failed to get user profile: ${userResponse.status} ${userResponse.statusText}`);
+                  }
+                }
+              }
+            } catch (error) {
+              console.error(`Error exchanging token for ${service}:`, error);
+              // Continue with mock token for demo purposes
+            }
           }
-          
-          const tokenData = await tokenResponse.json();
-          accessToken = tokenData.access_token;
-          */
         } catch (tokenError) {
           console.error("Token exchange error:", tokenError);
           // In a real app, we'd handle this error and show a specific message
