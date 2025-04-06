@@ -1014,13 +1014,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Prompt is required" });
       }
       
-      // Update OpenAI implementation to use session API key if available
-      openaiService.getOpenAIInstance(req);
-      
       const result = await openaiService.generateText(
         prompt, 
         maxTokens || 500, 
-        temperature || 0.7
+        temperature || 0.7,
+        req
       );
       
       res.json(result);
@@ -1040,10 +1038,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Prompt is required" });
       }
       
-      // Update OpenAI implementation to use session API key if available
-      openaiService.getOpenAIInstance(req);
-      
-      const result = await openaiService.generateImage(prompt, size, quality);
+      const result = await openaiService.generateImage(prompt, size, quality, req);
       res.json(result);
     } catch (error: any) {
       console.error("OpenAI image generation error:", error);
@@ -1061,10 +1056,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Text and task are required" });
       }
       
-      // Update OpenAI implementation to use session API key if available
-      openaiService.getOpenAIInstance(req);
-      
-      const result = await openaiService.analyzeText(text, task);
+      const result = await openaiService.analyzeText(text, task, req);
       res.json(result);
     } catch (error: any) {
       console.error("OpenAI text analysis error:", error);

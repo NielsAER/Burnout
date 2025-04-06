@@ -55,10 +55,11 @@ interface TextAnalysisResponse {
 export async function generateText(
   prompt: string,
   maxTokens: number = 500,
-  temperature: number = 0.7
+  temperature: number = 0.7,
+  req?: Request
 ): Promise<TextGenerationResponse> {
   try {
-    const openai = getOpenAIInstance();
+    const openai = getOpenAIInstance(req);
     
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
     const response = await openai.chat.completions.create({
@@ -84,10 +85,11 @@ export async function generateText(
 export async function generateImage(
   prompt: string,
   size: "1024x1024" | "1792x1024" | "1024x1792" = "1024x1024",
-  quality: "standard" | "hd" = "standard"
+  quality: "standard" | "hd" = "standard",
+  req?: Request
 ): Promise<ImageGenerationResponse> {
   try {
-    const openai = getOpenAIInstance();
+    const openai = getOpenAIInstance(req);
     
     const response = await openai.images.generate({
       model: "dall-e-3",
@@ -110,10 +112,11 @@ export async function generateImage(
 // Analyze text content (sentiment, classification, etc.)
 export async function analyzeText(
   text: string,
-  task: string
+  task: string,
+  req?: Request
 ): Promise<TextAnalysisResponse> {
   try {
-    const openai = getOpenAIInstance();
+    const openai = getOpenAIInstance(req);
     
     // Construct a system message based on the task
     let systemMessage = "You are a helpful assistant.";
@@ -160,9 +163,9 @@ export async function analyzeText(
 }
 
 // Moderate content
-export async function moderateContent(text: string): Promise<any> {
+export async function moderateContent(text: string, req?: Request): Promise<any> {
   try {
-    const openai = getOpenAIInstance();
+    const openai = getOpenAIInstance(req);
     
     const response = await openai.moderations.create({
       input: text,
