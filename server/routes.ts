@@ -249,24 +249,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ message: "Service parameter is required" });
     }
     
+    // Get API keys from session
+    const apiKeys = req.session.apiKeys || {};
     let available = false;
     
     switch (service) {
       case 'openai':
-        available = !!process.env.OPENAI_API_KEY;
+        available = !!process.env.OPENAI_API_KEY || !!apiKeys.openai;
         break;
       case 'anthropic':
-        available = !!process.env.ANTHROPIC_API_KEY;
+        available = !!process.env.ANTHROPIC_API_KEY || !!apiKeys.anthropic;
         break;
       case 'perplexity':
-        available = !!process.env.PERPLEXITY_API_KEY;
+        available = !!process.env.PERPLEXITY_API_KEY || !!apiKeys.perplexity;
         break;
       case 'ollama':
-        available = !!process.env.OLLAMA_HOST;
+        available = !!process.env.OLLAMA_HOST || !!apiKeys.ollama;
         break;
       case 'text-processor':
         // Text processor uses other services, so it's available if at least one LLM is available
-        available = !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY;
+        available = !!process.env.OPENAI_API_KEY || !!process.env.ANTHROPIC_API_KEY || 
+                    !!apiKeys.openai || !!apiKeys.anthropic;
         break;
       default:
         return res.status(400).json({ message: "Unknown service" });
@@ -1011,6 +1014,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Prompt is required" });
       }
       
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
+      
       const result = await openaiService.generateText(
         prompt, 
         maxTokens || 500, 
@@ -1034,6 +1040,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Prompt is required" });
       }
       
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
+      
       const result = await openaiService.generateImage(prompt, size, quality);
       res.json(result);
     } catch (error: any) {
@@ -1051,6 +1060,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!text || !task) {
         return res.status(400).json({ message: "Text and task are required" });
       }
+      
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
       
       const result = await openaiService.analyzeText(text, task);
       res.json(result);
@@ -1270,6 +1282,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Text is required" });
       }
       
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
+      
       const result = await textProcessorService.summarizeText(text, {
         length,
         format,
@@ -1294,6 +1309,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Text and target format are required" 
         });
       }
+      
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
       
       const result = await textProcessorService.formatText(
         text, 
@@ -1324,6 +1342,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
+      
       const result = await textProcessorService.extractFromText(
         text, 
         extractionTypes, 
@@ -1348,6 +1369,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           message: "Text and target language are required" 
         });
       }
+      
+      // Update OpenAI implementation to use session API key if available
+      openaiService.getOpenAIInstance(req);
       
       const result = await textProcessorService.translateText(
         text, 

@@ -1,20 +1,36 @@
 import OpenAI from "openai";
+import { Request } from "express";
 
 // Create OpenAI instance with a function to get it when needed
 let openaiInstance: OpenAI | null = null;
 
-function getOpenAIInstance(): OpenAI {
-  if (!process.env.OPENAI_API_KEY) {
+export function getOpenAIInstance(req?: Request): OpenAI {
+  // Check for API key in request session first, then environment variable
+  const apiKeys = req?.session?.apiKeys || {};
+  const apiKey = apiKeys.openai || process.env.OPENAI_API_KEY;
+  
+  if (!apiKey) {
     throw new Error("OpenAI API key is not set. Please provide an API key via settings.");
   }
   
-  if (!openaiInstance) {
+  // If we have a request with a session key, always create a fresh instance
+  // to use the session-provided key
+  if (req?.session?.apiKeys?.openai) {
+    return new OpenAI({ apiKey });
+  }
+  
+  // Otherwise, use/create the singleton instance with the env variable
+  if (!openaiInstance && process.env.OPENAI_API_KEY) {
     openaiInstance = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
+    return openaiInstance;
+  } else if (openaiInstance) {
+    return openaiInstance;
   }
   
-  return openaiInstance;
+  // Fallback to creating a new instance with the key we found
+  return new OpenAI({ apiKey });
 }
 
 // Define response interfaces
