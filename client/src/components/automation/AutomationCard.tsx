@@ -1,7 +1,7 @@
 import { FC, useState } from "react";
 import { Automation } from "@shared/schema";
 import { Toggle } from "@/components/ui/toggle";
-import { Edit, History, MoreHorizontal } from "lucide-react";
+import { Edit, History, MoreHorizontal, Info } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
@@ -28,6 +28,10 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus })
 
   const handleHistory = () => {
     navigate(`/history/automation/${id}`);
+  };
+  
+  const handleViewDetails = () => {
+    navigate(`/automations/${id}`);
   };
 
   const handleToggleStatus = () => {
@@ -62,7 +66,7 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus })
           <AppIconMap appId={actionAppId} />
         </div>
         <p className="mt-3 text-sm text-gray-500">
-          {automation.triggerConfig.description || `Send data from ${triggerAppId} to ${actionAppId}`}
+          {`Send data from ${triggerAppId} to ${actionAppId}`}
         </p>
         <div className="mt-4 flex items-center justify-between">
           <div className="text-xs text-gray-500">Last run: {formatLastRun()}</div>
@@ -72,6 +76,10 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus })
         </div>
       </div>
       <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
+        <Button variant="ghost" size="sm" className="text-xs text-gray-600 hover:text-gray-900" onClick={handleViewDetails}>
+          <Info className="h-3.5 w-3.5 mr-1" />
+          Details
+        </Button>
         <Button variant="ghost" size="sm" className="text-xs text-gray-600 hover:text-gray-900" onClick={handleEdit}>
           <Edit className="h-3.5 w-3.5 mr-1" />
           Edit
@@ -87,6 +95,7 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus })
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleViewDetails}>View Details</DropdownMenuItem>
             <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
             <DropdownMenuItem onClick={handleHistory}>View History</DropdownMenuItem>
             <DropdownMenuItem onClick={handleToggleStatus}>
