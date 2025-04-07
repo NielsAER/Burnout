@@ -26,6 +26,13 @@ export const automations = pgTable("automations", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastRunAt: timestamp("last_run_at"),
   runsToday: integer("runs_today").notNull().default(0),
+  healthScore: integer("health_score").notNull().default(100),
+  complexity: integer("complexity").notNull().default(1),
+  reliability: json("reliability").default({
+    successRate: 100,
+    errorCount: 0,
+    totalRuns: 0
+  }),
 });
 
 export const insertAutomationSchema = createInsertSchema(automations).omit({
@@ -33,6 +40,9 @@ export const insertAutomationSchema = createInsertSchema(automations).omit({
   createdAt: true,
   lastRunAt: true,
   runsToday: true,
+  healthScore: true,
+  complexity: true,
+  reliability: true,
 });
 
 // Execution history table schema
@@ -93,5 +103,42 @@ export type InsertExecutionHistory = z.infer<typeof insertExecutionHistorySchema
 export type AppConnection = typeof appConnections.$inferSelect;
 export type InsertAppConnection = z.infer<typeof insertAppConnectionSchema>;
 
+// Achievements table schema
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(), // 'reliability', 'complexity', 'volume', 'innovation'
+  icon: text("icon").notNull(),
+  threshold: integer("threshold").notNull(),
+  unlockedAt: timestamp("unlocked_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertAchievementSchema = createInsertSchema(achievements).omit({
+  id: true,
+  unlockedAt: true,
+  createdAt: true,
+});
+
+// User achievements table schema
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  achievementId: integer("achievement_id").notNull(),
+  automationId: integer("automation_id").notNull(),
+  unlockedAt: timestamp("unlocked_at").notNull().defaultNow(),
+});
+
+export const insertUserAchievementSchema = createInsertSchema(userAchievements).omit({
+  id: true,
+  unlockedAt: true,
+});
+
 export type Template = typeof templates.$inferSelect;
 export type InsertTemplate = z.infer<typeof insertTemplateSchema>;
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;

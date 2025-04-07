@@ -1384,6 +1384,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Health score and achievement routes
+  app.get("/api/automations/:id/health", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid automation ID" });
+      }
+      
+      const automation = await storage.getAutomation(id);
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      // Get execution histories to compute metrics
+      const histories = await storage.getExecutionHistoriesByAutomationId(id);
+      
+      // Build health report with improvement suggestions
+      const healthReport = {
+        score: automation.healthScore,
+        reliability: automation.reliability,
+        complexity: automation.complexity,
+        lastCheckedAt: new Date(),
+        improvementSuggestions: []
+      };
+      
+      // Add improvement suggestions based on metrics
+      if (histories.length > 0) {
+        const errors = histories.filter(h => h.status === 'error');
+        const errorRate = errors.length / histories.length;
+        
+        if (errorRate > 0.1) {
+          healthReport.improvementSuggestions.push({
+            category: 'reliability',
+            message: 'Add error handling to improve workflow reliability',
+            priority: 'high'
+          });
+        }
+      }
+      
+      if (automation.complexity < 2) {
+        healthReport.improvementSuggestions.push({
+          category: 'complexity',
+          message: 'Add conditional steps to make your workflow more sophisticated',
+          priority: 'medium'
+        });
+      }
+      
+      if (!automation.triggerConfig || Object.keys(automation.triggerConfig).length < 2) {
+        healthReport.improvementSuggestions.push({
+          category: 'configuration',
+          message: 'Add more specific trigger conditions to reduce false positives',
+          priority: 'low'
+        });
+      }
+      
+      res.json(healthReport);
+    } catch (error) {
+      console.error("Error generating automation health report:", error);
+      res.status(500).json({ message: "Failed to get automation health" });
+    }
+  });
+  
+  app.patch("/api/automations/:id/health-score", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid automation ID" });
+      }
+      
+      const { healthScore } = req.body;
+      if (typeof healthScore !== 'number' || healthScore < 0 || healthScore > 100) {
+        return res.status(400).json({ message: "Health score must be a number between 0 and 100" });
+      }
+      
+      const automation = await storage.updateAutomationHealthScore(id, healthScore);
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      res.json(automation);
+    } catch (error) {
+      console.error("Error updating automation health score:", error);
+      res.status(500).json({ message: "Failed to update health score" });
+    }
+  });
+  
+  app.patch("/api/automations/:id/complexity", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid automation ID" });
+      }
+      
+      const { complexity } = req.body;
+      if (typeof complexity !== 'number' || complexity < 1) {
+        return res.status(400).json({ message: "Complexity must be a positive number" });
+      }
+      
+      const automation = await storage.updateAutomationComplexity(id, complexity);
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      res.json(automation);
+    } catch (error) {
+      console.error("Error updating automation complexity:", error);
+      res.status(500).json({ message: "Failed to update complexity" });
+    }
+  });
+  
+  // Achievement routes
+  app.get("/api/achievements", async (req, res) => {
+    try {
+      const achievements = await storage.getAllAchievements();
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching achievements:", error);
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+  
+  app.get("/api/automations/:id/achievements", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid automation ID" });
+      }
+      
+      const automation = await storage.getAutomation(id);
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      const achievements = await storage.getUnlockedAchievements(id);
+      res.json(achievements);
+    } catch (error) {
+      console.error("Error fetching automation achievements:", error);
+      res.status(500).json({ message: "Failed to fetch automation achievements" });
+    }
+  });
+  
+  app.post("/api/automations/:id/unlock-achievement", async (req, res) => {
+    try {
+      const automationId = parseInt(req.params.id);
+      if (isNaN(automationId)) {
+        return res.status(400).json({ message: "Invalid automation ID" });
+      }
+      
+      const { achievementId } = req.body;
+      if (typeof achievementId !== 'number' || isNaN(achievementId)) {
+        return res.status(400).json({ message: "Invalid achievement ID" });
+      }
+      
+      const automation = await storage.getAutomation(automationId);
+      if (!automation) {
+        return res.status(404).json({ message: "Automation not found" });
+      }
+      
+      const achievement = await storage.getAchievement(achievementId);
+      if (!achievement) {
+        return res.status(404).json({ message: "Achievement not found" });
+      }
+      
+      const userAchievement = await storage.unlockAchievement(automationId, achievementId);
+      res.status(201).json(userAchievement);
+    } catch (error) {
+      console.error("Error unlocking achievement:", error);
+      res.status(500).json({ message: "Failed to unlock achievement" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

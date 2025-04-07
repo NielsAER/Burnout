@@ -7,6 +7,10 @@ import {
   InsertAppConnection,
   Template,
   InsertTemplate,
+  Achievement,
+  InsertAchievement,
+  UserAchievement,
+  InsertUserAchievement,
   users,
   type User,
   type InsertUser
@@ -26,6 +30,9 @@ export interface IStorage {
   deleteAutomation(id: number): Promise<boolean>;
   toggleAutomationStatus(id: number): Promise<Automation | undefined>;
   incrementAutomationRuns(id: number): Promise<Automation | undefined>;
+  updateAutomationHealthScore(id: number, score: number): Promise<Automation | undefined>;
+  updateAutomationComplexity(id: number, complexity: number): Promise<Automation | undefined>;
+  updateAutomationReliability(id: number, reliability: any): Promise<Automation | undefined>;
   
   // Execution history methods
   getAllExecutionHistories(): Promise<ExecutionHistory[]>;
@@ -43,6 +50,13 @@ export interface IStorage {
   getTemplate(id: number): Promise<Template | undefined>;
   getPopularTemplates(): Promise<Template[]>;
   createTemplate(template: InsertTemplate): Promise<Template>;
+  
+  // Achievement methods
+  getAllAchievements(): Promise<Achievement[]>;
+  getAchievement(id: number): Promise<Achievement | undefined>;
+  createAchievement(achievement: InsertAchievement): Promise<Achievement>;
+  getUnlockedAchievements(automationId: number): Promise<Achievement[]>;
+  unlockAchievement(automationId: number, achievementId: number): Promise<UserAchievement>;
 }
 
 export class MemStorage implements IStorage {
@@ -51,11 +65,15 @@ export class MemStorage implements IStorage {
   private executionHistories: Map<number, ExecutionHistory>;
   private appConnections: Map<number, AppConnection>;
   private templates: Map<number, Template>;
+  private achievements: Map<number, Achievement>;
+  private userAchievements: Map<number, UserAchievement>;
   private currentUserId: number;
   private currentAutomationId: number;
   private currentExecutionHistoryId: number;
   private currentAppConnectionId: number;
   private currentTemplateId: number;
+  private currentAchievementId: number;
+  private currentUserAchievementId: number;
 
   constructor() {
     this.users = new Map();
@@ -63,11 +81,15 @@ export class MemStorage implements IStorage {
     this.executionHistories = new Map();
     this.appConnections = new Map();
     this.templates = new Map();
+    this.achievements = new Map();
+    this.userAchievements = new Map();
     this.currentUserId = 1;
     this.currentAutomationId = 1;
     this.currentExecutionHistoryId = 1;
     this.currentAppConnectionId = 1;
     this.currentTemplateId = 1;
+    this.currentAchievementId = 1;
+    this.currentUserAchievementId = 1;
     
     // Seed templates data
     this.seedTemplates();
@@ -75,6 +97,156 @@ export class MemStorage implements IStorage {
     this.seedAutomations();
     // Seed execution history data
     this.seedExecutionHistories();
+    // Seed achievements
+    this.seedAchievements();
+  }
+  
+  // Health score and achievement methods
+  async updateAutomationHealthScore(id: number, score: number): Promise<Automation | undefined> {
+    const automation = this.automations.get(id);
+    if (!automation) return undefined;
+    
+    const updatedAutomation = { ...automation, healthScore: score };
+    this.automations.set(id, updatedAutomation);
+    return updatedAutomation;
+  }
+  
+  async updateAutomationComplexity(id: number, complexity: number): Promise<Automation | undefined> {
+    const automation = this.automations.get(id);
+    if (!automation) return undefined;
+    
+    const updatedAutomation = { ...automation, complexity };
+    this.automations.set(id, updatedAutomation);
+    return updatedAutomation;
+  }
+  
+  async updateAutomationReliability(id: number, reliability: any): Promise<Automation | undefined> {
+    const automation = this.automations.get(id);
+    if (!automation) return undefined;
+    
+    const updatedAutomation = { ...automation, reliability };
+    this.automations.set(id, updatedAutomation);
+    return updatedAutomation;
+  }
+  
+  // Achievement methods
+  async getAllAchievements(): Promise<Achievement[]> {
+    return Array.from(this.achievements.values());
+  }
+  
+  async getAchievement(id: number): Promise<Achievement | undefined> {
+    return this.achievements.get(id);
+  }
+  
+  async createAchievement(achievement: InsertAchievement): Promise<Achievement> {
+    const id = this.currentAchievementId++;
+    const newAchievement: Achievement = {
+      ...achievement,
+      id,
+      unlockedAt: null,
+      createdAt: new Date()
+    };
+    this.achievements.set(id, newAchievement);
+    return newAchievement;
+  }
+  
+  async getUnlockedAchievements(automationId: number): Promise<Achievement[]> {
+    const userAchievements = Array.from(this.userAchievements.values())
+      .filter(ua => ua.automationId === automationId);
+      
+    // Map user achievements to their achievement details with correct unlocked time
+    const result: Achievement[] = [];
+    
+    for (const ua of userAchievements) {
+      const achievement = this.achievements.get(ua.achievementId);
+      if (achievement) {
+        // Create a copy with the unlocked timestamp from the user achievement
+        result.push({
+          ...achievement,
+          unlockedAt: ua.unlockedAt
+        });
+      }
+    }
+    
+    return result;
+  }
+  
+  async unlockAchievement(automationId: number, achievementId: number): Promise<UserAchievement> {
+    // Check if this achievement is already unlocked for this automation
+    const existingUserAchievement = Array.from(this.userAchievements.values())
+      .find(ua => ua.automationId === automationId && ua.achievementId === achievementId);
+      
+    if (existingUserAchievement) {
+      return existingUserAchievement; // Already unlocked
+    }
+    
+    const id = this.currentUserAchievementId++;
+    const now = new Date();
+    
+    const userAchievement: UserAchievement = {
+      id,
+      automationId,
+      achievementId,
+      unlockedAt: now
+    };
+    
+    this.userAchievements.set(id, userAchievement);
+    
+    // Note: We no longer update the original achievement as that caused issues
+    // Instead, we just store the unlocked timestamp in the userAchievement
+    
+    return userAchievement;
+  }
+  
+  // Seed achievements
+  private seedAchievements() {
+    const achievements: InsertAchievement[] = [
+      {
+        name: "Workflow Pioneer",
+        description: "Created your first automation workflow",
+        category: "innovation",
+        icon: "rocket",
+        threshold: 1,
+      },
+      {
+        name: "100% Uptime",
+        description: "Maintained perfect reliability for 7 days",
+        category: "reliability",
+        icon: "badge-check",
+        threshold: 7,
+      },
+      {
+        name: "Workflow Architect",
+        description: "Created a workflow with at least 3 conditions",
+        category: "complexity",
+        icon: "git-branch",
+        threshold: 3,
+      },
+      {
+        name: "Automation Master",
+        description: "Created 10 or more automations",
+        category: "volume",
+        icon: "zap",
+        threshold: 10,
+      },
+      {
+        name: "Efficiency Expert",
+        description: "Saved over 5 hours with automations",
+        category: "volume",
+        icon: "clock",
+        threshold: 5,
+      }
+    ];
+    
+    achievements.forEach(achievement => {
+      const id = this.currentAchievementId++;
+      this.achievements.set(id, {
+        ...achievement,
+        id, 
+        unlockedAt: null,
+        createdAt: new Date()
+      });
+    });
   }
 
   // User methods
@@ -112,7 +284,14 @@ export class MemStorage implements IStorage {
       id,
       createdAt: now,
       lastRunAt: null,
-      runsToday: 0
+      runsToday: 0,
+      healthScore: 100,
+      complexity: 1,
+      reliability: {
+        successRate: 100,
+        errorCount: 0,
+        totalRuns: 0
+      }
     };
     this.automations.set(id, automation);
     return automation;
@@ -348,7 +527,14 @@ export class MemStorage implements IStorage {
         id,
         createdAt: new Date(now.getTime() - 604800000), // 1 week ago
         lastRunAt,
-        runsToday
+        runsToday,
+        healthScore: Math.floor(Math.random() * 30) + 70, // 70-100 score range
+        complexity: Math.floor(Math.random() * 3) + 1, // 1-3 complexity
+        reliability: {
+          successRate: Math.floor(Math.random() * 15) + 85, // 85-100% success rate
+          errorCount: Math.floor(Math.random() * 5),
+          totalRuns: Math.floor(Math.random() * 50) + 50
+        }
       });
     });
   }
