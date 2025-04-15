@@ -2,7 +2,7 @@ import { FC, useState, useRef } from "react";
 import { useDrop, useDrag } from "react-dnd";
 import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy } from "lucide-react";
 import AppIconMap from "@/components/automation/AppIconMap";
-import { APPS } from "@/lib/constants";
+import { APPS, AppId } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -118,10 +118,12 @@ const DraggableAction: FC<DraggableActionProps> = ({
 
   const opacity = isDragging ? 0.4 : 1;
   
-  const appDetails = APPS[action.appId] || {
-    name: action.appId,
-    description: "Do this..."
-  };
+  const appDetails = (action.appId in APPS) 
+    ? APPS[action.appId as AppId] 
+    : {
+        name: action.appId,
+        description: "Do this..."
+      };
   
   drag(drop(ref));
 
