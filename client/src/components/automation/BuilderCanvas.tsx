@@ -35,7 +35,7 @@ type ItemTypes = {
 };
 
 // Define our drop/drag types
-const ItemTypes: ItemTypes = {
+export const ItemTypes: ItemTypes = {
   APP: "app",
   ACTION: "action"
 };

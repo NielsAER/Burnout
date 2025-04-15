@@ -286,6 +286,7 @@ const AutomationBuilder = () => {
                 onReorderActions={handleReorderActions}
                 onUpdateConfig={handleUpdateConfig}
                 onTestWorkflow={handleTestWorkflow}
+                onAddTrigger={handleTriggerDrop}
               />
             </div>
           </div>
