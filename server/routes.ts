@@ -1202,7 +1202,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Perplexity Service Routes
   app.post("/api/services/perplexity/search", async (req, res) => {
     try {
-      const { query, model, searchDomain, searchRecency, temperature, maxTokens } = req.body;
+      const { query, model, searchDomain, searchRecency, temperature, maxTokens, systemMessage } = req.body;
       if (!query) {
         return res.status(400).json({ message: "Query is required" });
       }
@@ -1212,7 +1212,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         searchDomain,
         searchRecency,
         temperature,
-        maxTokens
+        maxTokens,
+        systemMessage
       });
       
       res.json(result);
@@ -1227,7 +1228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/services/perplexity/analyze-topic", async (req, res) => {
     try {
-      const { topic, model, searchRecency, temperature } = req.body;
+      const { topic, model, searchRecency, temperature, systemMessage, maxTokens } = req.body;
       if (!topic) {
         return res.status(400).json({ message: "Topic is required" });
       }
@@ -1235,7 +1236,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await perplexityService.analyzeTopic(topic, {
         model,
         searchRecency,
-        temperature
+        temperature,
+        systemMessage,
+        maxTokens
       });
       
       res.json(result);
@@ -1250,7 +1253,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   app.post("/api/services/perplexity/research-question", async (req, res) => {
     try {
-      const { question, model, searchRecency, temperature } = req.body;
+      const { question, model, searchRecency, temperature, systemMessage, maxTokens } = req.body;
       if (!question) {
         return res.status(400).json({ message: "Question is required" });
       }
@@ -1258,7 +1261,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await perplexityService.researchQuestion(question, {
         model,
         searchRecency,
-        temperature
+        temperature,
+        systemMessage,
+        maxTokens
       });
       
       res.json(result);

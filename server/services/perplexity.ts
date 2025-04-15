@@ -27,6 +27,7 @@ export async function performSearch(
     searchRecency?: "hour" | "day" | "week" | "month" | "year";
     temperature?: number;
     maxTokens?: number;
+    systemMessage?: string;
   } = {}
 ): Promise<SearchResponse> {
   try {
@@ -39,7 +40,8 @@ export async function performSearch(
       searchDomain = [],
       searchRecency = "month",
       temperature = 0.2,
-      maxTokens = 500
+      maxTokens = 500,
+      systemMessage = "You are a helpful assistant that provides accurate and relevant information."
     } = options;
 
     // Construct the API request
@@ -54,7 +56,7 @@ export async function performSearch(
         messages: [
           {
             role: "system",
-            content: "You are a helpful assistant that provides accurate and relevant information."
+            content: systemMessage
           },
           {
             role: "user",
@@ -96,6 +98,8 @@ export async function analyzeTopic(
     model?: string;
     searchRecency?: "hour" | "day" | "week" | "month" | "year";
     temperature?: number;
+    systemMessage?: string;
+    maxTokens?: number;
   } = {}
 ): Promise<PerplexityResponse> {
   try {
@@ -120,6 +124,8 @@ export async function researchQuestion(
     model?: string;
     searchRecency?: "hour" | "day" | "week" | "month" | "year";
     temperature?: number;
+    systemMessage?: string;
+    maxTokens?: number;
   } = {}
 ): Promise<PerplexityResponse> {
   try {
