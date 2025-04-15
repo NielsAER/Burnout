@@ -51,20 +51,32 @@ interface TextAnalysisResponse {
   modelUsed: string;
 }
 
-// Text generation with gpt-4o model
+// Text generation with flexible model selection and system message
 export async function generateText(
   prompt: string,
   maxTokens: number = 500,
   temperature: number = 0.7,
+  model: string = "gpt-4o",
+  systemMessage?: string,
   req?: Request
 ): Promise<TextGenerationResponse> {
   try {
     const openai = getOpenAIInstance(req);
     
     // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const messages = [];
+    
+    // Add system message if provided
+    if (systemMessage) {
+      messages.push({ role: "system" as const, content: systemMessage });
+    }
+    
+    // Add user prompt
+    messages.push({ role: "user" as const, content: prompt });
+    
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
+      model: model || "gpt-4o", // Default to gpt-4o if no model specified
+      messages: messages,
       max_tokens: maxTokens,
       temperature: temperature,
     });
@@ -142,8 +154,8 @@ export async function analyzeText(
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
       messages: [
-        { role: "system", content: systemMessage },
-        { role: "user", content: text }
+        { role: "system" as const, content: systemMessage },
+        { role: "user" as const, content: text }
       ],
       response_format: { type: "json_object" },
       temperature: 0.3,
