@@ -322,7 +322,8 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             <div className="ml-3">
               <h4 className="text-sm font-medium">Time Trigger</h4>
               <p className="text-xs text-gray-500">
-                {trigger.config?.scheduleType === 'recurring' ? 'Recurring schedule' : 'One-time schedule'}
+                {trigger.config?.scheduleType === 'recurring' ? 'Recurring schedule' : 
+                 trigger.config?.scheduleType === 'timer' ? 'Timer interval' : 'One-time schedule'}
               </p>
             </div>
             <div className="ml-auto flex space-x-2">
@@ -343,16 +344,31 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </div>
           </div>
           <div className="text-xs bg-blue-50 p-2 rounded border border-blue-100 flex items-center">
-            <Calendar className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
-            {trigger.config && trigger.config.time ? (
-              <span>
-                {trigger.config.frequency === 'daily' && `Every day at ${trigger.config.time}`}
-                {trigger.config.frequency === 'weekly' && `Every ${trigger.config.dayOfWeek || 'Monday'} at ${trigger.config.time}`}
-                {trigger.config.frequency === 'monthly' && `Every month on day ${trigger.config.dayOfMonth || '1'} at ${trigger.config.time}`}
-                {!trigger.config.frequency && `One time at ${trigger.config.time} on ${trigger.config.date || 'today'}`}
-              </span>
+            {trigger.config?.scheduleType === 'timer' ? (
+              <>
+                <TimerIcon className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+                {trigger.config.timerConfig ? (
+                  <span>
+                    Every {trigger.config.timerConfig.interval} {trigger.config.timerConfig.unit}
+                  </span>
+                ) : (
+                  <span>Click to configure timer...</span>
+                )}
+              </>
             ) : (
-              <span>Click to schedule...</span>
+              <>
+                <Calendar className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+                {trigger.config && trigger.config.time ? (
+                  <span>
+                    {trigger.config.frequency === 'daily' && `Every day at ${trigger.config.time}`}
+                    {trigger.config.frequency === 'weekly' && `Every ${trigger.config.dayOfWeek || 'Monday'} at ${trigger.config.time}`}
+                    {trigger.config.frequency === 'monthly' && `Every month on day ${trigger.config.dayOfMonth || '1'} at ${trigger.config.time}`}
+                    {!trigger.config.frequency && trigger.config.scheduleType !== 'timer' && `One time at ${trigger.config.time} on ${trigger.config.date || 'today'}`}
+                  </span>
+                ) : (
+                  <span>Click to schedule...</span>
+                )}
+              </>
             )}
           </div>
         </div>
@@ -593,18 +609,20 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   </div>
                 )}
                 
-                {/* Time input for both one-time and recurring */}
-                <div className="mb-4">
-                  <label className="block text-sm font-medium mb-2">
-                    Time:
-                  </label>
-                  <Input
-                    type="time"
-                    value={currentConfig.time || '08:00'}
-                    onChange={(e) => setCurrentConfig({...currentConfig, time: e.target.value})}
-                    className="w-full"
-                  />
-                </div>
+                {/* Time input for one-time and recurring only */}
+                {currentConfig.scheduleType !== 'timer' && (
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">
+                      Time:
+                    </label>
+                    <Input
+                      type="time"
+                      value={currentConfig.time || '08:00'}
+                      onChange={(e) => setCurrentConfig({...currentConfig, time: e.target.value})}
+                      className="w-full"
+                    />
+                  </div>
+                )}
                 
                 <div className="mb-4">
                   <label className="block text-sm font-medium mb-2">

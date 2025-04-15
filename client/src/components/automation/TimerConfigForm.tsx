@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,6 +19,14 @@ const TimerConfigForm: FC<TimerConfigFormProps> = ({ onSave, initialConfig }) =>
   const [interval, setInterval] = useState<number>(initialConfig?.interval || 15);
   const [unit, setUnit] = useState<"minutes" | "hours">(initialConfig?.unit || "minutes");
 
+  // Initialize timer config on component mount and when initialConfig changes
+  useEffect(() => {
+    if (initialConfig) {
+      setInterval(initialConfig.interval);
+      setUnit(initialConfig.unit);
+    }
+  }, [initialConfig]);
+
   // Validate input to ensure it's a positive number
   const handleIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
@@ -27,22 +35,25 @@ const TimerConfigForm: FC<TimerConfigFormProps> = ({ onSave, initialConfig }) =>
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSave({
-      interval,
-      unit
-    });
-  };
+  // Save timer config immediately when changes are made
+  useEffect(() => {
+    // Don't save on first render if no initialConfig
+    if (interval && unit) {
+      onSave({
+        interval,
+        unit
+      });
+    }
+  }, [interval, unit, onSave]);
 
   return (
-    <Card className="w-full">
-      <CardHeader>
-        <CardTitle>Timer Configuration</CardTitle>
+    <Card className="w-full shadow-sm">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Timer Configuration</CardTitle>
         <CardDescription>Set up a recurring timer to run your automation</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="interval">Interval</Label>
@@ -70,10 +81,12 @@ const TimerConfigForm: FC<TimerConfigFormProps> = ({ onSave, initialConfig }) =>
             </div>
           </div>
           
-          <div className="pt-2">
-            <Button type="submit" className="w-full">Save Timer Config</Button>
+          <div className="pt-2 flex items-center text-sm">
+            <div className="flex-1 text-gray-500">
+              This automation will run every <span className="font-medium text-primary">{interval} {unit}</span>
+            </div>
           </div>
-        </form>
+        </div>
       </CardContent>
     </Card>
   );
