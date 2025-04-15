@@ -227,11 +227,34 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
     if (configStepId) {
       const step = getStepById(configStepId);
       if (step) {
-        // Add the selected option to the config
+        // Add the selected option and any AI config to the config
         const updatedConfig = { 
           ...currentConfig,
           optionName: selectedOption 
         };
+        
+        // Check if this was an AI service and update the description
+        const isAIAction = (step.appId === 'openai' || step.appId === 'anthropic' || 
+                          step.appId === 'perplexity' || step.appId === 'ollama');
+                          
+        if (isAIAction && currentConfig.aiPrompt) {
+          const aiPrompt = currentConfig.aiPrompt as AIPromptConfigType;
+          
+          // Add a description based on the prompt
+          if (aiPrompt.prompt) {
+            const promptPreview = aiPrompt.prompt.length > 30 
+              ? aiPrompt.prompt.substring(0, 30) + '...' 
+              : aiPrompt.prompt;
+              
+            updatedConfig.description = `Custom prompt: "${promptPreview}"`;
+            
+            // Add model info if available
+            if (aiPrompt.model) {
+              updatedConfig.description += ` using ${aiPrompt.model}`;
+            }
+          }
+        }
+        
         onUpdateConfig(configStepId, updatedConfig);
         setIsConfigDialogOpen(false);
         
