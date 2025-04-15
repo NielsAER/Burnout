@@ -26,6 +26,7 @@ interface BuilderCanvasProps {
   onReorderActions: (fromIndex: number, toIndex: number) => void;
   onUpdateConfig: (stepId: string, config: Record<string, any>) => void;
   onTestWorkflow: () => void;
+  onAddTrigger?: (appId: string) => void; // Optional method to add trigger
 }
 
 type ItemTypes = {
@@ -130,7 +131,9 @@ const DraggableAction: FC<DraggableActionProps> = ({
   return (
     <div 
       ref={ref} 
-      className={`workflow-step w-full p-4 mb-4 bg-white border border-gray-200 rounded-lg shadow-sm transition-all ${isOver ? 'border-primary' : ''}`}
+      className={`workflow-step w-full p-4 mb-4 bg-white border ${isDragging ? 'border-dashed border-primary' : 'border-gray-200'} 
+                 rounded-lg shadow-sm transition-all duration-200 ${isOver ? 'border-primary' : ''} 
+                 ${isDragging ? 'shadow-md ring-2 ring-primary/20' : 'hover:shadow'}`}
       style={{ opacity }}
     >
       <div className="flex items-center mb-3">
@@ -182,7 +185,8 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
   onAddAction,
   onReorderActions,
   onUpdateConfig,
-  onTestWorkflow
+  onTestWorkflow,
+  onAddTrigger
 }) => {
   const { toast } = useToast();
   const [configStepId, setConfigStepId] = useState<string | null>(null);
@@ -256,16 +260,49 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
     onTestWorkflow();
   };
 
+  // Drop target for triggers
+  const [{ isOverTrigger, canDropTrigger }, dropTrigger] = useDrop({
+    accept: ItemTypes.APP,
+    drop: (item: { id: string; type: string }) => {
+      if (item.type === 'trigger') {
+        handleTriggerDrop(item.id);
+      }
+    },
+    collect: (monitor) => ({
+      isOverTrigger: monitor.isOver(),
+      canDropTrigger: monitor.canDrop(),
+    }),
+  });
+
+  // Helper method to handle trigger drop
+  const handleTriggerDrop = (appId: string) => {
+    if (onAddTrigger) {
+      // If we have a dedicated trigger handler, use it
+      onAddTrigger(appId);
+    } else {
+      // Fallback for backward compatibility
+      onRemoveTrigger(); // Remove any existing trigger first
+      onAddAction(appId); // Use the existing action add function as trigger
+    }
+  };
+
   // Render trigger or an empty drop zone
   const renderTriggerZone = () => {
     if (!trigger) {
       return (
-        <div className="drop-zone w-full mb-6 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center h-32">
+        <div 
+          ref={dropTrigger}
+          className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger ? 'border-primary bg-primary/5' : 'border-gray-300'} 
+                     rounded-lg flex flex-col items-center justify-center h-32 transition-all duration-200`}
+        >
           <div className="p-4 text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
-              <PlusIcon className="h-5 w-5 text-gray-400" />
+            <div className={`w-12 h-12 mx-auto rounded-full ${isOverTrigger && canDropTrigger ? 'bg-primary/10' : 'bg-gray-100'} 
+                            flex items-center justify-center transition-all duration-200`}>
+              <PlusIcon className={`h-5 w-5 ${isOverTrigger && canDropTrigger ? 'text-primary' : 'text-gray-400'} transition-colors`} />
             </div>
-            <p className="mt-2 text-sm text-gray-500">Add a trigger to start</p>
+            <p className={`mt-2 text-sm ${isOverTrigger && canDropTrigger ? 'text-primary' : 'text-gray-500'} transition-colors`}>
+              {isOverTrigger && canDropTrigger ? 'Drop trigger here' : 'Add a trigger to start'}
+            </p>
           </div>
         </div>
       );
