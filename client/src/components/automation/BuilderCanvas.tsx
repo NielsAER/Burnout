@@ -486,17 +486,58 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         <div 
           ref={drop} 
           className={`flex-1 ${actions.length === 0 ? 'flex items-center justify-center' : ''} 
-            ${isOver && canDrop ? 'bg-primary/5 border-2 border-dashed border-primary' : ''}`}
+            ${isOver && canDrop ? 'bg-primary/5 border-2 border-dashed border-primary rounded-lg' : ''}`}
         >
           {actions.length === 0 ? (
-            <div className="text-center p-6 border-2 border-dashed border-gray-300 rounded-lg w-full">
-              <div className="w-12 h-12 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
-                <Plus className="h-5 w-5 text-gray-400" />
+            <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg w-full">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                <Plus className="h-6 w-6 text-gray-400" />
               </div>
-              <p className="mt-2 text-sm text-gray-500">Drag actions here or click to add</p>
+              <h3 className="text-gray-600 font-medium mb-1">Add an action</h3>
+              <p className="text-sm text-gray-500 mb-4 max-w-xs mx-auto">
+                Drag actions here from the left panel or click the button below to add
+              </p>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center">
+                    <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    Add Action
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent align="center" className="w-64 p-0">
+                  <div className="py-2 border-b border-gray-100">
+                    <h4 className="px-3 text-xs font-medium text-gray-500 uppercase">Popular Actions</h4>
+                  </div>
+                  <div className="py-1 max-h-[300px] overflow-y-auto">
+                    {Object.keys(APPS)
+                      .filter(appId => {
+                        const app = APPS[appId as AppId];
+                        return app.actionOptions && app.actionOptions.length > 0;
+                      })
+                      .map(appId => {
+                        const app = APPS[appId as AppId];
+                        return (
+                          <div
+                            key={appId}
+                            className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                            onClick={() => onAddAction(appId)}
+                          >
+                            <AppIconMap appId={appId} size="sm" />
+                            <span className="ml-2 text-sm">{app.name}</span>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </PopoverContent>
+              </Popover>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div className="space-y-2 relative">
+              {/* Visual connector line for multiple actions */}
+              {actions.length > 1 && (
+                <div className="absolute top-0 bottom-0 left-6 w-px bg-gray-200 z-0"></div>
+              )}
+              
               {actions.map((action, index) => (
                 <DraggableAction
                   key={action.id}
@@ -514,31 +555,35 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <PopoverTrigger asChild>
                     <Button variant="outline" size="sm" className="flex items-center">
                       <Plus className="h-3.5 w-3.5 mr-1.5" />
-                      Add Action
+                      Add Another Action
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-56">
-                    <div className="space-y-1.5">
-                      {Object.keys(APPS)
-                        .filter(appId => {
-                          const app = APPS[appId as AppId];
-                          return app.actionOptions && app.actionOptions.length > 0;
-                        })
-                        .slice(0, 6) // Limit for demo purposes
-                        .map(appId => {
-                          const app = APPS[appId as AppId];
-                          return (
-                            <div
-                              key={appId}
-                              className="flex items-center p-1.5 rounded-md hover:bg-gray-100 cursor-pointer"
-                              onClick={() => onAddAction(appId)}
-                            >
-                              <AppIconMap appId={appId} size="sm" />
-                              <span className="ml-2 text-sm">{app.name}</span>
-                            </div>
-                          );
-                        })}
+                  <PopoverContent align="center" className="w-64 p-0">
+                    <div className="py-2 border-b border-gray-100">
+                      <h4 className="px-3 text-xs font-medium text-gray-500 uppercase">Add Next Action</h4>
                     </div>
+                    <ScrollArea className="h-[300px]">
+                      <div className="py-1">
+                        {Object.keys(APPS)
+                          .filter(appId => {
+                            const app = APPS[appId as AppId];
+                            return app.actionOptions && app.actionOptions.length > 0;
+                          })
+                          .map(appId => {
+                            const app = APPS[appId as AppId];
+                            return (
+                              <div
+                                key={appId}
+                                className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                                onClick={() => onAddAction(appId)}
+                              >
+                                <AppIconMap appId={appId} size="sm" />
+                                <span className="ml-2 text-sm">{app.name}</span>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </ScrollArea>
                   </PopoverContent>
                 </Popover>
               </div>
