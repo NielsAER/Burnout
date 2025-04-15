@@ -10,6 +10,7 @@ import * as anthropicService from "./services/anthropic";
 import * as ollamaService from "./services/ollama";
 import * as perplexityService from "./services/perplexity";
 import * as textProcessorService from "./services/text-processor";
+import * as googleDocsService from "./services/google-docs";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/automations - Get all automations
