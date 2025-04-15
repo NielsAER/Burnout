@@ -59,7 +59,8 @@ export const APPS: Record<AppId, AppDefinition> = {
       { name: "One-time Schedule", description: "Run once at a specific date and time" },
       { name: "Daily Schedule", description: "Run every day at a specific time" },
       { name: "Weekly Schedule", description: "Run on specific days of the week" },
-      { name: "Monthly Schedule", description: "Run on specific days of the month" }
+      { name: "Monthly Schedule", description: "Run on specific days of the month" },
+      { name: "Timer", description: "Run at regular intervals (minutes, hours)" }
     ]
   },
   "linkedin": {

@@ -1,6 +1,6 @@
 import { FC, useState, useRef } from "react";
 import { useDrop, useDrag } from "react-dnd";
-import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy, Clock, Calendar } from "lucide-react";
+import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy, Clock, Calendar, Timer as TimerIcon } from "lucide-react";
 import AppIconMap from "@/components/automation/AppIconMap";
 import { APPS, AppId } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import TimerConfigForm, { TimerConfig } from "./TimerConfigForm";
 
 export type BuilderStep = {
   id: string;
@@ -468,12 +469,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <div className="space-y-2">
                     <div 
                       className={`p-3 border rounded-md cursor-pointer transition-colors ${
-                        currentConfig.scheduleType !== 'recurring' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                        currentConfig.scheduleType === 'once' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
                       }`}
                       onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'once'})}
                     >
                       <div className="font-medium">One-time</div>
-                      <div className="text-sm text-gray-500">Run once at a specific time</div>
+                      <div className="text-sm text-gray-500">Run once at a specific date and time</div>
                     </div>
                     <div 
                       className={`p-3 border rounded-md cursor-pointer transition-colors ${
@@ -482,12 +483,34 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'recurring'})}
                     >
                       <div className="font-medium">Recurring</div>
-                      <div className="text-sm text-gray-500">Run on a regular schedule</div>
+                      <div className="text-sm text-gray-500">Run on a regular calendar schedule</div>
+                    </div>
+                    <div 
+                      className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                        currentConfig.scheduleType === 'timer' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'timer'})}
+                    >
+                      <div className="font-medium">Timer</div>
+                      <div className="text-sm text-gray-500">Run at regular intervals (e.g., every 15 minutes)</div>
                     </div>
                   </div>
                 </div>
                 
-                {currentConfig.scheduleType === 'recurring' ? (
+                {currentConfig.scheduleType === 'timer' ? (
+                  // Timer options - regular intervals
+                  <div className="mb-4">
+                    <TimerConfigForm
+                      onSave={(timerConfig: TimerConfig) => {
+                        setCurrentConfig({
+                          ...currentConfig,
+                          timerConfig
+                        });
+                      }}
+                      initialConfig={currentConfig.timerConfig}
+                    />
+                  </div>
+                ) : currentConfig.scheduleType === 'recurring' ? (
                   // Recurring schedule options
                   <>
                     <div className="mb-4">
