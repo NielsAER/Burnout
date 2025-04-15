@@ -11,6 +11,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import TimerConfigForm, { TimerConfig } from "./TimerConfigForm";
+import AIPromptConfig, { AIPromptConfigType } from "./AIPromptConfig";
 
 export type BuilderStep = {
   id: string;
@@ -453,6 +454,11 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       (step.appId === 'scheduler' || 
       (step.config && (step.config.scheduleType || step.config.time || step.config.frequency)));
     
+    // Check if this is an AI-related action
+    const isAIAction = step.type === 'action' && 
+      (step.appId === 'openai' || step.appId === 'anthropic' || 
+       step.appId === 'perplexity' || step.appId === 'ollama');
+    
     return (
       <Dialog open={isConfigDialogOpen} onOpenChange={setIsConfigDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
@@ -659,6 +665,23 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                     </div>
                   ))}
                 </div>
+              </div>
+            )}
+            
+            {/* AI Prompt Config section for AI services */}
+            {isAIAction && selectedOption && (
+              <div className="mt-4 mb-6 border-t border-gray-200 pt-4">
+                <h4 className="text-sm font-medium mb-2">Configure AI Prompt</h4>
+                <AIPromptConfig
+                  serviceId={step.appId as AppId}
+                  initialConfig={currentConfig.aiPrompt as AIPromptConfigType}
+                  onSave={(aiPromptConfig) => {
+                    setCurrentConfig({
+                      ...currentConfig,
+                      aiPrompt: aiPromptConfig
+                    });
+                  }}
+                />
               </div>
             )}
             
