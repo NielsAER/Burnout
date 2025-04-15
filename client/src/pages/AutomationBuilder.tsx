@@ -9,6 +9,7 @@ import { queryClient } from "@/lib/queryClient";
 import { Automation } from "@shared/schema";
 import BuilderCanvas, { BuilderStep } from "@/components/automation/BuilderCanvas";
 import AppSelector from "@/components/automation/AppSelector";
+import WorkflowPreviewPanel from "@/components/automation/WorkflowPreviewPanel";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -25,6 +26,7 @@ const AutomationBuilder = () => {
   const [isEditMode, setIsEditMode] = useState(false);
   const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
   const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [isRunningWorkflow, setIsRunningWorkflow] = useState(false);
   
   // Define the result type for better type safety
   type TestResult = {
@@ -224,9 +226,10 @@ const AutomationBuilder = () => {
       return;
     }
     
-    // Reset and open the test dialog
+    // Reset states
     setTestStatus('loading');
     setTestResults([]);
+    setIsRunningWorkflow(true);
     setIsTestDialogOpen(true);
     
     // Generate test results based on workflow components
@@ -250,16 +253,17 @@ const AutomationBuilder = () => {
       });
     }
     
-    // Simulate API call delay
+    // Simulate API call delay - long enough to see the visualization
     setTimeout(() => {
       setTestResults(results);
       setTestStatus('success');
+      setIsRunningWorkflow(false);
       
       toast({
         title: "Test successful",
         description: "Your workflow executed successfully. See the results in the preview.",
       });
-    }, 1500);
+    }, 2500);
   };
   
   // Helper function to generate sample trigger output
@@ -429,6 +433,17 @@ const AutomationBuilder = () => {
                 onAddTrigger={handleTriggerDrop}
               />
             </div>
+          </div>
+          
+          {/* Interactive Workflow Preview */}
+          <div className="px-6 py-4 border-t border-gray-200">
+            <WorkflowPreviewPanel
+              trigger={trigger}
+              actions={actions}
+              onTestWorkflow={handleTestWorkflow}
+              isRunning={isRunningWorkflow}
+              testResults={testResults}
+            />
           </div>
           
           <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3 border-t border-gray-200">
