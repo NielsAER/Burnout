@@ -21,8 +21,9 @@ export const automations = pgTable("automations", {
   active: boolean("active").notNull().default(true),
   triggerAppId: text("trigger_app_id").notNull(),
   triggerConfig: json("trigger_config").notNull(),
-  actionAppId: text("action_app_id").notNull(),
-  actionConfig: json("action_config").notNull(),
+  actionAppId: text("action_app_id").notNull(), // Kept for backwards compatibility
+  actionConfig: json("action_config").notNull(), // Kept for backwards compatibility
+  actions: json("actions").default([]),  // New field for multiple actions
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastRunAt: timestamp("last_run_at"),
   runsToday: integer("runs_today").notNull().default(0),
