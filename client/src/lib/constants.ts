@@ -7,6 +7,7 @@ export type AppId =
   | "crm" 
   | "google-drive" 
   | "google-calendar" 
+  | "google-docs"
   | "instagram" 
   | "wordpress" 
   | "events" 
@@ -465,6 +466,25 @@ export const APPS: Record<AppId, AppDefinition> = {
       { name: "Upload File", description: "Upload a file to Google Drive" },
       { name: "Create Folder", description: "Create a new folder" },
       { name: "Copy File", description: "Copy a file to another location" }
+    ]
+  },
+  "google-docs": {
+    id: "google-docs",
+    name: "Google Docs",
+    description: "Connect to Google Docs for document automation",
+    iconColor: "text-blue-600",
+    bgColor: "bg-blue-100",
+    triggerOptions: [
+      { name: "Document Updated", description: "Trigger when a document is updated" },
+      { name: "Comment Added", description: "Trigger when a comment is added to a document" },
+      { name: "New Document", description: "Trigger when a new document is created" }
+    ],
+    actionOptions: [
+      { name: "Create Document", description: "Create a new Google Doc" },
+      { name: "Insert Text", description: "Insert text into a document" },
+      { name: "Replace Text", description: "Find and replace text in a document" },
+      { name: "Add Header/Footer", description: "Add a header or footer to a document" },
+      { name: "Export as PDF", description: "Export a document as PDF" }
     ]
   },
   "google-calendar": {

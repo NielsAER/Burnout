@@ -33,7 +33,8 @@ import {
   File,
   Clock,
   Timer,
-  AlarmClock
+  AlarmClock,
+  FileText as FileDocument
 } from "lucide-react";
 
 interface AppIconMapProps {
@@ -96,6 +97,8 @@ const AppIconMap: FC<AppIconMapProps> = ({ appId, size = "md" }) => {
         return <HardDrive className={iconColor} />;
       case "google-calendar":
         return <Calendar className={iconColor} />;
+      case "google-docs":
+        return <FileDocument className={iconColor} />;
       case "google-forms":
         return <FormInput className={iconColor} />;
       case "google-ads":
