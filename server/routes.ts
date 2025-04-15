@@ -1010,7 +1010,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // OpenAI Service Routes
   app.post("/api/services/openai/generate-text", async (req, res) => {
     try {
-      const { prompt, maxTokens, temperature } = req.body;
+      const { prompt, maxTokens, temperature, model, systemMessage } = req.body;
       if (!prompt) {
         return res.status(400).json({ message: "Prompt is required" });
       }
@@ -1019,6 +1019,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         prompt, 
         maxTokens || 500, 
         temperature || 0.7,
+        model || "gpt-4o",
+        systemMessage,
         req
       );
       
@@ -1071,7 +1073,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Anthropic Service Routes
   app.post("/api/services/anthropic/generate-text", async (req, res) => {
     try {
-      const { prompt, maxTokens, temperature } = req.body;
+      const { prompt, maxTokens, temperature, model, systemMessage } = req.body;
       if (!prompt) {
         return res.status(400).json({ message: "Prompt is required" });
       }
@@ -1079,7 +1081,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const result = await anthropicService.generateText(
         prompt, 
         maxTokens || 500, 
-        temperature || 0.7
+        temperature || 0.7,
+        model || "claude-3-7-sonnet-20250219",
+        systemMessage
       );
       
       res.json(result);

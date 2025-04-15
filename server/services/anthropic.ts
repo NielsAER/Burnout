@@ -32,16 +32,19 @@ interface TextAnalysisResponse {
 export async function generateText(
   prompt: string,
   maxTokens: number = 500,
-  temperature: number = 0.7
+  temperature: number = 0.7,
+  model: string = "claude-3-7-sonnet-20250219",
+  systemMessage?: string
 ): Promise<TextGenerationResponse> {
   try {
     const anthropic = getAnthropicInstance();
     
     // the newest Anthropic model is "claude-3-7-sonnet-20250219" which was released February 24, 2025
     const message = await anthropic.messages.create({
-      model: "claude-3-7-sonnet-20250219",
+      model: model || "claude-3-7-sonnet-20250219",
       max_tokens: maxTokens,
       temperature: temperature,
+      system: systemMessage,
       messages: [{ role: "user", content: prompt }],
     });
 
