@@ -12,6 +12,8 @@ import AppSelector from "@/components/automation/AppSelector";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Check, XCircle, Loader2 } from "lucide-react";
 
 const AutomationBuilder = () => {
   const { id } = useParams();
@@ -21,6 +23,18 @@ const AutomationBuilder = () => {
   const [trigger, setTrigger] = useState<BuilderStep | null>(null);
   const [actions, setActions] = useState<BuilderStep[]>([]);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [isTestDialogOpen, setIsTestDialogOpen] = useState(false);
+  const [testStatus, setTestStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  
+  // Define the result type for better type safety
+  type TestResult = {
+    step: "trigger" | "action";
+    appId: string;
+    status: "success" | "error";
+    data: Record<string, any>;
+  };
+  
+  const [testResults, setTestResults] = useState<TestResult[]>([]);
   
   // Fetch existing automation if we're in edit mode
   const { data: existingAutomation, isLoading } = useQuery<Automation>({
@@ -201,18 +215,144 @@ const AutomationBuilder = () => {
   }, [trigger]);
 
   const handleTestWorkflow = () => {
-    toast({
-      title: "Testing workflow",
-      description: "Your workflow test has been initiated.",
+    if (!trigger || actions.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Cannot test workflow",
+        description: "You need both a trigger and at least one action to test this workflow.",
+      });
+      return;
+    }
+    
+    // Reset and open the test dialog
+    setTestStatus('loading');
+    setTestResults([]);
+    setIsTestDialogOpen(true);
+    
+    // Generate test results based on workflow components
+    const results: TestResult[] = [];
+    
+    // Add trigger result
+    results.push({
+      step: "trigger",
+      appId: trigger.appId,
+      status: "success",
+      data: generateTriggerTestData(trigger)
     });
     
-    // In a real implementation, this would call an API endpoint
+    // Add action results
+    for (const action of actions) {
+      results.push({
+        step: "action",
+        appId: action.appId,
+        status: "success",
+        data: generateActionTestData(action)
+      });
+    }
+    
+    // Simulate API call delay
     setTimeout(() => {
+      setTestResults(results);
+      setTestStatus('success');
+      
       toast({
         title: "Test successful",
-        description: "Your workflow executed successfully!",
+        description: "Your workflow executed successfully. See the results in the preview.",
       });
     }, 1500);
+  };
+  
+  // Helper function to generate sample trigger output
+  const generateTriggerTestData = (triggerStep: BuilderStep) => {
+    // Tailored sample data based on trigger type
+    if (triggerStep.appId === 'scheduler') {
+      return { 
+        timestamp: new Date().toISOString(),
+        trigger_type: triggerStep.config?.scheduleType || "timer",
+        message: "Scheduled trigger activated"
+      };
+    }
+    
+    if (triggerStep.appId === 'openai' || 
+        triggerStep.appId === 'anthropic' || 
+        triggerStep.appId === 'perplexity' || 
+        triggerStep.appId === 'ollama') {
+      const aiPrompt = triggerStep.config?.aiPrompt || {};
+      return {
+        prompt: aiPrompt.prompt || "Sample prompt",
+        model: aiPrompt.model || "Model not specified",
+        result: "This is a sample output from the AI model based on your prompt."
+      };
+    }
+    
+    // Default sample data
+    return {
+      timestamp: new Date().toISOString(),
+      event_type: triggerStep.config?.optionName || "Event triggered",
+      sample_data: { 
+        key1: "value1", 
+        key2: "value2",
+        message: `Sample data for ${triggerStep.appId} trigger`
+      }
+    };
+  };
+  
+  // Helper function to generate sample action output
+  const generateActionTestData = (actionStep: BuilderStep) => {
+    // Generate AI-specific sample data
+    if (actionStep.appId === 'openai') {
+      const aiPrompt = actionStep.config?.aiPrompt || {};
+      return {
+        prompt: aiPrompt.prompt || "Sample prompt",
+        model: aiPrompt.model || "gpt-4o",
+        completion: "This is a sample response from the OpenAI model. It would typically contain generated text based on your prompt and any additional context provided in your automation."
+      };
+    }
+    
+    if (actionStep.appId === 'anthropic') {
+      const aiPrompt = actionStep.config?.aiPrompt || {};
+      return {
+        prompt: aiPrompt.prompt || "Sample prompt",
+        model: aiPrompt.model || "claude-3-7-sonnet-20250219",
+        completion: "This is a sample response from Claude. In a real execution, this would contain AI-generated content based on your specific instructions and system message."
+      };
+    }
+    
+    if (actionStep.appId === 'perplexity') {
+      const aiPrompt = actionStep.config?.aiPrompt || {};
+      return {
+        query: aiPrompt.prompt || "Sample search query",
+        model: aiPrompt.model || "llama-3.1-sonar-small-128k-online",
+        response: "Sample search results and analysis would appear here based on your query.",
+        sources: ["https://example.com/source1", "https://example.com/source2"]
+      };
+    }
+    
+    if (actionStep.appId === 'gmail') {
+      return {
+        to: "recipient@example.com",
+        subject: "Sample Email Subject",
+        body: "This is a sample email body that would be sent based on your automation trigger.",
+        status: "sent"
+      };
+    }
+    
+    if (actionStep.appId === 'slack') {
+      return {
+        channel: "#general",
+        message: "This is a sample Slack message that would be sent as part of your automation.",
+        attachments: [],
+        status: "sent"
+      };
+    }
+    
+    // Default sample data
+    return {
+      timestamp: new Date().toISOString(),
+      action_type: actionStep.config?.optionName || "Action executed",
+      status: "completed",
+      result: `Sample result for ${actionStep.appId} action`
+    };
   };
 
   const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -306,6 +446,73 @@ const AutomationBuilder = () => {
             </Button>
           </div>
         </div>
+        
+        {/* Test Preview Dialog */}
+        <Dialog open={isTestDialogOpen} onOpenChange={setIsTestDialogOpen}>
+          <DialogContent className="sm:max-w-[700px]">
+            <DialogHeader>
+              <DialogTitle>
+                Workflow Test Results
+              </DialogTitle>
+              <DialogDescription>
+                Preview how your automation will execute in a real environment.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="py-4">
+              {testStatus === 'loading' && (
+                <div className="flex flex-col items-center justify-center py-10">
+                  <Loader2 className="h-10 w-10 text-primary animate-spin mb-4" />
+                  <p className="text-gray-500">Testing your workflow...</p>
+                </div>
+              )}
+              
+              {testStatus === 'success' && testResults.length > 0 && (
+                <div className="space-y-6">
+                  {testResults.map((result, index) => (
+                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                      <div className="flex items-center mb-3">
+                        <div className={`w-6 h-6 rounded-full flex items-center justify-center 
+                                      ${result.status === 'success' ? 'bg-green-100' : 'bg-red-100'} mr-2`}>
+                          {result.status === 'success' ? (
+                            <Check className="h-4 w-4 text-green-600" />
+                          ) : (
+                            <XCircle className="h-4 w-4 text-red-600" />
+                          )}
+                        </div>
+                        <h3 className="text-sm font-semibold">
+                          {result.step === 'trigger' ? 'Trigger' : `Action ${index}`}: {result.appId}
+                        </h3>
+                      </div>
+                      
+                      <div className="bg-gray-50 rounded p-3 text-sm font-mono overflow-auto max-h-[200px]">
+                        <pre className="whitespace-pre-wrap">
+                          {JSON.stringify(result.data, null, 2)}
+                        </pre>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              {testStatus === 'error' && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                  <h3 className="font-semibold mb-2 flex items-center">
+                    <XCircle className="h-5 w-5 mr-2" />
+                    Test Failed
+                  </h3>
+                  <p>There was an error testing your workflow. Please check your configuration and try again.</p>
+                </div>
+              )}
+            </div>
+            
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsTestDialogOpen(false)}>
+                Close
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </DndProvider>
   );
