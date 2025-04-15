@@ -30,7 +30,10 @@ import {
   PanelRight,
   Video,
   Play,
-  File
+  File,
+  Clock,
+  Timer,
+  AlarmClock
 } from "lucide-react";
 
 interface AppIconMapProps {
@@ -52,6 +55,10 @@ const AppIconMap: FC<AppIconMapProps> = ({ appId, size = "md" }) => {
 
   const renderIcon = () => {
     switch (appId) {
+      // Scheduling
+      case "scheduler":
+        return <AlarmClock className={iconColor} />;
+      
       // AI services
       case "openai":
         return <Sparkles className={iconColor} />;
