@@ -39,7 +39,7 @@ const AutomationBuilder = () => {
         id: "trigger-1",
         type: "trigger",
         appId: existingAutomation.triggerAppId,
-        config: existingAutomation.triggerConfig
+        config: (existingAutomation.triggerConfig as Record<string, any>) || {}
       });
       
       // Handle the transition from single action to multiple actions
@@ -55,7 +55,7 @@ const AutomationBuilder = () => {
           id: `action-${uuidv4()}`,
           type: "action",
           appId: existingAutomation.actionAppId,
-          config: existingAutomation.actionConfig
+          config: (existingAutomation.actionConfig as Record<string, any>) || {}
         }]);
       }
     }

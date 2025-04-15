@@ -204,7 +204,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       setIsConfigDialogOpen(true);
       
       // If it's a service with options, pre-select the current one
-      const appDetails = APPS[step.appId];
+      const appDetails = (step.appId in APPS) ? APPS[step.appId as AppId] : undefined;
       if (appDetails) {
         const options = step.type === 'trigger' ? appDetails.triggerOptions : appDetails.actionOptions;
         if (options && options.length > 0) {
@@ -271,10 +271,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       );
     }
 
-    const appDetails = APPS[trigger.appId] || {
-      name: trigger.appId,
-      description: "When this happens..."
-    };
+    const appDetails = (trigger.appId in APPS) 
+      ? APPS[trigger.appId as AppId] 
+      : {
+          name: trigger.appId,
+          description: "When this happens..."
+        };
 
     return (
       <div className="workflow-step w-full p-4 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm transition-all hover:shadow">
@@ -338,8 +340,10 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
     if (!step) return null;
     
     const stepType = step.type === 'trigger' ? 'Trigger' : 'Action';
-    const appDetails = APPS[step.appId];
-    const options = step.type === 'trigger' ? appDetails?.triggerOptions : appDetails?.actionOptions;
+    const appDetails = (step.appId in APPS) ? APPS[step.appId as AppId] : undefined;
+    const options = step.type === 'trigger' 
+      ? appDetails?.triggerOptions 
+      : appDetails?.actionOptions;
     
     return (
       <Dialog open={isConfigDialogOpen} onOpenChange={setIsConfigDialogOpen}>
@@ -359,7 +363,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   Select an option:
                 </label>
                 <div className="space-y-2">
-                  {options.map((option, idx) => (
+                  {options.map((option: { name: string; description: string }, idx: number) => (
                     <div 
                       key={idx} 
                       className={`p-3 border rounded-md cursor-pointer transition-colors ${
@@ -479,18 +483,24 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <PopoverContent className="w-56">
                     <div className="space-y-1.5">
                       {Object.keys(APPS)
-                        .filter(appId => APPS[appId].actionOptions)
+                        .filter(appId => {
+                          const app = APPS[appId as AppId];
+                          return app.actionOptions && app.actionOptions.length > 0;
+                        })
                         .slice(0, 6) // Limit for demo purposes
-                        .map(appId => (
-                          <div
-                            key={appId}
-                            className="flex items-center p-1.5 rounded-md hover:bg-gray-100 cursor-pointer"
-                            onClick={() => onAddAction(appId)}
-                          >
-                            <AppIconMap appId={appId} size="sm" />
-                            <span className="ml-2 text-sm">{APPS[appId].name}</span>
-                          </div>
-                        ))}
+                        .map(appId => {
+                          const app = APPS[appId as AppId];
+                          return (
+                            <div
+                              key={appId}
+                              className="flex items-center p-1.5 rounded-md hover:bg-gray-100 cursor-pointer"
+                              onClick={() => onAddAction(appId)}
+                            >
+                              <AppIconMap appId={appId} size="sm" />
+                              <span className="ml-2 text-sm">{app.name}</span>
+                            </div>
+                          );
+                        })}
                     </div>
                   </PopoverContent>
                 </Popover>
