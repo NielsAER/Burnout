@@ -1,12 +1,15 @@
 import { FC, useState, useRef } from "react";
 import { useDrop, useDrag } from "react-dnd";
-import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy } from "lucide-react";
+import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy, Clock, Calendar } from "lucide-react";
 import AppIconMap from "@/components/automation/AppIconMap";
 import { APPS, AppId } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 export type BuilderStep = {
   id: string;
@@ -308,6 +311,53 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       );
     }
 
+    // Special case for time trigger
+    if (trigger.appId === 'scheduler' || 
+        (trigger.config && (trigger.config.scheduleType || trigger.config.time || trigger.config.frequency))) {
+      return (
+        <div className="workflow-step w-full p-4 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm transition-all hover:shadow">
+          <div className="flex items-center mb-3">
+            <Clock className="h-5 w-5 text-blue-500" />
+            <div className="ml-3">
+              <h4 className="text-sm font-medium">Time Trigger</h4>
+              <p className="text-xs text-gray-500">
+                {trigger.config?.scheduleType === 'recurring' ? 'Recurring schedule' : 'One-time schedule'}
+              </p>
+            </div>
+            <div className="ml-auto flex space-x-2">
+              <button 
+                className="text-gray-400 hover:text-gray-600" 
+                onClick={() => handleConfigureStep(trigger.id)}
+                aria-label="Configure"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+              <button 
+                className="text-gray-400 hover:text-red-500" 
+                onClick={onRemoveTrigger}
+                aria-label="Remove"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          </div>
+          <div className="text-xs bg-blue-50 p-2 rounded border border-blue-100 flex items-center">
+            <Calendar className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+            {trigger.config && trigger.config.time ? (
+              <span>
+                {trigger.config.frequency === 'daily' && `Every day at ${trigger.config.time}`}
+                {trigger.config.frequency === 'weekly' && `Every ${trigger.config.dayOfWeek || 'Monday'} at ${trigger.config.time}`}
+                {trigger.config.frequency === 'monthly' && `Every month on day ${trigger.config.dayOfMonth || '1'} at ${trigger.config.time}`}
+                {!trigger.config.frequency && `One time at ${trigger.config.time} on ${trigger.config.date || 'today'}`}
+              </span>
+            ) : (
+              <span>Click to schedule...</span>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     const appDetails = (trigger.appId in APPS) 
       ? APPS[trigger.appId as AppId] 
       : {
@@ -382,19 +432,174 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       ? appDetails?.triggerOptions 
       : appDetails?.actionOptions;
     
+    const isTimeBasedTrigger = step.type === 'trigger' && 
+      (step.appId === 'scheduler' || 
+      (step.config && (step.config.scheduleType || step.config.time || step.config.frequency)));
+    
     return (
       <Dialog open={isConfigDialogOpen} onOpenChange={setIsConfigDialogOpen}>
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
-            <DialogTitle>Configure {stepType}</DialogTitle>
+            <DialogTitle>
+              {isTimeBasedTrigger ? (
+                <div className="flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-blue-500" />
+                  Configure Time Trigger
+                </div>
+              ) : (
+                `Configure ${stepType}`
+              )}
+            </DialogTitle>
             <DialogDescription>
-              Customize how this {stepType.toLowerCase()} will work
+              {isTimeBasedTrigger ? 
+                "Set when your automation should run" : 
+                `Customize how this ${stepType.toLowerCase()} will work`}
             </DialogDescription>
           </DialogHeader>
           
           <div className="py-4">
-            {/* Show available options if they exist */}
-            {options && options.length > 0 && (
+            {/* Time-based trigger configuration */}
+            {isTimeBasedTrigger && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">
+                    Schedule Type:
+                  </label>
+                  <div className="space-y-2">
+                    <div 
+                      className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                        currentConfig.scheduleType !== 'recurring' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'once'})}
+                    >
+                      <div className="font-medium">One-time</div>
+                      <div className="text-sm text-gray-500">Run once at a specific time</div>
+                    </div>
+                    <div 
+                      className={`p-3 border rounded-md cursor-pointer transition-colors ${
+                        currentConfig.scheduleType === 'recurring' ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                      onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'recurring'})}
+                    >
+                      <div className="font-medium">Recurring</div>
+                      <div className="text-sm text-gray-500">Run on a regular schedule</div>
+                    </div>
+                  </div>
+                </div>
+                
+                {currentConfig.scheduleType === 'recurring' ? (
+                  // Recurring schedule options
+                  <>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium mb-2">
+                        Frequency:
+                      </label>
+                      <Select 
+                        value={currentConfig.frequency || 'daily'} 
+                        onValueChange={(value) => setCurrentConfig({...currentConfig, frequency: value})}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select frequency" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="daily">Daily</SelectItem>
+                          <SelectItem value="weekly">Weekly</SelectItem>
+                          <SelectItem value="monthly">Monthly</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    {currentConfig.frequency === 'weekly' && (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">
+                          Day of Week:
+                        </label>
+                        <Select 
+                          value={currentConfig.dayOfWeek || 'Monday'} 
+                          onValueChange={(value) => setCurrentConfig({...currentConfig, dayOfWeek: value})}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select day" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Monday">Monday</SelectItem>
+                            <SelectItem value="Tuesday">Tuesday</SelectItem>
+                            <SelectItem value="Wednesday">Wednesday</SelectItem>
+                            <SelectItem value="Thursday">Thursday</SelectItem>
+                            <SelectItem value="Friday">Friday</SelectItem>
+                            <SelectItem value="Saturday">Saturday</SelectItem>
+                            <SelectItem value="Sunday">Sunday</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                    
+                    {currentConfig.frequency === 'monthly' && (
+                      <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">
+                          Day of Month:
+                        </label>
+                        <Select 
+                          value={currentConfig.dayOfMonth || '1'} 
+                          onValueChange={(value) => setCurrentConfig({...currentConfig, dayOfMonth: value})}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select day" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {Array.from({length: 31}, (_, i) => i + 1).map(day => (
+                              <SelectItem key={day} value={day.toString()}>{day}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  // One-time schedule options
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium mb-2">
+                      Date:
+                    </label>
+                    <Input
+                      type="date"
+                      value={currentConfig.date || new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setCurrentConfig({...currentConfig, date: e.target.value})}
+                      className="w-full"
+                    />
+                  </div>
+                )}
+                
+                {/* Time input for both one-time and recurring */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">
+                    Time:
+                  </label>
+                  <Input
+                    type="time"
+                    value={currentConfig.time || '08:00'}
+                    onChange={(e) => setCurrentConfig({...currentConfig, time: e.target.value})}
+                    className="w-full"
+                  />
+                </div>
+                
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-2">
+                    Trigger Name:
+                  </label>
+                  <Input
+                    type="text"
+                    value={currentConfig.name || ''}
+                    onChange={(e) => setCurrentConfig({ ...currentConfig, name: e.target.value })}
+                    className="w-full"
+                    placeholder="E.g., Daily Morning Report"
+                  />
+                </div>
+              </>
+            )}
+            
+            {/* Standard app options if they exist */}
+            {!isTimeBasedTrigger && options && options.length > 0 && (
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">
                   Select an option:
@@ -416,19 +621,21 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               </div>
             )}
             
-            {/* Simple mock input for demonstration */}
-            <div className="mb-4">
-              <label className="block text-sm font-medium mb-2">
-                {step.type === 'trigger' ? 'Trigger' : 'Action'} Name:
-              </label>
-              <input
-                type="text"
-                value={currentConfig.name || ''}
-                onChange={(e) => setCurrentConfig({ ...currentConfig, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                placeholder={`Enter custom name for this ${step.type}`}
-              />
-            </div>
+            {/* Simple name input for standard steps */}
+            {!isTimeBasedTrigger && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">
+                  {step.type === 'trigger' ? 'Trigger' : 'Action'} Name:
+                </label>
+                <Input
+                  type="text"
+                  value={currentConfig.name || ''}
+                  onChange={(e) => setCurrentConfig({ ...currentConfig, name: e.target.value })}
+                  className="w-full"
+                  placeholder={`Enter custom name for this ${step.type}`}
+                />
+              </div>
+            )}
           </div>
           
           <DialogFooter>

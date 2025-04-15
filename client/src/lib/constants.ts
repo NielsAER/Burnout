@@ -29,7 +29,8 @@ export type AppId =
   | "google-ads"
   | "zoom"
   | "youtube"
-  | "notion";
+  | "notion"
+  | "scheduler";
 
 export interface AppDefinition {
   id: AppId;
@@ -48,6 +49,19 @@ export interface AppDefinition {
 }
 
 export const APPS: Record<AppId, AppDefinition> = {
+  "scheduler": {
+    id: "scheduler",
+    name: "Time Scheduler",
+    description: "Schedule automations to run at specific times",
+    iconColor: "text-blue-500",
+    bgColor: "bg-blue-50",
+    triggerOptions: [
+      { name: "One-time Schedule", description: "Run once at a specific date and time" },
+      { name: "Daily Schedule", description: "Run every day at a specific time" },
+      { name: "Weekly Schedule", description: "Run on specific days of the week" },
+      { name: "Monthly Schedule", description: "Run on specific days of the month" }
+    ]
+  },
   "linkedin": {
     id: "linkedin",
     name: "LinkedIn",
