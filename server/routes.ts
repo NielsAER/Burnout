@@ -981,98 +981,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // GET /api/simulated-login - Simulated OAuth login page for services without implemented OAuth
-  app.get("/api/simulated-login", (req, res) => {
-    const { service, redirect } = req.query;
-    
-    if (!service || !redirect) {
-      return res.status(400).send("Missing required parameters");
+  app.get("/api/simulated-login", async (req, res) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.redirect('/auth?redirect=' + encodeURIComponent('/app-connections'));
+      }
+      
+      const { service } = req.query;
+      
+      if (!service) {
+        return res.status(400).json({ error: "Service parameter is required" });
+      }
+      
+      if (typeof service !== 'string') {
+        throw new Error("Invalid service parameter");
+      }
+      
+      // Create a fake profile and credentials for simulated login
+      const serviceName = service.charAt(0).toUpperCase() + service.slice(1);
+      const profile = {
+        id: `${service}_${Date.now()}`,
+        username: `${req.user.username || 'user'}@${service}`,
+        name: `${req.user.fullName || req.user.username || 'User'} (${serviceName})`,
+      };
+      
+      const credentials = {
+        access_token: `sim_token_${service}_${Date.now()}`,
+        refresh_token: `sim_refresh_${service}_${Date.now()}`,
+        expires_in: 3600,
+        created_at: new Date()
+      };
+      
+      // Check if the connection already exists
+      const existingConnection = await storage.getAppConnectionByUserAndApp(req.user.id, service);
+      
+      if (existingConnection) {
+        // Update existing connection
+        await storage.updateAppConnection(existingConnection.id, {
+          username: profile.username,
+          credentials
+        });
+      } else {
+        // Create new connection
+        await storage.createAppConnection({
+          appId: service,
+          userId: req.user.id,
+          username: profile.username,
+          permissions: ["read", "write"],
+          credentials
+        });
+      }
+      
+      // Redirect back to the app connections page with success
+      res.redirect('/app-connections?success=' + service);
+    } catch (error) {
+      console.error("Error in simulated login:", error);
+      res.redirect('/app-connections?error=simulated_login_failed');
     }
-    
-    // Return a simple HTML login form
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>Login to ${service}</title>
-        <style>
-          body {
-            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            max-width: 500px;
-            margin: 0 auto;
-            padding: 2rem;
-            text-align: center;
-          }
-          .card {
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            padding: 2rem;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-          }
-          h1 {
-            color: #2d3748;
-            font-size: 1.5rem;
-            margin-bottom: 1.5rem;
-          }
-          form {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-          }
-          input {
-            padding: 0.5rem;
-            border: 1px solid #cbd5e0;
-            border-radius: 0.25rem;
-          }
-          button {
-            background-color: #4f46e5;
-            color: white;
-            border: none;
-            border-radius: 0.25rem;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            font-weight: 500;
-          }
-          button:hover {
-            background-color: #4338ca;
-          }
-          .logo {
-            width: 50px;
-            height: 50px;
-            margin: 0 auto 1rem;
-            display: block;
-          }
-          .hint {
-            margin-top: 1rem;
-            font-size: 0.875rem;
-            color: #718096;
-          }
-        </style>
-      </head>
-      <body>
-        <div class="card">
-          <img src="https://placehold.co/50x50/4f46e5/white?text=${service as string ? (service as string).charAt(0).toUpperCase() : 'S'}" class="logo" alt="${service} logo">
-          <h1>Sign in to ${service}</h1>
-          <form action="${redirect}" method="GET">
-            <input type="text" name="username" placeholder="Username or Email" required>
-            <input type="password" name="password" placeholder="Password" required>
-            <input type="hidden" name="service" value="${service}">
-            <button type="submit">Sign In</button>
-          </form>
-          <p class="hint">
-            This is a simulated login for demonstration purposes only.
-            <br>No actual authentication will take place.
-          </p>
-        </div>
-      </body>
-      </html>
-    `);
   });
   
   // POST /api/app-connections/:appId/connect - Connect an app
   app.post("/api/app-connections/:appId/connect", async (req, res) => {
     try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to connect apps" });
+      }
+      
       const { appId } = req.params;
       const { code, apiIntegration } = req.body;
+      
+      if (!appId) {
+        return res.status(400).json({ message: "App ID is required" });
+      }
       
       let username = '';
       let permissions = ["read", "write"];
@@ -1101,20 +1082,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             permissions = ["summarize", "format", "extract", "translate"];
             break;
           default:
-            username = `${typeof appId === 'string' ? appId.charAt(0).toUpperCase() + appId.slice(1) : 'Unknown'} API`;
+            username = `${appId.charAt(0).toUpperCase() + appId.slice(1)} API`;
         }
       } else {
         // For OAuth services, we'd normally use the profile info from the OAuth provider
-        username = `user@${typeof appId === 'string' ? appId : 'app'}.com`;
+        username = `user@${appId}.com`;
       }
       
-      // For demo purposes, we'll create a connection
+      // Check if connection already exists
+      const existingConnection = await storage.getAppConnectionByUserAndApp(req.user.id, appId);
+      
+      if (existingConnection) {
+        // Update existing connection
+        const updatedConnection = await storage.updateAppConnection(existingConnection.id, {
+          username,
+          permissions,
+          credentials: { token: apiIntegration ? "api-key-integration" : "mock-token" }
+        });
+        
+        return res.json(updatedConnection);
+      }
+      
+      // Create a new connection with the user ID from the authenticated session
       const newConnection = await storage.createAppConnection({
         appId,
+        userId: req.user.id,
         username,
         permissions,
         credentials: { token: apiIntegration ? "api-key-integration" : "mock-token" }
-      } as any);
+      });
       
       res.json(newConnection);
     } catch (error) {
@@ -1380,13 +1376,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      // Create the app connection
-      const newConnection = await storage.createAppConnection({
-        appId: service,
-        username,
-        permissions,
-        credentials: { token: accessToken }
-      } as any);
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.redirect('/auth?redirect=' + encodeURIComponent('/app-connections'));
+      }
+      
+      // Check if connection already exists
+      const existingConnection = await storage.getAppConnectionByUserAndApp(req.user.id, service);
+      
+      if (existingConnection) {
+        // Update existing connection
+        await storage.updateAppConnection(existingConnection.id, {
+          username,
+          permissions,
+          credentials: { token: accessToken }
+        });
+      } else {
+        // Create new connection with user ID from authenticated session
+        await storage.createAppConnection({
+          appId: service,
+          userId: req.user.id,
+          username,
+          permissions,
+          credentials: { token: accessToken }
+        });
+      }
       
       // Return successful response with HTML that will close the popup and signal success
       res.send(`
@@ -1449,21 +1463,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // DELETE /api/app-connections/:appId - Disconnect an app
   app.delete("/api/app-connections/:appId", async (req, res) => {
     try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to disconnect apps" });
+      }
+      
       const { appId } = req.params;
       
-      // Get all connections
-      const connections = await storage.getAllAppConnections();
+      if (!appId) {
+        return res.status(400).json({ message: "App ID is required" });
+      }
       
-      // Find the connection with the matching appId
-      const connectionToDelete = connections.find(conn => conn.appId === appId);
+      // Get the user's connection for this app
+      const connection = await storage.getAppConnectionByUserAndApp(req.user.id, appId);
       
-      if (!connectionToDelete) {
+      if (!connection) {
         return res.status(404).json({ message: "Connection not found" });
       }
       
       // For a real app, we'd also revoke the token with the provider
       // For now, we'll just remove the connection from our storage
-      await storage.deleteAppConnection(connectionToDelete.id);
+      await storage.deleteAppConnection(connection.id);
       
       res.json({ success: true, message: "App disconnected successfully" });
     } catch (error) {

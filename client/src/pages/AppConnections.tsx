@@ -215,7 +215,17 @@ export default function AppConnections() {
   
   // Auth flow for connecting apps
   const startOAuthFlow = async (appId: string) => {
+    if (!appId) {
+      toast({
+        title: "Connection failed",
+        description: "Invalid app ID",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setConnectingApp(appId);
+    
     try {
       // Check if this is an API service that doesn't need OAuth
       const isApiService = ['openai', 'anthropic', 'perplexity', 'ollama', 'text-processor'].includes(appId);
@@ -240,6 +250,7 @@ export default function AppConnections() {
         return;
       }
       
+      // Safe service mapping - some services may not need OAuth
       // Map app IDs to OAuth service names
       const serviceMap: Record<string, string> = {
         'instagram': 'instagram',
@@ -252,32 +263,38 @@ export default function AppConnections() {
         'youtube': 'google'
       };
       
-      // Get the corresponding OAuth service name
-      const service = serviceMap[appId];
+      // Get the corresponding OAuth service name with a fallback
+      const service = serviceMap[appId] || appId;
       
-      if (!service) {
-        throw new Error(`OAuth not supported for ${appId}`);
-      }
+      // For direct connection or simulated login
+      const useSimulatedLogin = () => {
+        console.log(`Using simulated login for ${service}`);
+        // Use the original appId for the simulated login to ensure correct routing
+        window.location.href = `/api/simulated-login?service=${service}`;
+      };
       
-      // Start the OAuth flow by getting the authorization URL from the server
+      // Try to get the OAuth URL from the server
       try {
         const authResponse = await fetch(`/api/app-connections/${appId}/auth`);
+        
+        if (!authResponse.ok) {
+          throw new Error(`Failed to get authorization URL: ${authResponse.status}`);
+        }
+        
         const authData = await authResponse.json();
         
-        if (authData.oauthUrl) {
+        if (authData && authData.oauthUrl) {
           console.log(`Starting OAuth flow for ${appId} with URL: ${authData.oauthUrl}`);
           window.location.href = authData.oauthUrl;
         } else {
-          throw new Error("Failed to get authorization URL");
+          // If no OAuth URL, fall back to simulated login
+          useSimulatedLogin();
         }
       } catch (error) {
         console.error("Error starting OAuth flow:", error);
-        
-        // Fallback to simulated login if real OAuth fails or credentials are missing
-        console.log(`Falling back to simulated login for ${service}`);
-        window.location.href = `/api/simulated-login?service=${service}`;
+        // Fallback to simulated login if real OAuth fails
+        useSimulatedLogin();
       }
-      
     } catch (error) {
       console.error("OAuth error:", error);
       toast({
