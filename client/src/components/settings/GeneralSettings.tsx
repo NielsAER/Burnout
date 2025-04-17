@@ -32,17 +32,17 @@ export function GeneralSettings() {
   return (
     <div className="grid grid-cols-1 gap-6">
       {/* Theme Settings */}
-      <Card className="bg-zinc-900 border border-zinc-800">
+      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
         <CardHeader>
           <CardTitle className="text-white">Appearance</CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardDescription className="text-gray-400">
             Customize how BRNOUT looks on your device
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label className="text-base">Theme</Label>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-gray-400">
               Select the theme for the dashboard
             </p>
             <RadioGroup
@@ -98,10 +98,10 @@ export function GeneralSettings() {
       </Card>
       
       {/* Language Settings */}
-      <Card className="bg-zinc-900 border border-zinc-800">
+      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
         <CardHeader>
           <CardTitle className="text-white">Language & Region</CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardDescription className="text-gray-400">
             Set your preferred language and regional settings
           </CardDescription>
         </CardHeader>
@@ -129,10 +129,10 @@ export function GeneralSettings() {
       </Card>
       
       {/* Application Behavior */}
-      <Card className="bg-zinc-900 border border-zinc-800">
+      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
         <CardHeader>
           <CardTitle className="text-white">Application Behavior</CardTitle>
-          <CardDescription className="text-zinc-400">
+          <CardDescription className="text-gray-400">
             Configure how the application works for you
           </CardDescription>
         </CardHeader>
@@ -140,7 +140,7 @@ export function GeneralSettings() {
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label htmlFor="notifications" className="text-white">Desktop Notifications</Label>
-              <p className="text-sm text-zinc-400">
+              <p className="text-sm text-gray-400">
                 Receive notifications when automations execute
               </p>
             </div>
@@ -156,7 +156,7 @@ export function GeneralSettings() {
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
                 <Label htmlFor="auto-refresh" className="text-white">Auto Refresh Dashboard</Label>
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-gray-400">
                   Automatically refresh dashboard data
                 </p>
               </div>
@@ -180,9 +180,9 @@ export function GeneralSettings() {
                   step={1}
                   value={[refreshInterval]}
                   onValueChange={handleRefreshIntervalChange}
-                  className="[&>[role=slider]]:bg-coral-500"
+                  className="[&>[role=slider]]:bg-blue-600"
                 />
-                <div className="flex justify-between text-xs text-zinc-500">
+                <div className="flex justify-between text-xs text-gray-500">
                   <span>1 min</span>
                   <span>15 min</span>
                   <span>30 min</span>
