@@ -128,7 +128,7 @@ export function setupAuth(app: Express) {
     
     try {
       // Only allow updating these fields
-      const allowedFields = ['fullName', 'email', 'bio', 'avatarUrl'];
+      const allowedFields = ['fullName', 'email', 'bio', 'avatarUrl', 'companyName', 'vatNumber'];
       const updates: Record<string, any> = {};
       
       allowedFields.forEach(field => {

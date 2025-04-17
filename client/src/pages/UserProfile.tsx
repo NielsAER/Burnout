@@ -329,6 +329,27 @@ export default function UserProfile() {
                       <p className="text-sm">{user.bio}</p>
                     </div>
                   )}
+                  
+                  {(user.companyName || user.vatNumber) && (
+                    <div>
+                      <h3 className="text-lg font-medium">Company Information</h3>
+                      <Separator className="my-3" />
+                      <dl className="space-y-3">
+                        {user.companyName && (
+                          <div className="grid grid-cols-3 gap-4">
+                            <dt className="text-sm font-medium text-muted-foreground">Company Name</dt>
+                            <dd className="col-span-2 text-sm">{user.companyName}</dd>
+                          </div>
+                        )}
+                        {user.vatNumber && (
+                          <div className="grid grid-cols-3 gap-4">
+                            <dt className="text-sm font-medium text-muted-foreground">VAT Number</dt>
+                            <dd className="col-span-2 text-sm">{user.vatNumber}</dd>
+                          </div>
+                        )}
+                      </dl>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
