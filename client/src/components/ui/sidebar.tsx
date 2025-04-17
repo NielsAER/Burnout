@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 import { 
   LayoutDashboard, 
   ChartGantt, 
@@ -18,11 +19,16 @@ interface SidebarProps {
 
 export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
   const [location] = useLocation();
+  const { user, logoutMutation } = useAuth();
 
   const isActive = (path: string) => {
     if (path === "/" && location === "/") return true;
     if (path !== "/" && location.startsWith(path)) return true;
     return false;
+  };
+  
+  const handleLogout = () => {
+    logoutMutation.mutate();
   };
 
   return (
@@ -122,25 +128,35 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       
       {/* User Profile */}
       <div className="border-t border-gray-200 p-4">
-        <div className="flex items-center">
-          <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-600">JS</span>
-          </div>
-          <div className="ml-3">
-            <p className="text-sm font-medium">John Smith</p>
-            <p className="text-xs text-gray-500">Pro Plan</p>
-          </div>
-          <div className="ml-auto flex gap-2">
-            <Link href="/profile">
-              <button className="text-gray-400 hover:text-gray-500">
-                <User className="h-4 w-4" />
+        {user && (
+          <div className="flex items-center">
+            <div className="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center">
+              <span className="text-sm font-medium text-gray-600">
+                {user.fullName 
+                  ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
+                  : user.username.substring(0, 2).toUpperCase()}
+              </span>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm font-medium">{user.fullName || user.username}</p>
+              <p className="text-xs text-gray-500">Pro Plan</p>
+            </div>
+            <div className="ml-auto flex gap-2">
+              <Link href="/profile">
+                <button className="text-gray-400 hover:text-gray-500">
+                  <User className="h-4 w-4" />
+                </button>
+              </Link>
+              <button 
+                className="text-gray-400 hover:text-gray-500"
+                onClick={handleLogout}
+                disabled={logoutMutation.isPending}
+              >
+                <LogOut className="h-4 w-4" />
               </button>
-            </Link>
-            <button className="text-gray-400 hover:text-gray-500">
-              <LogOut className="h-4 w-4" />
-            </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </aside>
   );

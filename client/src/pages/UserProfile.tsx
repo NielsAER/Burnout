@@ -36,6 +36,8 @@ const profileFormSchema = z.object({
   email: z.string().email().optional(),
   bio: z.string().max(500).optional(),
   avatarUrl: z.string().url().optional(),
+  companyName: z.string().optional(),
+  vatNumber: z.string().optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -53,6 +55,8 @@ export default function UserProfile() {
       email: user?.email || "",
       bio: user?.bio || "",
       avatarUrl: user?.avatarUrl || "",
+      companyName: user?.companyName || "",
+      vatNumber: user?.vatNumber || "",
     },
   });
 
@@ -223,6 +227,47 @@ export default function UserProfile() {
                           </FormControl>
                           <FormDescription>
                             URL to your profile picture.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <div className="space-y-2 pt-2">
+                      <h3 className="text-lg font-medium">Company Information</h3>
+                      <p className="text-sm text-muted-foreground">
+                        Add your company details for business accounts.
+                      </p>
+                    </div>
+                    
+                    <FormField
+                      control={form.control}
+                      name="companyName"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Company Name</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Your company name" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            The name of your company or organization.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    
+                    <FormField
+                      control={form.control}
+                      name="vatNumber"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>VAT Number</FormLabel>
+                          <FormControl>
+                            <Input placeholder="e.g. GB123456789" {...field} />
+                          </FormControl>
+                          <FormDescription>
+                            Your company's VAT identification number.
                           </FormDescription>
                           <FormMessage />
                         </FormItem>
