@@ -497,44 +497,46 @@ export function SettingsForm() {
             </Card>
             
             {/* Slack OAuth */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Slack OAuth</CardTitle>
-                    <CardDescription>Configure Slack OAuth credentials for messaging integration</CardDescription>
+                    <CardTitle className="text-white">Slack OAuth</CardTitle>
+                    <CardDescription className="text-gray-400">Configure Slack OAuth credentials for messaging integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("slack")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveSlackCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="slack-client-id">Client ID</Label>
+                    <Label htmlFor="slack-client-id" className="text-white">Client ID</Label>
                     <Input
                       id="slack-client-id"
                       placeholder="Slack Client ID"
                       value={slackClientId}
                       onChange={(e) => setSlackClientId(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="slack-client-secret">Client Secret</Label>
+                    <Label htmlFor="slack-client-secret" className="text-white">Client Secret</Label>
                     <Input
                       id="slack-client-secret"
                       type="password"
                       placeholder="Slack Client Secret"
                       value={slackClientSecret}
                       onChange={(e) => setSlackClientSecret(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://api.slack.com/apps"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
                       Slack API Apps
                     </a>
@@ -543,6 +545,7 @@ export function SettingsForm() {
                   <Button 
                     type="submit" 
                     disabled={oauthPending || !slackClientId || !slackClientSecret}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
                   >
                     {oauthPending ? (
                       <>
@@ -561,44 +564,46 @@ export function SettingsForm() {
             </Card>
             
             {/* Instagram OAuth */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Instagram OAuth</CardTitle>
-                    <CardDescription>Configure Instagram OAuth credentials for posting and media integration</CardDescription>
+                    <CardTitle className="text-white">Instagram OAuth</CardTitle>
+                    <CardDescription className="text-gray-400">Configure Instagram OAuth credentials for posting and media integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("instagram")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveInstagramCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="instagram-client-id">Client ID</Label>
+                    <Label htmlFor="instagram-client-id" className="text-white">Client ID</Label>
                     <Input
                       id="instagram-client-id"
                       placeholder="Instagram Client ID"
                       value={instagramClientId}
                       onChange={(e) => setInstagramClientId(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="instagram-client-secret">Client Secret</Label>
+                    <Label htmlFor="instagram-client-secret" className="text-white">Client Secret</Label>
                     <Input
                       id="instagram-client-secret"
                       type="password"
                       placeholder="Instagram Client Secret"
                       value={instagramClientSecret}
                       onChange={(e) => setInstagramClientSecret(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://developers.facebook.com/apps"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
                       Facebook Developer Portal
                     </a>
@@ -607,6 +612,7 @@ export function SettingsForm() {
                   <Button 
                     type="submit" 
                     disabled={oauthPending || !instagramClientId || !instagramClientSecret}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
                   >
                     {oauthPending ? (
                       <>
@@ -625,44 +631,46 @@ export function SettingsForm() {
             </Card>
             
             {/* LinkedIn OAuth */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>LinkedIn OAuth</CardTitle>
-                    <CardDescription>Configure LinkedIn OAuth credentials for professional network integration</CardDescription>
+                    <CardTitle className="text-white">LinkedIn OAuth</CardTitle>
+                    <CardDescription className="text-gray-400">Configure LinkedIn OAuth credentials for professional network integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("linkedin")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveLinkedinCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="linkedin-client-id">Client ID</Label>
+                    <Label htmlFor="linkedin-client-id" className="text-white">Client ID</Label>
                     <Input
                       id="linkedin-client-id"
                       placeholder="LinkedIn Client ID"
                       value={linkedinClientId}
                       onChange={(e) => setLinkedinClientId(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="linkedin-client-secret">Client Secret</Label>
+                    <Label htmlFor="linkedin-client-secret" className="text-white">Client Secret</Label>
                     <Input
                       id="linkedin-client-secret"
                       type="password"
                       placeholder="LinkedIn Client Secret"
                       value={linkedinClientSecret}
                       onChange={(e) => setLinkedinClientSecret(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://www.linkedin.com/developers/apps"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
                       LinkedIn Developer Portal
                     </a>
@@ -671,6 +679,7 @@ export function SettingsForm() {
                   <Button 
                     type="submit" 
                     disabled={oauthPending || !linkedinClientId || !linkedinClientSecret}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
                   >
                     {oauthPending ? (
                       <>
