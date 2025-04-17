@@ -10,7 +10,7 @@ export const oauthConfigs = {
     tokenURL: "https://api.instagram.com/oauth/access_token",
     clientID: process.env.INSTAGRAM_CLIENT_ID,
     clientSecret: process.env.INSTAGRAM_CLIENT_SECRET,
-    callbackURL: "/api/auth/instagram/callback",
+    callbackURL: "/api/callback/instagram", // Updated to use consistent path format
     scope: ["user_profile", "user_media"],
     apiBaseURL: "https://graph.instagram.com",
     profile: (accessToken: string) => getInstagramProfile(accessToken),
@@ -20,7 +20,7 @@ export const oauthConfigs = {
     tokenURL: "https://www.linkedin.com/oauth/v2/accessToken",
     clientID: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
-    callbackURL: "/api/auth/linkedin/callback",
+    callbackURL: "/api/callback/linkedin", // Updated to use consistent path format
     scope: ["r_liteprofile", "r_emailaddress", "w_member_social"],
     apiBaseURL: "https://api.linkedin.com/v2",
     profile: (accessToken: string) => getLinkedInProfile(accessToken),
@@ -30,7 +30,7 @@ export const oauthConfigs = {
     tokenURL: "https://api.twitter.com/2/oauth2/token",
     clientID: process.env.TWITTER_CLIENT_ID,
     clientSecret: process.env.TWITTER_CLIENT_SECRET,
-    callbackURL: "/api/auth/twitter/callback",
+    callbackURL: "/api/callback/twitter", // Updated to use consistent path format
     scope: ["tweet.read", "tweet.write", "users.read", "offline.access"],
     apiBaseURL: "https://api.twitter.com/2",
     profile: (accessToken: string) => getTwitterProfile(accessToken),
@@ -40,7 +40,7 @@ export const oauthConfigs = {
     tokenURL: "https://oauth2.googleapis.com/token",
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: "/api/auth/google/callback",
+    callbackURL: "/api/callback/google", // Updated to use consistent path format
     scope: ["https://www.googleapis.com/auth/youtube", "https://www.googleapis.com/auth/userinfo.profile", "https://www.googleapis.com/auth/userinfo.email"],
     apiBaseURL: "https://www.googleapis.com/youtube/v3",
     profile: (accessToken: string) => getGoogleProfile(accessToken),
@@ -59,7 +59,8 @@ export function generateState(): string {
 }
 
 // Store the OAuth state in the session
-export function storeOAuthState(req: Request, service: OAuthService, state: string) {
+// Accepts any service string to support additional OAuth services beyond the main ones
+export function storeOAuthState(req: Request, service: string, state: string) {
   if (!req.session.oauthStates) {
     req.session.oauthStates = {};
   }
@@ -67,7 +68,8 @@ export function storeOAuthState(req: Request, service: OAuthService, state: stri
 }
 
 // Verify the OAuth state from the session
-export function verifyOAuthState(req: Request, service: OAuthService, state: string): boolean {
+// Accepts any service string to support additional OAuth services beyond the main ones
+export function verifyOAuthState(req: Request, service: string, state: string): boolean {
   const storedState = req.session.oauthStates?.[service];
   if (storedState && storedState === state) {
     delete req.session.oauthStates?.[service];
@@ -77,7 +79,8 @@ export function verifyOAuthState(req: Request, service: OAuthService, state: str
 }
 
 // Store OAuth credentials in the session
-export function storeOAuthCredentials(req: Request, service: OAuthService, credentials: any) {
+// Accepts any service string to support additional OAuth services beyond the main ones
+export function storeOAuthCredentials(req: Request, service: string, credentials: any) {
   if (!req.session.oauthCredentials) {
     req.session.oauthCredentials = {};
   }
@@ -85,7 +88,8 @@ export function storeOAuthCredentials(req: Request, service: OAuthService, crede
 }
 
 // Get OAuth credentials from session
-export function getOAuthCredentials(req: Request, service: OAuthService): any {
+// Accepts any service string to support additional OAuth services beyond the main ones
+export function getOAuthCredentials(req: Request, service: string): any {
   return req.session.oauthCredentials?.[service];
 }
 
@@ -148,7 +152,8 @@ async function getGoogleProfile(accessToken: string) {
 }
 
 // Save connection to the database
-export async function saveConnection(req: Request, service: OAuthService, profile: any, credentials: any) {
+// Accepts any service string to support additional OAuth services beyond the main ones
+export async function saveConnection(req: Request, service: string, profile: any, credentials: any) {
   try {
     if (!req.isAuthenticated()) {
       throw new Error("User not authenticated");
@@ -163,7 +168,7 @@ export async function saveConnection(req: Request, service: OAuthService, profil
     const connectionData = {
       appId: service,
       userId: req.user!.id,
-      username: profile.username || profile.name || profile.email,
+      username: profile.username || profile.name || profile.email || `${service}_user`,
       permissions: ["read", "write"],
       credentials: credentials
     };
@@ -182,7 +187,8 @@ export async function saveConnection(req: Request, service: OAuthService, profil
 }
 
 // Development helper for simulated login
-export function getSimulatedAuthUrl(req: Request, service: OAuthService, redirectUrl: string): string {
+// Accepts any service string to support additional OAuth services beyond the main ones
+export function getSimulatedAuthUrl(req: Request, service: string, redirectUrl: string): string {
   // We no longer use simulated login by default - only use it if explicitly set
   if (process.env.USE_SIMULATED_LOGIN === 'true') {
     console.log(`Using simulated login for ${service} as USE_SIMULATED_LOGIN is enabled`);

@@ -906,9 +906,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'linkedin', state);
             
-            const redirectUri = `${baseUrl}/api/auth/linkedin/callback`;
+            // For LinkedIn OAuth, use the exact registered redirect URI from LinkedIn Developer portal
+            // Use a generic callback path that's likely registered in the LinkedIn app settings
+            const redirectUri = `${baseUrl}/api/callback/linkedin`;
             
             // LinkedIn OAuth URL with proper CSRF protection
+            // LinkedIn uses space-separated scopes but URL-encoded
             oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code&state=${state}`;
           }
           break;
@@ -926,9 +929,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'twitter', state);
             
-            const redirectUri = `${baseUrl}/api/auth/twitter/callback`;
+            // For Twitter OAuth 2.0, use consistent pattern with other platforms
+            const redirectUri = `${baseUrl}/api/callback/twitter`;
             
             // Twitter OAuth 2.0 URL with proper CSRF protection
+            // Twitter OAuth 2.0 requires code_challenge for PKCE flow
             oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${process.env.TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=tweet.read%20tweet.write%20users.read&response_type=code&state=${state}&code_challenge=challenge&code_challenge_method=plain`;
           }
           break;
@@ -949,7 +954,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'google', state);
             
-            const redirectUri = `${baseUrl}/api/auth/google/callback`;
+            // For Google OAuth, use the consistent pattern with other platforms
+            const redirectUri = `${baseUrl}/api/callback/google`;
             
             // Google OAuth URL with appropriate scopes
             let scopes = 'https://www.googleapis.com/auth/userinfo.profile';
