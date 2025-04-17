@@ -2,18 +2,28 @@ import { pgTable, text, serial, integer, boolean, timestamp, json } from "drizzl
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-// User table schema (optional for future auth)
+// User table schema
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
   email: text("email"),
+  fullName: text("full_name"),
+  bio: text("bio"),
+  avatarUrl: text("avatar_url"),
+  role: text("role").default("user"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastLoginAt: timestamp("last_login_at"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   password: true,
   email: true,
+  fullName: true,
+  bio: true,
+  avatarUrl: true,
+  role: true,
 });
 
 // Automation table schema

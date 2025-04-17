@@ -12,12 +12,24 @@ import {
   UserAchievement,
   InsertUserAchievement,
   users,
+  automations,
+  executionHistories,
+  appConnections,
+  templates,
+  achievements,
+  userAchievements,
   type User,
   type InsertUser
 } from "@shared/schema";
 
 import session from "express-session";
 import createMemoryStore from "memorystore";
+import connectPg from "connect-pg-simple";
+import { eq, desc } from "drizzle-orm";
+import { db, pool } from "./db";
+
+const MemoryStore = createMemoryStore(session);
+const PostgresSessionStore = connectPg(session);
 
 export interface IStorage {
   // User methods
@@ -630,4 +642,272 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database storage class that implements IStorage interface using Drizzle ORM
+export class DatabaseStorage implements IStorage {
+  sessionStore: session.Store;
+
+  constructor() {
+    // Initialize the PostgreSQL session store
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true
+    });
+  }
+
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  // Automation methods
+  async getAllAutomations(): Promise<Automation[]> {
+    return await db.select().from(automations);
+  }
+
+  async getAutomation(id: number): Promise<Automation | undefined> {
+    const [automation] = await db.select().from(automations).where(eq(automations.id, id));
+    return automation;
+  }
+
+  async createAutomation(insertAutomation: InsertAutomation): Promise<Automation> {
+    const [automation] = await db.insert(automations).values(insertAutomation).returning();
+    return automation;
+  }
+
+  async updateAutomation(id: number, data: Partial<InsertAutomation>): Promise<Automation | undefined> {
+    const [automation] = await db
+      .update(automations)
+      .set(data)
+      .where(eq(automations.id, id))
+      .returning();
+    return automation;
+  }
+
+  async deleteAutomation(id: number): Promise<boolean> {
+    const result = await db.delete(automations).where(eq(automations.id, id));
+    return result.rowCount > 0;
+  }
+
+  async toggleAutomationStatus(id: number): Promise<Automation | undefined> {
+    const [automation] = await db.select().from(automations).where(eq(automations.id, id));
+    if (!automation) return undefined;
+
+    const [updatedAutomation] = await db
+      .update(automations)
+      .set({ active: !automation.active })
+      .where(eq(automations.id, id))
+      .returning();
+    
+    return updatedAutomation;
+  }
+
+  async incrementAutomationRuns(id: number): Promise<Automation | undefined> {
+    const [automation] = await db.select().from(automations).where(eq(automations.id, id));
+    if (!automation) return undefined;
+
+    const [updatedAutomation] = await db
+      .update(automations)
+      .set({ 
+        lastRunAt: new Date(),
+        runsToday: automation.runsToday + 1
+      })
+      .where(eq(automations.id, id))
+      .returning();
+    
+    return updatedAutomation;
+  }
+
+  async updateAutomationHealthScore(id: number, score: number): Promise<Automation | undefined> {
+    const [updatedAutomation] = await db
+      .update(automations)
+      .set({ healthScore: score })
+      .where(eq(automations.id, id))
+      .returning();
+    
+    return updatedAutomation;
+  }
+
+  async updateAutomationComplexity(id: number, complexity: number): Promise<Automation | undefined> {
+    const [updatedAutomation] = await db
+      .update(automations)
+      .set({ complexity })
+      .where(eq(automations.id, id))
+      .returning();
+    
+    return updatedAutomation;
+  }
+
+  async updateAutomationReliability(id: number, reliability: any): Promise<Automation | undefined> {
+    const [updatedAutomation] = await db
+      .update(automations)
+      .set({ reliability })
+      .where(eq(automations.id, id))
+      .returning();
+    
+    return updatedAutomation;
+  }
+
+  // Execution history methods
+  async getAllExecutionHistories(): Promise<ExecutionHistory[]> {
+    return await db.select().from(executionHistories).orderBy(desc(executionHistories.executedAt));
+  }
+
+  async getExecutionHistoriesByAutomationId(automationId: number): Promise<ExecutionHistory[]> {
+    return await db
+      .select()
+      .from(executionHistories)
+      .where(eq(executionHistories.automationId, automationId))
+      .orderBy(desc(executionHistories.executedAt));
+  }
+
+  async createExecutionHistory(insertHistory: InsertExecutionHistory): Promise<ExecutionHistory> {
+    const [history] = await db
+      .insert(executionHistories)
+      .values(insertHistory)
+      .returning();
+    
+    return history;
+  }
+
+  // App connection methods
+  async getAllAppConnections(): Promise<AppConnection[]> {
+    return await db.select().from(appConnections);
+  }
+
+  async getAppConnection(id: number): Promise<AppConnection | undefined> {
+    const [connection] = await db
+      .select()
+      .from(appConnections)
+      .where(eq(appConnections.id, id));
+    
+    return connection;
+  }
+
+  async createAppConnection(insertConnection: InsertAppConnection): Promise<AppConnection> {
+    const [connection] = await db
+      .insert(appConnections)
+      .values(insertConnection)
+      .returning();
+    
+    return connection;
+  }
+
+  async deleteAppConnection(id: number): Promise<boolean> {
+    const result = await db
+      .delete(appConnections)
+      .where(eq(appConnections.id, id));
+    
+    return result.rowCount > 0;
+  }
+
+  // Template methods
+  async getAllTemplates(): Promise<Template[]> {
+    return await db.select().from(templates);
+  }
+
+  async getTemplate(id: number): Promise<Template | undefined> {
+    const [template] = await db
+      .select()
+      .from(templates)
+      .where(eq(templates.id, id));
+    
+    return template;
+  }
+
+  async getPopularTemplates(): Promise<Template[]> {
+    return await db
+      .select()
+      .from(templates)
+      .where(eq(templates.popular, true));
+  }
+
+  async createTemplate(insertTemplate: InsertTemplate): Promise<Template> {
+    const [template] = await db
+      .insert(templates)
+      .values(insertTemplate)
+      .returning();
+    
+    return template;
+  }
+
+  // Achievement methods
+  async getAllAchievements(): Promise<Achievement[]> {
+    return await db.select().from(achievements);
+  }
+
+  async getAchievement(id: number): Promise<Achievement | undefined> {
+    const [achievement] = await db
+      .select()
+      .from(achievements)
+      .where(eq(achievements.id, id));
+    
+    return achievement;
+  }
+
+  async createAchievement(insertAchievement: InsertAchievement): Promise<Achievement> {
+    const [achievement] = await db
+      .insert(achievements)
+      .values(insertAchievement)
+      .returning();
+    
+    return achievement;
+  }
+
+  async getUnlockedAchievements(automationId: number): Promise<Achievement[]> {
+    // Join userAchievements and achievements tables to get all unlocked achievements for an automation
+    const result = await db
+      .select({
+        id: achievements.id,
+        name: achievements.name,
+        description: achievements.description,
+        category: achievements.category,
+        icon: achievements.icon,
+        threshold: achievements.threshold,
+        unlockedAt: userAchievements.unlockedAt,
+        createdAt: achievements.createdAt
+      })
+      .from(userAchievements)
+      .innerJoin(achievements, eq(userAchievements.achievementId, achievements.id))
+      .where(eq(userAchievements.automationId, automationId));
+    
+    return result;
+  }
+
+  async unlockAchievement(automationId: number, achievementId: number): Promise<UserAchievement> {
+    // Check if already unlocked
+    const [existing] = await db
+      .select()
+      .from(userAchievements)
+      .where(eq(userAchievements.automationId, automationId))
+      .where(eq(userAchievements.achievementId, achievementId));
+    
+    if (existing) {
+      return existing;
+    }
+    
+    // Create new user achievement record
+    const [userAchievement] = await db
+      .insert(userAchievements)
+      .values({
+        automationId,
+        achievementId
+      })
+      .returning();
+    
+    return userAchievement;
+  }
+}
+
+// Use DatabaseStorage instead of MemStorage
+export const storage = new DatabaseStorage();
