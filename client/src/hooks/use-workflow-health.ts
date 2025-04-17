@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Automation } from '@shared/schema';
 import { useQuery } from '@tanstack/react-query';
 
-interface WorkflowHealth {
+interface WorkflowHealthResult {
   score: number;
   complexity: number;
   status: string;
@@ -13,16 +13,19 @@ interface WorkflowHealth {
     errorCount: number;
     totalRuns: number;
   };
+  isLoading: boolean;
+  refetch: () => void;
 }
 
 /**
  * Hook to calculate and track automation workflow health
  * 
  * @param automationId The ID of the automation to analyze
- * @returns WorkflowHealth object with score, complexity and recommendations
+ * @returns WorkflowHealth object with score, complexity, recommendations and refetch function
  */
-export function useWorkflowHealth(automationId?: number): WorkflowHealth {
-  const [health, setHealth] = useState<WorkflowHealth>({
+export function useWorkflowHealth(automationId?: number): WorkflowHealthResult {
+  // Default health state
+  const [health, setHealth] = useState({
     score: 0,
     complexity: 0,
     status: 'Unknown',
@@ -36,20 +39,30 @@ export function useWorkflowHealth(automationId?: number): WorkflowHealth {
   });
   
   // Fetch automation data
-  const { data: automation, isLoading } = useQuery<Automation>({
-    queryKey: ['/api/automations', automationId],
+  const { 
+    data: automation, 
+    isLoading, 
+    refetch: refetchAutomation 
+  } = useQuery<Automation>({
+    queryKey: [`/api/automations/${automationId}`],
     enabled: !!automationId,
   });
   
   // Fetch execution history for this automation
-  const { data: executionHistory } = useQuery<any[]>({
-    queryKey: ['/api/execution-history/automation', automationId],
+  const { 
+    data: executionHistory,
+    refetch: refetchHistory
+  } = useQuery<any[]>({
+    queryKey: [`/api/execution-history/automation/${automationId}`],
     enabled: !!automationId,
   });
   
   // Fetch achievements for this automation
-  const { data: achievements } = useQuery<any[]>({
-    queryKey: ['/api/achievements/automation', automationId],
+  const { 
+    data: achievements,
+    refetch: refetchAchievements 
+  } = useQuery<any[]>({
+    queryKey: [`/api/automations/${automationId}/achievements/unlocked`],
     enabled: !!automationId,
   });
 
@@ -113,5 +126,17 @@ export function useWorkflowHealth(automationId?: number): WorkflowHealth {
     });
   }, [automation, executionHistory, achievements]);
   
-  return health;
+  // Create a refetch function that refetches all the related data
+  const refetch = () => {
+    refetchAutomation();
+    refetchHistory();
+    refetchAchievements();
+  };
+
+  // Return the health data along with loading state and refetch function
+  return {
+    ...health,
+    isLoading,
+    refetch
+  };
 }

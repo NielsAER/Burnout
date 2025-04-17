@@ -1,21 +1,15 @@
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { useWorkflowHealth } from "@/hooks/use-workflow-health";
-import { AchievementsPanel } from "@/components/achievements/AchievementsPanel";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, Award, BarChart, BrainCircuit, GitBranch } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
+import { Gauge, RefreshCw, Zap } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useWorkflowHealth } from "@/hooks/use-workflow-health";
+import { Achievement } from "@shared/schema";
+import { AchievementsPanel } from "@/components/achievements/AchievementsPanel";
 
 interface WorkflowHealthCardProps {
   automationId: number;
@@ -23,135 +17,181 @@ interface WorkflowHealthCardProps {
 }
 
 export function WorkflowHealthCard({ automationId, className }: WorkflowHealthCardProps) {
-  const [activeTab, setActiveTab] = useState('health');
-  const { score, complexity, status, statusColor, recommendation, reliability } = useWorkflowHealth(automationId);
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("health");
 
-  const progressColor = score < 40 
-    ? "bg-red-500" 
-    : score < 70 
-      ? "bg-yellow-500" 
-      : score < 90 
-        ? "bg-blue-500" 
-        : "bg-green-500";
-  
-  const complexityLabel = complexity <= 1 
-    ? "Basic" 
-    : complexity <= 3 
-      ? "Standard" 
-      : complexity <= 5 
-        ? "Advanced" 
-        : complexity <= 8 
-          ? "Complex" 
-          : "Expert";
-  
-  const complexityColor = complexity <= 1 
-    ? "bg-slate-100 text-slate-800" 
-    : complexity <= 3 
-      ? "bg-blue-100 text-blue-800" 
-      : complexity <= 5 
-        ? "bg-purple-100 text-purple-800" 
-        : complexity <= 8 
-          ? "bg-amber-100 text-amber-800" 
-          : "bg-fuchsia-100 text-fuchsia-800";
+  // Fetch workflow health data
+  const {
+    score,
+    complexity,
+    status,
+    statusColor,
+    recommendation,
+    reliability,
+    isLoading: healthLoading,
+    refetch: refetchHealth,
+  } = useWorkflowHealth(automationId);
+
+  // Fetch unlocked achievements
+  const {
+    data: unlockedAchievements,
+    isLoading: achievementsLoading,
+    refetch: refetchAchievements,
+  } = useQuery<Achievement[]>({
+    queryKey: [`/api/automations/${automationId}/achievements/unlocked`],
+    enabled: !!automationId,
+  });
+
+  // Function to refresh health score and recalculate
+  const handleRefreshHealth = async () => {
+    try {
+      await apiRequest("POST", `/api/automations/${automationId}/refresh-health`);
+      refetchHealth();
+      toast({
+        title: "Health score refreshed",
+        description: "The workflow health score has been recalculated.",
+      });
+    } catch (error) {
+      toast({
+        title: "Failed to refresh health score",
+        description: "An error occurred while refreshing the workflow health score.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Calculate color class based on health score
+  const getHealthScoreColor = (score: number) => {
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-blue-600";
+    if (score >= 40) return "text-yellow-600";
+    return "text-red-600";
+  };
+
+  // Get progress color class for score visualization
+  const getProgressColor = (score: number) => {
+    if (score >= 80) return "bg-green-600";
+    if (score >= 60) return "bg-blue-600";
+    if (score >= 40) return "bg-yellow-600"; 
+    return "bg-red-600";
+  };
+
+  // Calculate complexity level label
+  const getComplexityLabel = (complexity: number) => {
+    if (complexity >= 8) return "Advanced";
+    if (complexity >= 5) return "Intermediate";
+    if (complexity >= 3) return "Basic";
+    return "Simple";
+  };
+
+  // Calculate success rate percentage
+  const successRate = reliability?.successRate 
+    ? Math.round(reliability.successRate * 100) 
+    : 0;
 
   return (
-    <Card className={cn("w-full", className)}>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <div>
-            <CardTitle>Workflow Analytics</CardTitle>
-            <CardDescription>Health metrics and achievements</CardDescription>
-          </div>
-          <Badge 
-            variant="outline" 
-            className={cn(
-              "font-normal", 
-              complexityColor
-            )}
-          >
-            <BrainCircuit className="mr-1 h-3 w-3" />
-            {complexityLabel} · Level {complexity}
-          </Badge>
-        </div>
+    <Card className={`overflow-hidden ${className}`}>
+      <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 pb-4">
+        <CardTitle className="flex items-center gap-2">
+          <Gauge className="w-5 h-5" />
+          Workflow Performance
+        </CardTitle>
+        <CardDescription>
+          Health metrics and achievements for this automation
+        </CardDescription>
       </CardHeader>
-      <CardContent>
-        <Tabs 
-          defaultValue="health" 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <TabsList className="grid w-full grid-cols-2 mb-4">
-            <TabsTrigger value="health" className="flex items-center">
-              <BarChart className="mr-2 h-4 w-4" />
-              <span>Health Metrics</span>
-            </TabsTrigger>
-            <TabsTrigger value="achievements" className="flex items-center">
-              <Award className="mr-2 h-4 w-4" />
-              <span>Achievements</span>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="health" className="mt-0">
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">Health Score</span>
-                  <span className="text-sm font-medium">{score}%</span>
-                </div>
-                <Progress value={score} className={cn("h-2", progressColor)} />
+      
+      <Tabs defaultValue="health" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-2 mx-4 mt-2">
+          <TabsTrigger value="health">Health Score</TabsTrigger>
+          <TabsTrigger value="achievements">Achievements</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="health" className="m-0 p-0">
+          <CardContent className="pt-4">
+            {healthLoading ? (
+              <div className="flex flex-col gap-4 items-center justify-center py-8">
+                <div className="animate-pulse w-24 h-24 rounded-full border-8 border-gray-200"></div>
+                <p className="text-muted-foreground">Loading health data...</p>
               </div>
-              
-              <div className="space-y-2">
-                <div className="flex justify-between mb-1">
-                  <span className="text-sm font-medium">Success Rate</span>
-                  <span className="text-sm font-medium">{reliability.successRate}%</span>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Health Score Display */}
+                <div className="flex flex-col items-center justify-center">
+                  <div className="relative flex items-center justify-center mb-4">
+                    <div className="w-32 h-32 rounded-full flex items-center justify-center border-8 border-gray-200">
+                      <div className={`text-4xl font-bold ${getHealthScoreColor(score)}`}>
+                        {score}
+                      </div>
+                    </div>
+                    <div className="absolute -bottom-2 bg-white px-3 py-1 rounded-full border shadow-sm text-sm font-medium">
+                      {status}
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-lg font-medium mt-2">Workflow Complexity</h3>
+                  <div className="w-full mt-1 mb-3">
+                    <div className="flex justify-between text-sm mb-1">
+                      <span>{getComplexityLabel(complexity)}</span>
+                      <span className="font-medium">{complexity}/10</span>
+                    </div>
+                    <Progress value={complexity * 10} className="h-2" />
+                  </div>
+                  
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    onClick={handleRefreshHealth}
+                    className="mt-2"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh Health
+                  </Button>
                 </div>
-                <Progress 
-                  value={reliability.successRate} 
-                  className={cn(
-                    "h-2", 
-                    reliability.successRate < 90 ? "bg-yellow-500" : "bg-green-500"
-                  )} 
-                />
+                
+                {/* Health Details */}
+                <div>
+                  <div className="mb-4">
+                    <h3 className="text-lg font-medium mb-2">Reliability</h3>
+                    <div className="flex items-center mb-1">
+                      <div className="w-full">
+                        <div className="flex justify-between text-sm mb-1">
+                          <span>Success Rate</span>
+                          <span className="font-medium">{successRate}%</span>
+                        </div>
+                        <Progress value={successRate} className={`h-2 ${getProgressColor(successRate)}`} />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 mt-3">
+                      <div className="bg-gray-50 p-2 rounded">
+                        <div className="text-sm text-gray-500">Total Runs</div>
+                        <div className="font-medium">{reliability?.totalRuns || 0}</div>
+                      </div>
+                      <div className="bg-gray-50 p-2 rounded">
+                        <div className="text-sm text-gray-500">Errors</div>
+                        <div className="font-medium">{reliability?.errorCount || 0}</div>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Recommendation</h3>
+                    <div className="bg-gradient-to-r from-primary/5 to-transparent p-3 rounded-lg">
+                      <p className="text-sm">{recommendation}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              <div className="grid grid-cols-2 gap-4">
-                <div className="flex flex-col border rounded-md p-3">
-                  <span className="text-sm text-muted-foreground">Error count</span>
-                  <span className="text-2xl font-bold">{reliability.errorCount}</span>
-                </div>
-                <div className="flex flex-col border rounded-md p-3">
-                  <span className="text-sm text-muted-foreground">Total runs</span>
-                  <span className="text-2xl font-bold">{reliability.totalRuns}</span>
-                </div>
-              </div>
-              
-              <Alert variant="default" className="bg-slate-50 dark:bg-slate-950">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle className="font-medium">{status}</AlertTitle>
-                <AlertDescription>
-                  {recommendation}
-                </AlertDescription>
-              </Alert>
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="achievements" className="mt-0">
+            )}
+          </CardContent>
+        </TabsContent>
+        
+        <TabsContent value="achievements" className="m-0 p-0">
+          <CardContent className="pt-4">
             <AchievementsPanel automationId={automationId} />
-          </TabsContent>
-        </Tabs>
-      </CardContent>
-      <CardFooter className="flex justify-between">
-        <Button variant="outline" size="sm" onClick={() => setActiveTab('health')}>
-          <BarChart className="mr-2 h-4 w-4" />
-          <span>View Health</span>
-        </Button>
-        <Button variant="outline" size="sm" onClick={() => setActiveTab('achievements')}>
-          <Award className="mr-2 h-4 w-4" />
-          <span>View Achievements</span>
-        </Button>
-      </CardFooter>
+          </CardContent>
+        </TabsContent>
+      </Tabs>
     </Card>
   );
 }
