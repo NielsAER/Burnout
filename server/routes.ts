@@ -1,10 +1,21 @@
-import type { Express } from "express";
+import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAutomationSchema, insertExecutionHistorySchema } from "@shared/schema";
 import { z } from "zod";
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
+import axios from "axios";
+import { 
+  oauthConfigs, 
+  isValidOAuthService, 
+  generateState, 
+  storeOAuthState, 
+  verifyOAuthState, 
+  storeOAuthCredentials,
+  saveConnection,
+  getSimulatedAuthUrl
+} from './oauth';
 
 // Import LLM service modules
 import * as openaiService from "./services/openai";
@@ -351,6 +362,210 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     res.json({ available });
+  });
+  
+  // OAuth Routes
+
+  // Start OAuth flow for a specific service
+  app.get('/api/auth/:service', async (req, res) => {
+    const { service } = req.params;
+    
+    if (!isValidOAuthService(service)) {
+      return res.status(400).json({ error: `Unsupported service: ${service}` });
+    }
+    
+    const config = oauthConfigs[service];
+    const redirect_uri = `${req.protocol}://${req.get('host')}${config.callbackURL}`;
+    
+    // Check for simulated authentication in development
+    const simulatedUrl = getSimulatedAuthUrl(req, service, redirect_uri);
+    if (simulatedUrl) {
+      return res.redirect(simulatedUrl);
+    }
+    
+    // Generate and store a state parameter to prevent CSRF
+    const state = generateState();
+    storeOAuthState(req, service, state);
+    
+    // Build the authorization URL
+    const authUrl = new URL(config.authorizationURL);
+    authUrl.searchParams.append('client_id', config.clientID!);
+    authUrl.searchParams.append('redirect_uri', redirect_uri);
+    authUrl.searchParams.append('scope', config.scope.join(' '));
+    authUrl.searchParams.append('state', state);
+    authUrl.searchParams.append('response_type', 'code');
+    
+    // Add service-specific parameters
+    if (service === 'instagram') {
+      // Instagram requires this additional parameter
+      authUrl.searchParams.append('response_type', 'code');
+    } else if (service === 'twitter') {
+      // Twitter requires these additional parameters
+      authUrl.searchParams.append('code_challenge', 'challenge');
+      authUrl.searchParams.append('code_challenge_method', 'plain');
+    }
+    
+    // Redirect the user to the authorization URL
+    res.redirect(authUrl.toString());
+  });
+
+  // OAuth callback routes
+  app.get('/api/auth/:service/callback', async (req, res) => {
+    const { service } = req.params;
+    const { code, state } = req.query;
+    
+    if (!isValidOAuthService(service)) {
+      return res.status(400).json({ error: `Unsupported service: ${service}` });
+    }
+    
+    // Verify the state parameter to prevent CSRF
+    if (!state || !verifyOAuthState(req, service, state as string)) {
+      return res.status(400).json({ error: 'Invalid state parameter' });
+    }
+    
+    try {
+      const config = oauthConfigs[service];
+      const redirect_uri = `${req.protocol}://${req.get('host')}${config.callbackURL}`;
+      
+      // Exchange the authorization code for an access token
+      const tokenResponse = await axios.post(config.tokenURL, {
+        client_id: config.clientID,
+        client_secret: config.clientSecret,
+        code,
+        redirect_uri,
+        grant_type: 'authorization_code'
+      }, {
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        }
+      });
+      
+      const { access_token, refresh_token, expires_in } = tokenResponse.data;
+      
+      // Store the credentials in the session
+      const credentials = {
+        access_token,
+        refresh_token,
+        expires_in,
+        created_at: new Date()
+      };
+      
+      storeOAuthCredentials(req, service, credentials);
+      
+      // Fetch the user profile
+      const profile = await config.profile(access_token);
+      
+      // Save the connection to the database
+      if (req.isAuthenticated()) {
+        await saveConnection(req, service, profile, credentials);
+        // Redirect to the app connections page
+        res.redirect('/app-connections?success=true');
+      } else {
+        // Not logged in, redirect to auth page
+        res.redirect('/auth?error=not_authenticated');
+      }
+    } catch (error) {
+      console.error(`Error in ${service} OAuth callback:`, error);
+      res.redirect('/app-connections?error=true');
+    }
+  });
+
+  // Get connected apps for the current user
+  app.get('/api/connections', (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    storage.getAppConnectionsByUser(req.user.id)
+      .then(connections => {
+        // Remove sensitive information before sending to client
+        const safeConnections = connections.map(conn => ({
+          id: conn.id,
+          appId: conn.appId,
+          username: conn.username,
+          createdAt: conn.createdAt
+        }));
+        
+        res.json(safeConnections);
+      })
+      .catch(err => {
+        console.error('Error fetching connections:', err);
+        res.status(500).json({ error: 'Failed to fetch connections' });
+      });
+  });
+
+  // Delete a connection
+  app.delete('/api/connections/:id', async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ error: 'Not authenticated' });
+    }
+    
+    const connectionId = parseInt(req.params.id);
+    
+    try {
+      // Verify connection belongs to the current user
+      const connection = await storage.getAppConnection(connectionId);
+      
+      if (!connection) {
+        return res.status(404).json({ error: 'Connection not found' });
+      }
+      
+      if (connection.userId !== req.user.id) {
+        return res.status(403).json({ error: 'Unauthorized' });
+      }
+      
+      const result = await storage.deleteAppConnection(connectionId);
+      
+      if (result) {
+        res.json({ success: true });
+      } else {
+        res.status(500).json({ error: 'Failed to delete connection' });
+      }
+    } catch (error) {
+      console.error('Error deleting connection:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  });
+
+  // Simulated login for development/testing
+  app.get('/api/simulated-login', (req, res) => {
+    const { service, redirect } = req.query;
+    
+    if (!isValidOAuthService(service as string)) {
+      return res.status(400).json({ error: `Unsupported service: ${service}` });
+    }
+    
+    // Create a fake profile and credentials
+    const profile = {
+      id: `${service}_123456`,
+      username: `${service}_user`,
+      name: `${service.charAt(0).toUpperCase() + service.slice(1)} User`
+    };
+    
+    const credentials = {
+      access_token: `fake_token_${service}_${Date.now()}`,
+      refresh_token: `fake_refresh_${service}_${Date.now()}`,
+      expires_in: 3600,
+      created_at: new Date()
+    };
+    
+    // Store the credentials in the session
+    storeOAuthCredentials(req, service as string, credentials);
+    
+    // Save the connection if the user is authenticated
+    if (req.isAuthenticated()) {
+      saveConnection(req, service as string, profile, credentials)
+        .then(() => {
+          res.redirect(redirect as string || '/app-connections?success=true');
+        })
+        .catch(error => {
+          console.error('Error in simulated login:', error);
+          res.redirect('/app-connections?error=true');
+        });
+    } else {
+      res.redirect('/auth');
+    }
   });
   
   // App Connections Routes

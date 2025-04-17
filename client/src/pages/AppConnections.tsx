@@ -240,37 +240,28 @@ export default function AppConnections() {
         return;
       }
       
-      // For OAuth services, get OAuth URL from server
-      const response = await fetch(`/api/app-connections/${appId}/auth`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Map app IDs to OAuth service names
+      const serviceMap: Record<string, string> = {
+        'instagram': 'instagram',
+        'linkedin': 'linkedin',
+        'twitter': 'twitter',
+        'google-drive': 'google',
+        'google-calendar': 'google',
+        'google-sheets': 'google',
+        'gmail': 'google',
+        'youtube': 'google'
+      };
       
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! Status: ${response.status}`);
+      // Get the corresponding OAuth service name
+      const service = serviceMap[appId];
+      
+      if (!service) {
+        throw new Error(`OAuth not supported for ${appId}`);
       }
       
-      const data = await response.json();
+      // Redirect to OAuth flow
+      window.location.href = `/api/auth/${service}`;
       
-      if (data.oauthUrl) {
-        // Open OAuth flow in a new window
-        const authWindow = window.open(data.oauthUrl, "_blank", "width=600,height=700");
-        
-        if (!authWindow) {
-          throw new Error("Popup blocked! Please allow popups for this site.");
-        }
-        
-        // Show toast that auth flow has started
-        toast({
-          title: "Authorization Started",
-          description: "Please complete the authorization process in the new window",
-        });
-      } else {
-        throw new Error("No OAuth URL provided");
-      }
     } catch (error) {
       console.error("OAuth error:", error);
       toast({
