@@ -29,7 +29,7 @@ async function comparePasswords(supplied: string, stored: string) {
 }
 
 export function setupAuth(app: Express) {
-  // Session secret - in production this should be an environment variable
+  // Use a consistent session secret across the app
   const sessionSecret = process.env.SESSION_SECRET || "brnout-workflow-automation-secret";
   
   const sessionSettings: session.SessionOptions = {

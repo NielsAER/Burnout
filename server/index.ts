@@ -3,9 +3,7 @@ import session from "express-session";
 import createMemoryStore from "memorystore";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-
-// Create MemoryStore
-const MemoryStore = createMemoryStore(session);
+import { storage } from "./storage";
 
 // Extend the Express session interface
 declare module 'express-session' {
@@ -16,25 +14,18 @@ declare module 'express-session' {
   }
 }
 
-const sessionSettings: session.SessionOptions = {
-  secret: process.env.SESSION_SECRET || 'flowconnect-session-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production',
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  },
-  store: new MemoryStore({
+// Configure the session store to be used by both auth.ts and routes.ts
+if (!storage.sessionStore) {
+  // Create MemoryStore if the storage doesn't have one
+  const MemoryStore = createMemoryStore(session);
+  storage.sessionStore = new MemoryStore({
     checkPeriod: 86400000 // Prune expired entries every 24h
-  })
-};
+  });
+}
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-// Initialize session
-app.use(session(sessionSettings));
 
 app.use((req, res, next) => {
   const start = Date.now();
