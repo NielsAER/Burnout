@@ -69,15 +69,22 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
           isDarkMode ? "bg-background border-b border-border" : "bg-white"
         )}>
           <div className="py-4 px-6 flex items-center justify-between">
-            <div>
-              <h1 className={cn(
-                "text-2xl font-semibold",
-                isDarkMode ? "text-foreground" : "text-gray-900"
-              )}>{getPageTitle()}</h1>
-              <p className={cn(
-                "text-sm",
-                isDarkMode ? "text-muted-foreground" : "text-gray-500"
-              )}>Manage your automation workflows</p>
+            <div className="flex items-center">
+              <img 
+                src="@assets/3_Transparent_Image.png" 
+                alt="BRNOUT Logo" 
+                className="h-10 mr-4 object-contain hidden md:block" 
+              />
+              <div>
+                <h1 className={cn(
+                  "text-2xl font-semibold",
+                  isDarkMode ? "text-foreground" : "text-gray-900"
+                )}>{getPageTitle()}</h1>
+                <p className={cn(
+                  "text-sm",
+                  isDarkMode ? "text-muted-foreground" : "text-gray-500"
+                )}>Manage your automation workflows</p>
+              </div>
             </div>
             <div className="flex items-center space-x-4">
               {!location.includes("/builder") && (

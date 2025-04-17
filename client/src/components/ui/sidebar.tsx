@@ -49,18 +49,21 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
         isDarkMode ? "border-border" : "border-gray-200"
       )}>
         <div className="flex items-center">
-          <div className="w-8 h-8 rounded bg-primary flex items-center justify-center">
-            <ChartGantt className="h-5 w-5 text-white" />
-          </div>
-          <h1 className="ml-2 text-xl font-semibold">BRNOUT</h1>
+          <img 
+            src="@assets/3_Transparent_Image.png" 
+            alt="BRNOUT Logo" 
+            className="h-8 object-contain" 
+          />
         </div>
       </div>
       
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto p-4">
         <div className="space-y-1">
-          <Link href="/" onClick={onClose}>
-            <a className={cn(
+          <Link 
+            href="/" 
+            onClick={onClose}
+            className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
@@ -69,13 +72,15 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
                     ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )
-            )}>
-              <LayoutDashboard className="mr-3 h-5 w-5" />
-              Dashboard
-            </a>
+            )}
+          >
+            <LayoutDashboard className="mr-3 h-5 w-5" />
+            Dashboard
           </Link>
-          <Link href="/automations" onClick={onClose}>
-            <a className={cn(
+          <Link 
+            href="/automations" 
+            onClick={onClose}
+            className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/automations") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
@@ -84,13 +89,15 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
                     ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )
-            )}>
-              <ChartGantt className="mr-3 h-5 w-5" />
-              My Automations
-            </a>
+            )}
+          >
+            <ChartGantt className="mr-3 h-5 w-5" />
+            My Automations
           </Link>
-          <Link href="/app-connections" onClick={onClose}>
-            <a className={cn(
+          <Link 
+            href="/app-connections" 
+            onClick={onClose}
+            className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/app-connections") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
@@ -99,13 +106,15 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
                     ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )
-            )}>
-              <ExternalLink className="mr-3 h-5 w-5" />
-              App Connections
-            </a>
+            )}
+          >
+            <ExternalLink className="mr-3 h-5 w-5" />
+            App Connections
           </Link>
-          <Link href="/history" onClick={onClose}>
-            <a className={cn(
+          <Link 
+            href="/history" 
+            onClick={onClose}
+            className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/history") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
@@ -114,13 +123,15 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
                     ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )
-            )}>
-              <History className="mr-3 h-5 w-5" />
-              Execution History
-            </a>
+            )}
+          >
+            <History className="mr-3 h-5 w-5" />
+            Execution History
           </Link>
-          <Link href="/ai-services" onClick={onClose}>
-            <a className={cn(
+          <Link 
+            href="/ai-services" 
+            onClick={onClose}
+            className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/ai-services") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
@@ -129,13 +140,15 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
                     ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )
-            )}>
-              <BrainCircuit className="mr-3 h-5 w-5" />
-              AI Services
-            </a>
+            )}
+          >
+            <BrainCircuit className="mr-3 h-5 w-5" />
+            AI Services
           </Link>
-          <Link href="/settings" onClick={onClose}>
-            <a className={cn(
+          <Link 
+            href="/settings" 
+            onClick={onClose}
+            className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/settings") 
                 ? "bg-primary/10 text-primary border-l-3 border-primary" 
@@ -144,10 +157,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
                     ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
                     : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
                 )
-            )}>
-              <Settings className="mr-3 h-5 w-5" />
-              Settings
-            </a>
+            )}
+          >
+            <Settings className="mr-3 h-5 w-5" />
+            Settings
           </Link>
         </div>
         
@@ -215,20 +228,23 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
               )}>Pro Plan</p>
             </div>
             <div className="ml-auto flex gap-2">
-              <Link href="/profile">
-                <button className={cn(
+              <Link 
+                href="/profile"
+                className={cn(
+                  "p-1 rounded-full",
                   isDarkMode 
-                    ? "text-muted-foreground hover:text-foreground" 
-                    : "text-gray-400 hover:text-gray-500"
-                )}>
-                  <User className="h-4 w-4" />
-                </button>
+                    ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
+                    : "text-gray-400 hover:text-gray-500 hover:bg-gray-100"
+                )}
+              >
+                <User className="h-4 w-4" />
               </Link>
               <button 
                 className={cn(
+                  "p-1 rounded-full",
                   isDarkMode 
-                    ? "text-muted-foreground hover:text-foreground" 
-                    : "text-gray-400 hover:text-gray-500"
+                    ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
+                    : "text-gray-400 hover:text-gray-500 hover:bg-gray-100"
                 )}
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
