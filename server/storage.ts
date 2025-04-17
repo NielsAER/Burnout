@@ -61,7 +61,10 @@ export interface IStorage {
   // App connection methods
   getAllAppConnections(): Promise<AppConnection[]>;
   getAppConnection(id: number): Promise<AppConnection | undefined>;
+  getAppConnectionsByUser(userId: number): Promise<AppConnection[]>;
+  getAppConnectionByUserAndApp(userId: number, appId: string): Promise<AppConnection | undefined>;
   createAppConnection(connection: InsertAppConnection): Promise<AppConnection>;
+  updateAppConnection(id: number, data: Partial<InsertAppConnection>): Promise<AppConnection | undefined>;
   deleteAppConnection(id: number): Promise<boolean>;
   
   // Template methods
@@ -412,6 +415,16 @@ export class MemStorage implements IStorage {
     return this.appConnections.get(id);
   }
 
+  async getAppConnectionsByUser(userId: number): Promise<AppConnection[]> {
+    return Array.from(this.appConnections.values())
+      .filter(conn => conn.userId === userId);
+  }
+
+  async getAppConnectionByUserAndApp(userId: number, appId: string): Promise<AppConnection | undefined> {
+    return Array.from(this.appConnections.values())
+      .find(conn => conn.userId === userId && conn.appId === appId);
+  }
+
   async createAppConnection(insertConnection: InsertAppConnection): Promise<AppConnection> {
     const id = this.currentAppConnectionId++;
     const now = new Date();
@@ -422,6 +435,15 @@ export class MemStorage implements IStorage {
     };
     this.appConnections.set(id, connection);
     return connection;
+  }
+  
+  async updateAppConnection(id: number, data: Partial<InsertAppConnection>): Promise<AppConnection | undefined> {
+    const connection = this.appConnections.get(id);
+    if (!connection) return undefined;
+
+    const updatedConnection = { ...connection, ...data };
+    this.appConnections.set(id, updatedConnection);
+    return updatedConnection;
   }
   
   async deleteAppConnection(id: number): Promise<boolean> {
@@ -837,6 +859,25 @@ export class DatabaseStorage implements IStorage {
     return connection;
   }
 
+  async getAppConnectionsByUser(userId: number): Promise<AppConnection[]> {
+    return await db
+      .select()
+      .from(appConnections)
+      .where(eq(appConnections.userId, userId));
+  }
+
+  async getAppConnectionByUserAndApp(userId: number, appId: string): Promise<AppConnection | undefined> {
+    const [connection] = await db
+      .select()
+      .from(appConnections)
+      .where(and(
+        eq(appConnections.userId, userId),
+        eq(appConnections.appId, appId)
+      ));
+    
+    return connection;
+  }
+
   async createAppConnection(insertConnection: InsertAppConnection): Promise<AppConnection> {
     const [connection] = await db
       .insert(appConnections)
@@ -846,12 +887,22 @@ export class DatabaseStorage implements IStorage {
     return connection;
   }
 
+  async updateAppConnection(id: number, data: Partial<InsertAppConnection>): Promise<AppConnection | undefined> {
+    const [updatedConnection] = await db
+      .update(appConnections)
+      .set(data)
+      .where(eq(appConnections.id, id))
+      .returning();
+    
+    return updatedConnection;
+  }
+
   async deleteAppConnection(id: number): Promise<boolean> {
     const result = await db
       .delete(appConnections)
       .where(eq(appConnections.id, id));
     
-    return result.rowCount > 0;
+    return result.rowCount! > 0;
   }
 
   // Template methods

@@ -81,6 +81,7 @@ export const insertExecutionHistorySchema = createInsertSchema(executionHistorie
 export const appConnections = pgTable("app_connections", {
   id: serial("id").primaryKey(),
   appId: text("app_id").notNull(),
+  userId: integer("user_id").notNull(),
   username: text("username"),
   permissions: json("permissions").default(['read']),
   credentials: json("credentials"),
