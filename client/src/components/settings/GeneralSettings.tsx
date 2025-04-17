@@ -98,16 +98,16 @@ export function GeneralSettings() {
       </Card>
       
       {/* Language Settings */}
-      <Card>
+      <Card className="bg-zinc-900 border border-zinc-800">
         <CardHeader>
-          <CardTitle>Language & Region</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Language & Region</CardTitle>
+          <CardDescription className="text-zinc-400">
             Set your preferred language and regional settings
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="language">Language</Label>
+            <Label htmlFor="language" className="text-white">Language</Label>
             <Select value={language} onValueChange={setLanguage}>
               <SelectTrigger id="language" className="w-full">
                 <SelectValue placeholder="Select language" />
@@ -129,18 +129,18 @@ export function GeneralSettings() {
       </Card>
       
       {/* Application Behavior */}
-      <Card>
+      <Card className="bg-zinc-900 border border-zinc-800">
         <CardHeader>
-          <CardTitle>Application Behavior</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Application Behavior</CardTitle>
+          <CardDescription className="text-zinc-400">
             Configure how the application works for you
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="notifications">Desktop Notifications</Label>
-              <p className="text-sm text-muted-foreground">
+              <Label htmlFor="notifications" className="text-white">Desktop Notifications</Label>
+              <p className="text-sm text-zinc-400">
                 Receive notifications when automations execute
               </p>
             </div>
@@ -148,14 +148,15 @@ export function GeneralSettings() {
               id="notifications"
               checked={notifications}
               onCheckedChange={handleNotificationsChange}
+              className="data-[state=checked]:bg-coral-500"
             />
           </div>
           
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="auto-refresh">Auto Refresh Dashboard</Label>
-                <p className="text-sm text-muted-foreground">
+                <Label htmlFor="auto-refresh" className="text-white">Auto Refresh Dashboard</Label>
+                <p className="text-sm text-zinc-400">
                   Automatically refresh dashboard data
                 </p>
               </div>
@@ -163,13 +164,14 @@ export function GeneralSettings() {
                 id="auto-refresh"
                 checked={autoRefresh}
                 onCheckedChange={handleAutoRefreshChange}
+                className="data-[state=checked]:bg-coral-500"
               />
             </div>
             
             {autoRefresh && (
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label htmlFor="refresh-interval">Refresh Interval: {refreshInterval} minutes</Label>
+                  <Label htmlFor="refresh-interval" className="text-white">Refresh Interval: {refreshInterval} minutes</Label>
                 </div>
                 <Slider
                   id="refresh-interval"
@@ -178,8 +180,9 @@ export function GeneralSettings() {
                   step={1}
                   value={[refreshInterval]}
                   onValueChange={handleRefreshIntervalChange}
+                  className="[&>[role=slider]]:bg-coral-500"
                 />
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-xs text-zinc-500">
                   <span>1 min</span>
                   <span>15 min</span>
                   <span>30 min</span>

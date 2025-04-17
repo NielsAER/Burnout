@@ -45,7 +45,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-950">
+    <div className="flex h-screen overflow-hidden bg-[#0f0f0f]">
       {/* Sidebar for desktop */}
       <div className={`${mobileSidebarOpen ? 'fixed inset-0 z-50' : 'hidden'} md:relative md:flex`}>
         <Sidebar onClose={() => setMobileSidebarOpen(false)} />
@@ -55,7 +55,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
       <div className="md:hidden fixed bottom-4 right-4 z-50">
         <Button 
           size="icon" 
-          className="rounded-full shadow-lg bg-coral-500 text-white hover:bg-coral-600"
+          className="rounded-sm shadow-lg bg-blue-600 text-white hover:bg-blue-700"
           onClick={toggleMobileSidebar}
         >
           <Menu className="h-5 w-5" />
@@ -63,22 +63,22 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-zinc-900">
+      <main className="flex-1 overflow-y-auto bg-[#0f0f0f]">
         {/* Header */}
-        <header className="bg-zinc-900 border-b border-zinc-800 shadow-md">
+        <header className="bg-[#0f0f0f] border-b border-[#2a2a2a] shadow-sm">
           <div className="py-4 px-6 flex items-center justify-between">
             <div className="flex items-center">
               <Logo size="md" className="mr-4 hidden md:block" />
               <div>
                 <h1 className="text-2xl font-semibold text-white">{getPageTitle()}</h1>
-                <p className="text-sm text-zinc-400">Manage your automation workflows</p>
+                <p className="text-sm text-gray-400">Manage your automation workflows</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
               {!location.includes("/builder") && (
                 <Button 
                   onClick={handleCreateAutomation}
-                  className="bg-coral-500 hover:bg-coral-600 text-white border-none"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-none rounded-sm px-3 py-2 text-sm h-9"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Create Automation
@@ -87,14 +87,14 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 border-zinc-700"
+                className="text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-sm"
               >
                 <Search className="h-5 w-5" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-zinc-400 hover:text-white hover:bg-zinc-800 border-zinc-700"
+                className="text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-sm"
               >
                 <Bell className="h-5 w-5" />
               </Button>

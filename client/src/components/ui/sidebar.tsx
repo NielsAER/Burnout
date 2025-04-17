@@ -37,9 +37,9 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
   };
 
   return (
-    <aside className="w-64 flex flex-col z-20 h-full bg-zinc-950 border-r border-zinc-800 transition-colors duration-200">
+    <aside className="w-64 flex flex-col z-20 h-full bg-[#181818] border-r border-[#2a2a2a] transition-colors duration-200">
       {/* Logo */}
-      <div className="p-4 border-b border-zinc-800 transition-colors duration-200">
+      <div className="p-4 border-b border-[#2a2a2a] transition-colors duration-200">
         <div className="flex items-center">
           <Logo size="sm" />
         </div>
@@ -52,10 +52,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             href="/" 
             onClick={onClose}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+              "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/") 
-                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
             )}
           >
             <LayoutDashboard className="mr-3 h-5 w-5" />
