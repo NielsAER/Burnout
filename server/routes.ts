@@ -409,7 +409,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.redirect(authUrl.toString());
   });
 
-  // OAuth callback routes
+  // OAuth callback routes - keeping for backward compatibility
   app.get('/api/auth/:service/callback', async (req, res) => {
     const { service } = req.params;
     const { code, state } = req.query;
@@ -418,8 +418,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: `Unsupported service: ${service}` });
     }
     
+    // For backwards compatibility, redirect to the new callback URL format
+    console.log(`Redirecting from old callback format to new format for ${service}`);
+    const redirectUrl = `/api/callback/${service}?code=${code}&state=${state}`;
+    return res.redirect(redirectUrl);
+  });
+  
+  // New OAuth callback routes using consistent pattern
+  app.get('/api/callback/:service', async (req, res) => {
+    const { service } = req.params;
+    const { code, state, api_integration } = req.query;
+    
+    console.log(`OAuth callback received for ${service}`);
+    
+    // Special handling for direct API integrations
+    if (api_integration === 'true') {
+      console.log(`Processing direct API integration for ${service}`);
+      
+      // For API-based services like OpenAI, create a placeholder connection
+      const profile = {
+        id: `${service}_api`,
+        username: `${service}_api`,
+        name: `${service.charAt(0).toUpperCase() + service.slice(1)} API`
+      };
+      
+      const credentials = {
+        integrated: true,
+        created_at: new Date()
+      };
+      
+      // Store minimal credentials in the session
+      storeOAuthCredentials(req, service, credentials);
+      
+      // Save the connection if the user is authenticated
+      if (req.isAuthenticated()) {
+        try {
+          await saveConnection(req, service, profile, credentials);
+          return res.redirect('/app-connections?success=' + service);
+        } catch (error) {
+          console.error(`Error in API integration for ${service}:`, error);
+          return res.redirect('/app-connections?error=true');
+        }
+      } else {
+        return res.redirect('/auth');
+      }
+    }
+    
     // For development/testing, if the code starts with "fake_code", use simulated login
     if (code && code.toString().startsWith('fake_code')) {
+      console.log(`Processing simulated login for ${service}`);
+      
       // Create a fake profile and credentials for simulated login
       const profile = {
         id: `${service}_123456`,
@@ -456,68 +504,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: 'Invalid state parameter' });
     }
     
+    // Process regular OAuth code exchange
     try {
-      const config = oauthConfigs[service];
-      const redirect_uri = `${req.protocol}://${req.get('host')}${config.callbackURL}`;
-      
-      // Exchange the authorization code for an access token
-      // Different services have different requirements for the token request
-      let tokenResponse;
-      
-      if (service === 'linkedin') {
-        // LinkedIn requires form-urlencoded data
-        const formData = new URLSearchParams();
-        formData.append('client_id', config.clientID);
-        formData.append('client_secret', config.clientSecret);
-        formData.append('code', code as string);
-        formData.append('redirect_uri', redirect_uri);
-        formData.append('grant_type', 'authorization_code');
+      // Check if this is a main OAuth service (instagram, linkedin, twitter, google)
+      // or a custom one (slack, facebook-ads, etc.)
+      if (isValidOAuthService(service)) {
+        console.log(`Processing standard OAuth for ${service}`);
+        const config = oauthConfigs[service];
+        const redirect_uri = `${req.protocol}://${req.get('host')}${config.callbackURL}`;
         
-        tokenResponse = await axios.post(config.tokenURL, formData.toString(), {
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json'
-          }
-        });
+        // Exchange the authorization code for an access token
+        // Different services have different requirements for the token request
+        let tokenResponse;
+        
+        if (service === 'linkedin') {
+          // LinkedIn requires form-urlencoded data
+          const formData = new URLSearchParams();
+          formData.append('client_id', config.clientID!);
+          formData.append('client_secret', config.clientSecret!);
+          formData.append('code', code as string);
+          formData.append('redirect_uri', redirect_uri);
+          formData.append('grant_type', 'authorization_code');
+          
+          console.log(`LinkedIn token request with redirect_uri: ${redirect_uri}`);
+          
+          tokenResponse = await axios.post(config.tokenURL, formData.toString(), {
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json'
+            }
+          });
+        } else {
+          // Default JSON request for most services
+          tokenResponse = await axios.post(config.tokenURL, {
+            client_id: config.clientID,
+            client_secret: config.clientSecret,
+            code,
+            redirect_uri,
+            grant_type: 'authorization_code'
+          }, {
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json'
+            }
+          });
+        }
+        
+        const { access_token, refresh_token, expires_in } = tokenResponse.data;
+        
+        // Store the credentials in the session
+        const credentials = {
+          access_token,
+          refresh_token,
+          expires_in,
+          created_at: new Date()
+        };
+        
+        storeOAuthCredentials(req, service, credentials);
+        
+        // Fetch the user profile
+        const profile = await config.profile(access_token);
+        
+        // Save the connection to the database
+        if (req.isAuthenticated()) {
+          await saveConnection(req, service, profile, credentials);
+          // Redirect to the app connections page
+          res.redirect('/app-connections?success=' + service);
+        } else {
+          // Not logged in, redirect to auth page
+          res.redirect('/auth?error=not_authenticated');
+        }
       } else {
-        // Default JSON request for most services
-        tokenResponse = await axios.post(config.tokenURL, {
-          client_id: config.clientID,
-          client_secret: config.clientSecret,
-          code,
-          redirect_uri,
-          grant_type: 'authorization_code'
-        }, {
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          }
-        });
-      }
-      
-      const { access_token, refresh_token, expires_in } = tokenResponse.data;
-      
-      // Store the credentials in the session
-      const credentials = {
-        access_token,
-        refresh_token,
-        expires_in,
-        created_at: new Date()
-      };
-      
-      storeOAuthCredentials(req, service, credentials);
-      
-      // Fetch the user profile
-      const profile = await config.profile(access_token);
-      
-      // Save the connection to the database
-      if (req.isAuthenticated()) {
-        await saveConnection(req, service, profile, credentials);
-        // Redirect to the app connections page
-        res.redirect('/app-connections?success=' + service);
-      } else {
-        // Not logged in, redirect to auth page
-        res.redirect('/auth?error=not_authenticated');
+        // Handle custom OAuth services like Slack, Facebook Ads, etc.
+        console.log(`Processing custom OAuth for ${service}`);
+        // This is where custom token exchange for services not in oauthConfigs would go
+        res.redirect('/app-connections?error=unsupported_service');
       }
     } catch (error) {
       console.error(`Error in ${service} OAuth callback:`, error);
