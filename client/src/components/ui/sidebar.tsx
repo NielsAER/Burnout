@@ -50,7 +50,7 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       )}>
         <div className="flex items-center">
           <img 
-            src="@assets/3_Transparent_Image.png" 
+            src="/attached_assets/3_Transparent_Image.png" 
             alt="BRNOUT Logo" 
             className="h-8 object-contain" 
           />

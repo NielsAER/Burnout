@@ -71,7 +71,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
           <div className="py-4 px-6 flex items-center justify-between">
             <div className="flex items-center">
               <img 
-                src="@assets/3_Transparent_Image.png" 
+                src="/attached_assets/3_Transparent_Image.png" 
                 alt="BRNOUT Logo" 
                 className="h-10 mr-4 object-contain hidden md:block" 
               />
