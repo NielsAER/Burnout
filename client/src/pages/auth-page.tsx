@@ -6,6 +6,7 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { Redirect } from "wouter";
 import { insertUserSchema } from "@shared/schema";
+import { Logo } from "@/components/ui/logo";
 
 import {
   Form,
@@ -84,9 +85,7 @@ export default function AuthPage() {
       <div className="max-w-7xl w-full grid md:grid-cols-2 gap-6 items-center">
         {/* Hero section */}
         <div className="flex flex-col space-y-4 order-2 md:order-1">
-          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-            BRNOUT
-          </h1>
+          <Logo size="lg" showTagline={true} />
           <p className="text-2xl md:text-3xl font-semibold text-foreground/90">
             Automation without the complexity
           </p>

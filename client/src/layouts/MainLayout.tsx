@@ -71,11 +71,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
         )}>
           <div className="py-4 px-6 flex items-center justify-between">
             <div className="flex items-center">
-              <img 
-                src="/brnout-logo.png" 
-                alt="BRNOUT Logo" 
-                className="h-10 mr-4 object-contain hidden md:block" 
-              />
+              <Logo size="md" className="mr-4 hidden md:block" />
               <div>
                 <h1 className={cn(
                   "text-2xl font-semibold",
