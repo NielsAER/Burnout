@@ -883,10 +883,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'instagram', state);
             
-            const redirectUri = `${baseUrl}/api/auth/instagram/callback`;
+            // For Instagram OAuth, we need to use the exact redirect URI registered in Meta Developer portal
+            // Use a generic path that's likely registered in the Instagram app settings
+            const redirectUri = `${baseUrl}/api/callback/instagram`;
             
             // Instagram OAuth URL with proper CSRF protection
-            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile&response_type=code&state=${state}`;
+            // Instagram Basic Display API requires user_profile and user_media scopes
+            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           }
           break;
           
