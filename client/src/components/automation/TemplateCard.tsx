@@ -8,6 +8,11 @@ import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+interface TemplateConfig {
+  triggerOptions?: Record<string, any>;
+  actionOptions?: Record<string, any>;
+}
+
 interface TemplateCardProps {
   template: Template;
 }
@@ -19,13 +24,15 @@ const TemplateCard: FC<TemplateCardProps> = ({ template }) => {
 
   const createFromTemplateMutation = useMutation({
     mutationFn: async () => {
+      // Type assertion is needed since templateConfig is unknown from Template
+      const config = templateConfig as TemplateConfig;
       const automationData = {
         name,
         active: true,
         triggerAppId,
-        triggerConfig: templateConfig.triggerOptions || {},
+        triggerConfig: config.triggerOptions || {},
         actionAppId,
-        actionConfig: templateConfig.actionOptions || {}
+        actionConfig: config.actionOptions || {}
       };
       
       return await apiRequest("POST", "/api/automations", automationData);

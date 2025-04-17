@@ -478,10 +478,10 @@ const AutomationBuilder = () => {
   if (isLoading) {
     return (
       <div className="py-6 px-6">
-        <div className="bg-white rounded-lg shadow p-6">
+        <div className="bg-white dark:bg-[#0f0f0f] dark:border dark:border-[#2a2a2a] rounded-lg shadow p-6">
           <Skeleton className="h-8 w-1/4 mb-6" />
           <div className="flex space-x-4">
-            <div className="w-64 border-r border-gray-200 pr-4">
+            <div className="w-64 border-r border-gray-200 dark:border-[#2a2a2a] pr-4">
               <Skeleton className="h-6 w-1/2 mb-4" />
               <div className="space-y-2">
                 {Array(3).fill(0).map((_, i) => (
@@ -509,16 +509,16 @@ const AutomationBuilder = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="py-6 px-6">
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-white dark:bg-[#0f0f0f] dark:border dark:border-[#2a2a2a] rounded-lg shadow">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-[#2a2a2a] dark:bg-[#0f0f0f]">
             <input
               type="text"
               value={automationName}
               onChange={handleNameChange}
-              className="text-xl font-semibold text-gray-900 border-none focus:outline-none focus:ring-0 w-full"
+              className="text-xl font-semibold text-gray-900 dark:text-white border-none focus:outline-none focus:ring-0 w-full bg-transparent"
               placeholder="Enter automation name..."
             />
-            <p className="text-sm text-gray-500">Connect apps and create an automated workflow.</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Connect apps and create an automated workflow.</p>
           </div>
           
           <div className="p-6 dark:bg-[#0f0f0f]">
