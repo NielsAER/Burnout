@@ -113,10 +113,8 @@ const StatsCard: FC<StatsCardProps> = ({
       {link && linkText && (
         <div className="bg-gray-50 dark:bg-[#181818] border-t border-gray-200 dark:border-[#2a2a2a] px-5 py-3">
           <div className="text-sm">
-            <Link href={link}>
-              <a className="font-medium text-primary dark:text-blue-400 hover:text-primary/90 dark:hover:text-blue-300">
-                {linkText}
-              </a>
+            <Link href={link} className="font-medium text-primary dark:text-blue-400 hover:text-primary/90 dark:hover:text-blue-300">
+              {linkText}
             </Link>
           </div>
         </div>

@@ -176,11 +176,9 @@ const Dashboard = () => {
             </div>
             
             <div className="mt-6 text-center">
-              <Link href="/templates">
-                <a className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
-                  View all templates
-                  <ArrowRight className="ml-1 h-4 w-4" />
-                </a>
+              <Link href="/templates" className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
+                View all templates
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
             </div>
           </div>
@@ -215,11 +213,9 @@ const Dashboard = () => {
                 />
                 
                 <div className="mt-6 text-center">
-                  <Link href="/history">
-                    <a className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
-                      View all activity
-                      <ArrowRight className="ml-1 h-4 w-4" />
-                    </a>
+                  <Link href="/history" className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
+                    View all activity
+                    <ArrowRight className="ml-1 h-4 w-4" />
                   </Link>
                 </div>
               </>
