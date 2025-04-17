@@ -229,7 +229,15 @@ export default function AuthPage() {
                           <FormItem>
                             <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input type="email" placeholder="Enter your email" {...field} />
+                              <Input 
+                                type="email" 
+                                placeholder="Enter your email" 
+                                value={field.value || ''} 
+                                onChange={field.onChange}
+                                onBlur={field.onBlur}
+                                name={field.name}
+                                ref={field.ref}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

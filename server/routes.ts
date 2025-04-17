@@ -13,8 +13,11 @@ import * as ollamaService from "./services/ollama";
 import * as perplexityService from "./services/perplexity";
 import * as textProcessorService from "./services/text-processor";
 import * as googleDocsService from "./services/google-docs";
+import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication
+  setupAuth(app);
   // GET /api/automations - Get all automations
   app.get("/api/automations", async (req, res) => {
     try {
