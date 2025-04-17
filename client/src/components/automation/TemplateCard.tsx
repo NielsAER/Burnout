@@ -52,9 +52,9 @@ const TemplateCard: FC<TemplateCardProps> = ({ template }) => {
   };
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-sm transition">
-      <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-        <h3 className="text-sm font-medium text-gray-900">{name}</h3>
+    <div className="border border-[#2a2a2a] bg-[#181818] rounded-sm overflow-hidden hover:shadow-sm transition">
+      <div className="px-4 py-3 bg-[#1f1f1f] border-b border-[#2a2a2a]">
+        <h3 className="text-sm font-medium text-white">{name}</h3>
       </div>
       <div className="p-4">
         <div className="flex items-center mb-3">
@@ -64,11 +64,11 @@ const TemplateCard: FC<TemplateCardProps> = ({ template }) => {
           </div>
           <AppIconMap appId={actionAppId} size="sm" />
         </div>
-        <p className="text-xs text-gray-500">{description}</p>
+        <p className="text-xs text-gray-400">{description}</p>
         <Button
           variant="outline"
           size="sm"
-          className="mt-3 w-full text-primary border-primary"
+          className="mt-3 w-full text-blue-400 border-blue-900 hover:bg-blue-900/20 hover:text-blue-300"
           onClick={handleUseTemplate}
           disabled={createFromTemplateMutation.isPending}
         >

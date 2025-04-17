@@ -521,7 +521,7 @@ const AutomationBuilder = () => {
             <p className="text-sm text-gray-500">Connect apps and create an automated workflow.</p>
           </div>
           
-          <div className="p-6">
+          <div className="p-6 dark:bg-[#0f0f0f]">
             <div className="flex items-start space-x-4">
               {/* Apps Panel */}
               <AppSelector 
@@ -545,7 +545,7 @@ const AutomationBuilder = () => {
           </div>
           
           {/* Interactive Workflow Preview */}
-          <div className="px-6 py-4 border-t border-gray-200">
+          <div className="px-6 py-4 border-t border-gray-200 dark:border-[#2a2a2a] dark:bg-[#0f0f0f]">
             <WorkflowPreviewPanel
               trigger={trigger}
               actions={actions}
@@ -555,7 +555,7 @@ const AutomationBuilder = () => {
             />
           </div>
           
-          <div className="bg-gray-50 px-6 py-3 flex justify-end space-x-3 border-t border-gray-200">
+          <div className="bg-gray-50 dark:bg-[#181818] px-6 py-3 flex justify-end space-x-3 border-t border-gray-200 dark:border-[#2a2a2a]">
             <Button
               variant="outline"
               onClick={handleCancel}
@@ -594,23 +594,25 @@ const AutomationBuilder = () => {
               {testStatus === 'success' && testResults.length > 0 && (
                 <div className="space-y-6">
                   {testResults.map((result, index) => (
-                    <div key={index} className="border border-gray-200 rounded-lg p-4">
+                    <div key={index} className="border border-gray-200 dark:border-[#2a2a2a] rounded-lg p-4 dark:bg-[#0f0f0f]">
                       <div className="flex items-center mb-3">
                         <div className={`w-6 h-6 rounded-full flex items-center justify-center 
-                                      ${result.status === 'success' ? 'bg-green-100' : 'bg-red-100'} mr-2`}>
+                                      ${result.status === 'success' 
+                                        ? 'bg-green-100 dark:bg-green-900/30' 
+                                        : 'bg-red-100 dark:bg-red-900/30'} mr-2`}>
                           {result.status === 'success' ? (
-                            <Check className="h-4 w-4 text-green-600" />
+                            <Check className="h-4 w-4 text-green-600 dark:text-green-400" />
                           ) : (
-                            <XCircle className="h-4 w-4 text-red-600" />
+                            <XCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                           )}
                         </div>
-                        <h3 className="text-sm font-semibold">
+                        <h3 className="text-sm font-semibold dark:text-white">
                           {result.step === 'trigger' ? 'Trigger' : `Action ${index}`}: {result.appId}
                         </h3>
                       </div>
                       
-                      <div className="bg-gray-50 rounded p-3 text-sm font-mono overflow-auto max-h-[200px]">
-                        <pre className="whitespace-pre-wrap">
+                      <div className="bg-gray-50 dark:bg-[#181818] rounded p-3 text-sm font-mono overflow-auto max-h-[200px]">
+                        <pre className="whitespace-pre-wrap dark:text-gray-300">
                           {JSON.stringify(result.data, null, 2)}
                         </pre>
                       </div>
@@ -620,7 +622,7 @@ const AutomationBuilder = () => {
               )}
               
               {testStatus === 'error' && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+                <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 rounded-lg p-4 text-red-700 dark:text-red-400">
                   <h3 className="font-semibold mb-2 flex items-center">
                     <XCircle className="h-5 w-5 mr-2" />
                     Test Failed

@@ -46,59 +46,60 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus })
   };
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden hover:shadow-md transition">
-      <div className="px-5 py-4 border-b border-gray-200 bg-gray-50 flex items-center justify-between">
+    <div className="bg-[#0f0f0f] border border-[#2a2a2a] shadow rounded-sm overflow-hidden hover:shadow-md transition">
+      <div className="px-5 py-4 border-b border-[#2a2a2a] bg-[#181818] flex items-center justify-between">
         <div className="flex items-center">
-          <span className={`inline-flex h-2 w-2 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-400'} mr-2`}></span>
-          <h3 className="text-sm font-medium text-gray-900">{name}</h3>
+          <span className={`inline-flex h-2 w-2 rounded-full ${active ? 'bg-emerald-500' : 'bg-gray-600'} mr-2`}></span>
+          <h3 className="text-sm font-medium text-white">{name}</h3>
         </div>
         <Toggle 
           checked={active} 
           onCheckedChange={handleToggleStatus}
+          className="data-[state=checked]:bg-blue-600"
         />
       </div>
       <div className="px-5 py-4">
         <div className="flex items-center">
           <AppIconMap appId={triggerAppId} />
-          <div className="mx-3 text-gray-500">
+          <div className="mx-3 text-gray-400">
             <ArrowRightIcon className="h-4 w-4" />
           </div>
           <AppIconMap appId={actionAppId} />
         </div>
-        <p className="mt-3 text-sm text-gray-500">
+        <p className="mt-3 text-sm text-gray-400">
           {`Send data from ${triggerAppId} to ${actionAppId}`}
         </p>
         <div className="mt-4 flex items-center justify-between">
-          <div className="text-xs text-gray-500">Last run: {formatLastRun()}</div>
-          <div className={`text-xs font-medium ${active ? 'text-emerald-500' : 'text-gray-500'}`}>
+          <div className="text-xs text-gray-400">Last run: {formatLastRun()}</div>
+          <div className={`text-xs font-medium ${active ? 'text-emerald-400' : 'text-gray-400'}`}>
             {active ? `${runsToday} runs today` : 'Inactive'}
           </div>
         </div>
       </div>
-      <div className="px-5 py-3 border-t border-gray-200 bg-gray-50 flex justify-end space-x-3">
-        <Button variant="ghost" size="sm" className="text-xs text-gray-600 hover:text-gray-900" onClick={handleViewDetails}>
+      <div className="px-5 py-3 border-t border-[#2a2a2a] bg-[#181818] flex justify-end space-x-3">
+        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-white hover:bg-[#2a2a2a]" onClick={handleViewDetails}>
           <Info className="h-3.5 w-3.5 mr-1" />
           Details
         </Button>
-        <Button variant="ghost" size="sm" className="text-xs text-gray-600 hover:text-gray-900" onClick={handleEdit}>
+        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-white hover:bg-[#2a2a2a]" onClick={handleEdit}>
           <Edit className="h-3.5 w-3.5 mr-1" />
           Edit
         </Button>
-        <Button variant="ghost" size="sm" className="text-xs text-gray-600 hover:text-gray-900" onClick={handleHistory}>
+        <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-white hover:bg-[#2a2a2a]" onClick={handleHistory}>
           <History className="h-3.5 w-3.5 mr-1" />
           History
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-xs text-gray-600 hover:text-gray-900">
+            <Button variant="ghost" size="sm" className="text-xs text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
               <MoreHorizontal className="h-3.5 w-3.5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleViewDetails}>View Details</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleEdit}>Edit</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleHistory}>View History</DropdownMenuItem>
-            <DropdownMenuItem onClick={handleToggleStatus}>
+          <DropdownMenuContent align="end" className="bg-[#181818] border-[#2a2a2a] text-white">
+            <DropdownMenuItem onClick={handleViewDetails} className="focus:bg-[#2a2a2a] focus:text-white">View Details</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleEdit} className="focus:bg-[#2a2a2a] focus:text-white">Edit</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleHistory} className="focus:bg-[#2a2a2a] focus:text-white">View History</DropdownMenuItem>
+            <DropdownMenuItem onClick={handleToggleStatus} className="focus:bg-[#2a2a2a] focus:text-white">
               {active ? "Disable" : "Enable"}
             </DropdownMenuItem>
           </DropdownMenuContent>
