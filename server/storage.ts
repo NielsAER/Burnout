@@ -16,11 +16,17 @@ import {
   type InsertUser
 } from "@shared/schema";
 
+import session from "express-session";
+import createMemoryStore from "memorystore";
+
 export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Session store for authentication
+  sessionStore: session.Store;
   
   // Automation methods
   getAllAutomations(): Promise<Automation[]>;
@@ -74,6 +80,8 @@ export class MemStorage implements IStorage {
   private currentTemplateId: number;
   private currentAchievementId: number;
   private currentUserAchievementId: number;
+  
+  sessionStore: session.Store;
 
   constructor() {
     this.users = new Map();
@@ -90,6 +98,12 @@ export class MemStorage implements IStorage {
     this.currentTemplateId = 1;
     this.currentAchievementId = 1;
     this.currentUserAchievementId = 1;
+    
+    // Initialize the session store
+    const MemoryStore = createMemoryStore(session);
+    this.sessionStore = new MemoryStore({
+      checkPeriod: 86400000, // prune expired entries every 24h
+    });
     
     // Seed templates data
     this.seedTemplates();
