@@ -854,47 +854,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { appId } = req.params;
       
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "You must be logged in to connect apps" });
+      }
+      
       // Get the host from the request to create proper redirect URLs
-      const host = req.headers.host || 'localhost:3000';
-      const protocol = req.secure ? 'https' : 'http';
+      const host = req.headers.host || 'localhost:5000';
+      const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
       const baseUrl = `${protocol}://${host}`;
-      const redirectUri = `${baseUrl}/api/callback/${appId}`;
       
       // Generate appropriate OAuth URLs for each supported service
       let oauthUrl = '';
-      let useSimulatedLogin = false;
-
-      // Check if we're in a production environment
-      // This determines if we should use real OAuth or fallback to simulated
-      const inDevelopmentMode = process.env.NODE_ENV !== 'production';
+      let requiredSecrets = [];
       
       // Handle different OAuth providers
       switch (appId) {
         case 'instagram':
-          if (inDevelopmentMode || !process.env.INSTAGRAM_CLIENT_ID || !process.env.INSTAGRAM_CLIENT_SECRET) {
-            // Use simulated login for development or when credentials aren't available
-            useSimulatedLogin = true;
+          if (!process.env.INSTAGRAM_CLIENT_ID || !process.env.INSTAGRAM_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['INSTAGRAM_CLIENT_ID', 'INSTAGRAM_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Instagram OAuth credentials", 
+              requiredSecrets
+            });
           } else {
-            // Instagram OAuth URL
-            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile&response_type=code`;
+            // Generate state for CSRF protection
+            const state = generateState();
+            storeOAuthState(req, 'instagram', state);
+            
+            const redirectUri = `${baseUrl}/api/auth/instagram/callback`;
+            
+            // Instagram OAuth URL with proper CSRF protection
+            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile&response_type=code&state=${state}`;
           }
           break;
           
         case 'linkedin':
-          if (inDevelopmentMode || !process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
-            useSimulatedLogin = true;
+          if (!process.env.LINKEDIN_CLIENT_ID || !process.env.LINKEDIN_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing LinkedIn OAuth credentials", 
+              requiredSecrets
+            });
           } else {
-            // LinkedIn OAuth URL
-            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code`;
+            // Generate state for CSRF protection
+            const state = generateState();
+            storeOAuthState(req, 'linkedin', state);
+            
+            const redirectUri = `${baseUrl}/api/auth/linkedin/callback`;
+            
+            // LinkedIn OAuth URL with proper CSRF protection
+            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code&state=${state}`;
           }
           break;
           
         case 'twitter':
-          if (inDevelopmentMode || !process.env.TWITTER_CLIENT_ID || !process.env.TWITTER_CLIENT_SECRET) {
-            useSimulatedLogin = true;
+          if (!process.env.TWITTER_CLIENT_ID || !process.env.TWITTER_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['TWITTER_CLIENT_ID', 'TWITTER_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Twitter OAuth credentials", 
+              requiredSecrets
+            });
           } else {
-            // Twitter OAuth 2.0 URL
-            oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${process.env.TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=tweet.read%20tweet.write%20users.read&response_type=code&state=state&code_challenge=challenge&code_challenge_method=plain`;
+            // Generate state for CSRF protection
+            const state = generateState();
+            storeOAuthState(req, 'twitter', state);
+            
+            const redirectUri = `${baseUrl}/api/auth/twitter/callback`;
+            
+            // Twitter OAuth 2.0 URL with proper CSRF protection
+            oauthUrl = `https://twitter.com/i/oauth2/authorize?client_id=${process.env.TWITTER_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=tweet.read%20tweet.write%20users.read&response_type=code&state=${state}&code_challenge=challenge&code_challenge_method=plain`;
           }
           break;
           
@@ -902,9 +934,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'gmail':
         case 'google-sheets':
         case 'google-calendar':
-          if (inDevelopmentMode || !process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-            useSimulatedLogin = true;
+          if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Google OAuth credentials", 
+              requiredSecrets
+            });
           } else {
+            // Generate state for CSRF protection
+            const state = generateState();
+            storeOAuthState(req, 'google', state);
+            
+            const redirectUri = `${baseUrl}/api/auth/google/callback`;
+            
             // Google OAuth URL with appropriate scopes
             let scopes = 'https://www.googleapis.com/auth/userinfo.profile';
             
@@ -918,34 +961,77 @@ export async function registerRoutes(app: Express): Promise<Server> {
               scopes += ' https://www.googleapis.com/auth/calendar';
             }
             
-            oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code&access_type=offline&prompt=consent`;
+            oauthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}&response_type=code&access_type=offline&prompt=consent&state=${state}`;
           }
           break;
           
         case 'slack':
-          if (inDevelopmentMode || !process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET) {
-            useSimulatedLogin = true;
+          if (!process.env.SLACK_CLIENT_ID || !process.env.SLACK_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['SLACK_CLIENT_ID', 'SLACK_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Slack OAuth credentials", 
+              requiredSecrets
+            });
           } else {
-            // Slack OAuth URL
-            oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=channels:read,chat:write&user_scope=`;
+            // Generate state for CSRF protection
+            const state = generateState();
+            // We're using a custom flow for Slack as it's not in our oauthConfigs
+            if (!req.session.oauthStates) {
+              req.session.oauthStates = {};
+            }
+            req.session.oauthStates['slack'] = state;
+            
+            const redirectUri = `${baseUrl}/api/callback/slack`;
+            
+            // Slack OAuth URL with proper CSRF protection
+            oauthUrl = `https://slack.com/oauth/v2/authorize?client_id=${process.env.SLACK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=channels:read,chat:write&user_scope=&state=${state}`;
           }
           break;
           
         case 'facebook-ads':
-          if (inDevelopmentMode || !process.env.FACEBOOK_CLIENT_ID || !process.env.FACEBOOK_CLIENT_SECRET) {
-            useSimulatedLogin = true;
+          if (!process.env.FACEBOOK_CLIENT_ID || !process.env.FACEBOOK_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['FACEBOOK_CLIENT_ID', 'FACEBOOK_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Facebook OAuth credentials", 
+              requiredSecrets
+            });
           } else {
-            // Facebook OAuth URL
-            oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=ads_management,ads_read&response_type=code`;
+            // Generate state for CSRF protection
+            const state = generateState();
+            if (!req.session.oauthStates) {
+              req.session.oauthStates = {};
+            }
+            req.session.oauthStates['facebook-ads'] = state;
+            
+            const redirectUri = `${baseUrl}/api/callback/facebook-ads`;
+            
+            // Facebook OAuth URL with proper CSRF protection
+            oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${process.env.FACEBOOK_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=ads_management,ads_read&response_type=code&state=${state}`;
           }
           break;
           
         case 'trello':
-          if (inDevelopmentMode || !process.env.TRELLO_CLIENT_ID || !process.env.TRELLO_CLIENT_SECRET) {
-            useSimulatedLogin = true;
+          if (!process.env.TRELLO_CLIENT_ID || !process.env.TRELLO_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['TRELLO_CLIENT_ID', 'TRELLO_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Trello OAuth credentials", 
+              requiredSecrets
+            });
           } else {
-            // Trello OAuth URL
-            oauthUrl = `https://trello.com/1/authorize?expiration=never&name=FlowConnect&scope=read,write&response_type=code&client_id=${process.env.TRELLO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}`;
+            // Generate state for CSRF protection
+            const state = generateState();
+            if (!req.session.oauthStates) {
+              req.session.oauthStates = {};
+            }
+            req.session.oauthStates['trello'] = state;
+            
+            const redirectUri = `${baseUrl}/api/callback/trello`;
+            
+            // Trello OAuth URL with proper CSRF protection
+            oauthUrl = `https://trello.com/1/authorize?expiration=never&name=BRNOUT&scope=read,write&response_type=code&client_id=${process.env.TRELLO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
           }
           break;
           
@@ -962,13 +1048,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
         default:
           // For services that we don't have specific OAuth implementations for yet
-          useSimulatedLogin = true;
-      }
-      
-      // Use simulated login for development mode or when credentials are missing
-      if (useSimulatedLogin) {
-        console.log(`Using simulated login for ${appId} as we're in development mode or OAuth credentials are missing`);
-        oauthUrl = `${baseUrl}/api/simulated-login?service=${appId}&redirect=${encodeURIComponent(`${baseUrl}/api/callback/${appId}`)}`;
+          return res.status(400).json({ 
+            error: `Unsupported OAuth integration for service: ${appId}`,
+            message: "This service needs to be integrated manually with proper OAuth credentials."
+          });
       }
       
       // Return the OAuth URL to the client for redirect

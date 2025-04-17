@@ -276,24 +276,61 @@ export default function AppConnections() {
       // Try to get the OAuth URL from the server
       try {
         const authResponse = await fetch(`/api/app-connections/${appId}/auth`);
+        const authData = await authResponse.json();
         
         if (!authResponse.ok) {
-          throw new Error(`Failed to get authorization URL: ${authResponse.status}`);
+          if (authResponse.status === 400 && authData.requiredSecrets) {
+            // Missing OAuth credentials
+            setConnectingApp(null);
+            
+            toast({
+              title: "OAuth Credentials Required",
+              description: `To connect to ${appId.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}, you need to provide OAuth credentials: ${authData.requiredSecrets.join(', ')}`,
+              variant: "destructive",
+              action: (
+                <ToastAction altText="Go to Settings" onClick={() => navigate('/settings')}>
+                  Go to Settings
+                </ToastAction>
+              ),
+            });
+            return;
+          } else {
+            throw new Error(`Failed to get authorization URL: ${authResponse.status} - ${authData.error || 'Unknown error'}`);
+          }
         }
-        
-        const authData = await authResponse.json();
         
         if (authData && authData.oauthUrl) {
           console.log(`Starting OAuth flow for ${appId} with URL: ${authData.oauthUrl}`);
-          window.location.href = authData.oauthUrl;
+          // Open in a popup window for better UX
+          const width = 600;
+          const height = 700;
+          const left = window.screenX + (window.outerWidth - width) / 2;
+          const top = window.screenY + (window.outerHeight - height) / 2;
+          
+          const popup = window.open(
+            authData.oauthUrl, 
+            `${appId}_oauth`,
+            `width=${width},height=${height},left=${left},top=${top}`
+          );
+          
+          // If popup was blocked, redirect in the same window
+          if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+            console.log("Popup blocked, redirecting in same window");
+            window.location.href = authData.oauthUrl;
+          }
         } else {
-          // If no OAuth URL, fall back to simulated login
-          useSimulatedLogin();
+          // No OAuth URL returned
+          throw new Error("No OAuth URL returned from server");
         }
       } catch (error) {
         console.error("Error starting OAuth flow:", error);
-        // Fallback to simulated login if real OAuth fails
-        useSimulatedLogin();
+        setConnectingApp(null);
+        
+        toast({
+          title: "Connection Failed",
+          description: error instanceof Error ? error.message : "Failed to start OAuth flow",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       console.error("OAuth error:", error);

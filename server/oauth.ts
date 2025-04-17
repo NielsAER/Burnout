@@ -183,8 +183,9 @@ export async function saveConnection(req: Request, service: OAuthService, profil
 
 // Development helper for simulated login
 export function getSimulatedAuthUrl(req: Request, service: OAuthService, redirectUrl: string): string {
-  if (process.env.NODE_ENV !== 'production' || !oauthConfigs[service].clientID) {
-    console.log(`Using simulated login for ${service} as we're in development mode or OAuth credentials are missing`);
+  // We no longer use simulated login by default - only use it if explicitly set
+  if (process.env.USE_SIMULATED_LOGIN === 'true') {
+    console.log(`Using simulated login for ${service} as USE_SIMULATED_LOGIN is enabled`);
     
     // Generate and store a state parameter for CSRF protection
     const state = generateState();
