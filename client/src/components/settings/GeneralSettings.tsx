@@ -32,10 +32,10 @@ export function GeneralSettings() {
   return (
     <div className="grid grid-cols-1 gap-6">
       {/* Theme Settings */}
-      <Card>
+      <Card className="bg-zinc-900 border border-zinc-800">
         <CardHeader>
-          <CardTitle>Appearance</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Appearance</CardTitle>
+          <CardDescription className="text-zinc-400">
             Customize how BRNOUT looks on your device
           </CardDescription>
         </CardHeader>
@@ -58,10 +58,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-light"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-zinc-700 bg-zinc-800 p-4 hover:bg-zinc-700 peer-data-[state=checked]:border-coral-500 [&:has([data-state=checked])]:border-coral-500 cursor-pointer transition-all"
                 >
-                  <SunIcon className="mb-3 h-6 w-6" />
-                  Light
+                  <SunIcon className="mb-3 h-6 w-6 text-zinc-300" />
+                  <span className="text-zinc-300">Light</span>
                 </Label>
               </div>
               <div>
@@ -72,10 +72,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-dark"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-zinc-700 bg-zinc-800 p-4 hover:bg-zinc-700 peer-data-[state=checked]:border-coral-500 [&:has([data-state=checked])]:border-coral-500 cursor-pointer transition-all"
                 >
-                  <MoonIcon className="mb-3 h-6 w-6" />
-                  Dark
+                  <MoonIcon className="mb-3 h-6 w-6 text-zinc-300" />
+                  <span className="text-zinc-300">Dark</span>
                 </Label>
               </div>
               <div>
@@ -86,10 +86,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-system"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                  className="flex flex-col items-center justify-between rounded-md border-2 border-zinc-700 bg-zinc-800 p-4 hover:bg-zinc-700 peer-data-[state=checked]:border-coral-500 [&:has([data-state=checked])]:border-coral-500 cursor-pointer transition-all"
                 >
-                  <MonitorIcon className="mb-3 h-6 w-6" />
-                  System
+                  <MonitorIcon className="mb-3 h-6 w-6 text-zinc-300" />
+                  <span className="text-zinc-300">System</span>
                 </Label>
               </div>
             </RadioGroup>

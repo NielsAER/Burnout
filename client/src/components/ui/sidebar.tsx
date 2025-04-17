@@ -67,12 +67,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/automations") 
-                ? "bg-primary/10 text-primary border-l-3 border-primary" 
-                : cn(
-                  isDarkMode
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )
+                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             )}
           >
             <ChartGantt className="mr-3 h-5 w-5" />
@@ -84,12 +80,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/app-connections") 
-                ? "bg-primary/10 text-primary border-l-3 border-primary" 
-                : cn(
-                  isDarkMode
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )
+                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             )}
           >
             <ExternalLink className="mr-3 h-5 w-5" />
@@ -101,12 +93,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/history") 
-                ? "bg-primary/10 text-primary border-l-3 border-primary" 
-                : cn(
-                  isDarkMode
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )
+                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             )}
           >
             <History className="mr-3 h-5 w-5" />
@@ -118,12 +106,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/ai-services") 
-                ? "bg-primary/10 text-primary border-l-3 border-primary" 
-                : cn(
-                  isDarkMode
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )
+                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             )}
           >
             <BrainCircuit className="mr-3 h-5 w-5" />
@@ -135,12 +119,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/settings") 
-                ? "bg-primary/10 text-primary border-l-3 border-primary" 
-                : cn(
-                  isDarkMode
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )
+                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             )}
           >
             <Settings className="mr-3 h-5 w-5" />
@@ -149,35 +129,17 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
         </div>
         
         <div className="mt-8">
-          <h3 className={cn(
-            "px-3 text-xs font-semibold uppercase tracking-wider",
-            isDarkMode ? "text-muted-foreground" : "text-gray-500"
-          )}>
+          <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
             Recent Templates
           </h3>
           <div className="mt-2 space-y-1">
-            <a href="#" className={cn(
-              "group flex items-center px-3 py-2 text-sm font-medium rounded-md",
-              isDarkMode
-                ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            )}>
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800">
               <span className="truncate">Gmail to Slack Notifications</span>
             </a>
-            <a href="#" className={cn(
-              "group flex items-center px-3 py-2 text-sm font-medium rounded-md",
-              isDarkMode
-                ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            )}>
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800">
               <span className="truncate">Twitter to CRM Lead</span>
             </a>
-            <a href="#" className={cn(
-              "group flex items-center px-3 py-2 text-sm font-medium rounded-md",
-              isDarkMode
-                ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-            )}>
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800">
               <span className="truncate">Form Submission to Google Sheet</span>
             </a>
           </div>
@@ -185,51 +147,29 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       </nav>
       
       {/* User Profile */}
-      <div className={cn(
-        "border-t p-4 transition-colors duration-200",
-        isDarkMode ? "border-border" : "border-gray-200"
-      )}>
+      <div className="border-t border-zinc-800 p-4 transition-colors duration-200">
         {user && (
           <div className="flex items-center">
-            <div className={cn(
-              "h-8 w-8 rounded-full flex items-center justify-center",
-              isDarkMode ? "bg-muted" : "bg-gray-200"
-            )}>
-              <span className={cn(
-                "text-sm font-medium",
-                isDarkMode ? "text-muted-foreground" : "text-gray-600"
-              )}>
+            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-coral-500/20">
+              <span className="text-sm font-medium text-coral-400">
                 {user.fullName 
                   ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
                   : user.username.substring(0, 2).toUpperCase()}
               </span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium">{user.fullName || user.username}</p>
-              <p className={cn(
-                "text-xs",
-                isDarkMode ? "text-muted-foreground" : "text-gray-500"
-              )}>Pro Plan</p>
+              <p className="text-sm font-medium text-white">{user.fullName || user.username}</p>
+              <p className="text-xs text-zinc-400">Pro Plan</p>
             </div>
             <div className="ml-auto flex gap-2">
               <Link 
                 href="/profile"
-                className={cn(
-                  "p-1 rounded-full",
-                  isDarkMode 
-                    ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
-                    : "text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                )}
+                className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800"
               >
                 <User className="h-4 w-4" />
               </Link>
               <button 
-                className={cn(
-                  "p-1 rounded-full",
-                  isDarkMode 
-                    ? "text-muted-foreground hover:text-foreground hover:bg-muted" 
-                    : "text-gray-400 hover:text-gray-500 hover:bg-gray-100"
-                )}
+                className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800"
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
               >
