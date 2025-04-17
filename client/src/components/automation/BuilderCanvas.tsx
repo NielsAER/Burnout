@@ -136,25 +136,25 @@ const DraggableAction: FC<DraggableActionProps> = ({
   return (
     <div 
       ref={ref} 
-      className={`workflow-step w-full p-4 mb-4 bg-white border ${isDragging ? 'border-dashed border-primary' : 'border-gray-200'} 
-                 rounded-lg shadow-sm transition-all duration-200 ${isOver ? 'border-primary' : ''} 
-                 ${isDragging ? 'shadow-md ring-2 ring-primary/20' : 'hover:shadow'}`}
+      className={`workflow-step w-full p-4 mb-4 bg-white dark:bg-[#181818] border ${isDragging ? 'border-dashed border-primary dark:border-blue-600' : 'border-gray-200 dark:border-[#2a2a2a]'} 
+                 rounded-lg shadow-sm transition-all duration-200 ${isOver ? 'border-primary dark:border-blue-600' : ''} 
+                 ${isDragging ? 'shadow-md ring-2 ring-primary/20 dark:ring-blue-600/20' : 'hover:shadow'}`}
       style={{ opacity }}
     >
       <div className="flex items-center mb-3">
-        <div className="cursor-move p-1 mr-2 text-gray-400 hover:text-gray-600">
+        <div className="cursor-move p-1 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
           <MoreHorizontal className="h-4 w-4" />
         </div>
         <AppIconMap appId={action.appId} />
         <div className="ml-3">
-          <h4 className="text-sm font-medium">{appDetails.name}</h4>
-          <p className="text-xs text-gray-500">
+          <h4 className="text-sm font-medium dark:text-gray-300">{appDetails.name}</h4>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
             {action.description || "Do this..."}
           </p>
         </div>
         <div className="ml-auto flex space-x-2">
           <button 
-            className="text-gray-400 hover:text-gray-600" 
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
             onClick={() => onConfigure(action.id)}
             aria-label="Configure"
           >
@@ -320,15 +320,15 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       return (
         <div 
           ref={dropTrigger}
-          className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger ? 'border-primary bg-primary/5' : 'border-gray-300'} 
+          className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' : 'border-gray-300 dark:border-[#2a2a2a]'} 
                      rounded-lg flex flex-col items-center justify-center h-32 transition-all duration-200`}
         >
           <div className="p-4 text-center">
-            <div className={`w-12 h-12 mx-auto rounded-full ${isOverTrigger && canDropTrigger ? 'bg-primary/10' : 'bg-gray-100'} 
+            <div className={`w-12 h-12 mx-auto rounded-full ${isOverTrigger && canDropTrigger ? 'bg-primary/10 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-[#181818]'} 
                             flex items-center justify-center transition-all duration-200`}>
-              <PlusIcon className={`h-5 w-5 ${isOverTrigger && canDropTrigger ? 'text-primary' : 'text-gray-400'} transition-colors`} />
+              <PlusIcon className={`h-5 w-5 ${isOverTrigger && canDropTrigger ? 'text-primary dark:text-blue-400' : 'text-gray-400'} transition-colors`} />
             </div>
-            <p className={`mt-2 text-sm ${isOverTrigger && canDropTrigger ? 'text-primary' : 'text-gray-500'} transition-colors`}>
+            <p className={`mt-2 text-sm ${isOverTrigger && canDropTrigger ? 'text-primary dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} transition-colors`}>
               {isOverTrigger && canDropTrigger ? 'Drop trigger here' : 'Add a trigger to start'}
             </p>
           </div>
@@ -340,12 +340,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
     if (trigger.appId === 'scheduler' || 
         (trigger.config && (trigger.config.scheduleType || trigger.config.time || trigger.config.frequency))) {
       return (
-        <div className="workflow-step w-full p-4 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm transition-all hover:shadow">
+        <div className="workflow-step w-full p-4 mb-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-lg shadow-sm transition-all hover:shadow">
           <div className="flex items-center mb-3">
-            <Clock className="h-5 w-5 text-blue-500" />
+            <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
             <div className="ml-3">
-              <h4 className="text-sm font-medium">Time Trigger</h4>
-              <p className="text-xs text-gray-500">
+              <h4 className="text-sm font-medium dark:text-gray-300">Time Trigger</h4>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
                 {trigger.config?.scheduleType === 'recurring' ? 'Recurring schedule' : 
                  trigger.config?.scheduleType === 'timer' ? 'Timer interval' : 'One-time schedule'}
               </p>
@@ -407,18 +407,18 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         };
 
     return (
-      <div className="workflow-step w-full p-4 mb-6 bg-white border border-gray-200 rounded-lg shadow-sm transition-all hover:shadow">
+      <div className="workflow-step w-full p-4 mb-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-lg shadow-sm transition-all hover:shadow">
         <div className="flex items-center mb-3">
           <AppIconMap appId={trigger.appId} />
           <div className="ml-3">
-            <h4 className="text-sm font-medium">{appDetails.name}</h4>
-            <p className="text-xs text-gray-500">
+            <h4 className="text-sm font-medium dark:text-gray-300">{appDetails.name}</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
               {trigger.description || "When this happens..."}
             </p>
           </div>
           <div className="ml-auto flex space-x-2">
             <button 
-              className="text-gray-400 hover:text-gray-600" 
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
               onClick={() => handleConfigureStep(trigger.id)}
               aria-label="Configure"
             >
@@ -433,7 +433,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </button>
           </div>
         </div>
-        <div className="text-xs text-gray-500 italic">
+        <div className="text-xs text-gray-500 dark:text-gray-400 italic">
           {trigger.config && Object.keys(trigger.config).length > 0 
             ? `${
                 trigger.config.optionName 
@@ -740,16 +740,16 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
 
   return (
     <div className="flex-1">
-      <div className="bg-gray-50 border border-dashed border-gray-300 rounded-lg p-6 min-h-[500px] relative flex flex-col">
+      <div className="bg-gray-50 dark:bg-[#111111] border border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-lg p-6 min-h-[500px] relative flex flex-col">
         {/* Top toolbar */}
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-sm font-medium text-gray-700">Workflow Builder</h3>
+          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Workflow Builder</h3>
           <div className="flex space-x-2">
             <Button 
               variant="outline" 
               size="sm"
               onClick={handleTestWorkflow}
-              className="flex items-center"
+              className="flex items-center dark:text-gray-300 dark:border-[#2a2a2a] dark:hover:bg-[#1a1a1a]"
             >
               <Play className="h-3.5 w-3.5 mr-1.5" />
               Test Workflow
@@ -759,7 +759,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         
         {/* Title Text if no trigger or actions */}
         {!trigger && actions.length === 0 && (
-          <div className="text-center text-sm text-gray-500 mb-6">
+          <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">
             <p>Start by adding a trigger, then add one or more actions</p>
           </div>
         )}
@@ -769,9 +769,9 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         
         {/* Connector */}
         {trigger && (
-          <div className="h-8 w-px bg-gray-300 relative self-center">
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full border-2 border-primary bg-white">
-              <ArrowDown className="h-3 w-3 text-primary absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          <div className="h-8 w-px bg-gray-300 dark:bg-[#2a2a2a] relative self-center">
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full border-2 border-primary dark:border-blue-600 bg-white dark:bg-[#111111]">
+              <ArrowDown className="h-3 w-3 text-primary dark:text-blue-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
             </div>
           </div>
         )}
@@ -780,27 +780,27 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         <div 
           ref={drop} 
           className={`flex-1 ${actions.length === 0 ? 'flex items-center justify-center' : ''} 
-            ${isOver && canDrop ? 'bg-primary/5 border-2 border-dashed border-primary rounded-lg' : ''}`}
+            ${isOver && canDrop ? 'bg-primary/5 dark:bg-blue-900/20 border-2 border-dashed border-primary dark:border-blue-600 rounded-lg' : ''}`}
         >
           {actions.length === 0 ? (
-            <div className="text-center p-8 border-2 border-dashed border-gray-300 rounded-lg w-full">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 flex items-center justify-center mb-2">
+            <div className="text-center p-8 border-2 border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-lg w-full">
+              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-[#181818] flex items-center justify-center mb-2">
                 <Plus className="h-6 w-6 text-gray-400" />
               </div>
-              <h3 className="text-gray-600 font-medium mb-1">Add an action</h3>
-              <p className="text-sm text-gray-500 mb-4 max-w-xs mx-auto">
+              <h3 className="text-gray-600 dark:text-gray-300 font-medium mb-1">Add an action</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-xs mx-auto">
                 Drag actions here from the left panel or click the button below to add
               </p>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center">
+                  <Button variant="outline" size="sm" className="flex items-center dark:border-[#2a2a2a] dark:text-gray-300 dark:hover:bg-[#1a1a1a]">
                     <Plus className="h-3.5 w-3.5 mr-1.5" />
                     Add Action
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent align="center" className="w-64 p-0">
-                  <div className="py-2 border-b border-gray-100">
-                    <h4 className="px-3 text-xs font-medium text-gray-500 uppercase">Popular Actions</h4>
+                <PopoverContent align="center" className="w-64 p-0 dark:bg-[#181818] dark:border-[#2a2a2a]">
+                  <div className="py-2 border-b border-gray-100 dark:border-[#2a2a2a]">
+                    <h4 className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Popular Actions</h4>
                   </div>
                   <div className="py-1 max-h-[300px] overflow-y-auto">
                     {Object.keys(APPS)
@@ -813,11 +813,11 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                         return (
                           <div
                             key={appId}
-                            className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                            className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer"
                             onClick={() => onAddAction(appId)}
                           >
                             <AppIconMap appId={appId} size="sm" />
-                            <span className="ml-2 text-sm">{app.name}</span>
+                            <span className="ml-2 text-sm dark:text-gray-300">{app.name}</span>
                           </div>
                         );
                       })}
@@ -829,7 +829,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             <div className="space-y-2 relative">
               {/* Visual connector line for multiple actions */}
               {actions.length > 1 && (
-                <div className="absolute top-0 bottom-0 left-6 w-px bg-gray-200 z-0"></div>
+                <div className="absolute top-0 bottom-0 left-6 w-px bg-gray-200 dark:bg-[#2a2a2a] z-0"></div>
               )}
               
               {actions.map((action, index) => (
@@ -847,14 +847,14 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               <div className="mt-4 flex justify-center">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center">
+                    <Button variant="outline" size="sm" className="flex items-center dark:border-[#2a2a2a] dark:text-gray-300 dark:hover:bg-[#1a1a1a]">
                       <Plus className="h-3.5 w-3.5 mr-1.5" />
                       Add Another Action
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent align="center" className="w-64 p-0">
-                    <div className="py-2 border-b border-gray-100">
-                      <h4 className="px-3 text-xs font-medium text-gray-500 uppercase">Add Next Action</h4>
+                  <PopoverContent align="center" className="w-64 p-0 dark:bg-[#181818] dark:border-[#2a2a2a]">
+                    <div className="py-2 border-b border-gray-100 dark:border-[#2a2a2a]">
+                      <h4 className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Add Next Action</h4>
                     </div>
                     <ScrollArea className="h-[300px]">
                       <div className="py-1">
@@ -868,11 +868,11 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                             return (
                               <div
                                 key={appId}
-                                className="flex items-center px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                                className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer"
                                 onClick={() => onAddAction(appId)}
                               >
                                 <AppIconMap appId={appId} size="sm" />
-                                <span className="ml-2 text-sm">{app.name}</span>
+                                <span className="ml-2 text-sm dark:text-gray-300">{app.name}</span>
                               </div>
                             );
                           })}
