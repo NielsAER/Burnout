@@ -176,29 +176,29 @@ export function SettingsForm() {
   return (
     <div className="w-full max-w-5xl mx-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 mb-8 w-[400px] bg-[#181818] border border-[#2a2a2a] rounded-sm">
-          <TabsTrigger value="ai-services" className="data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">AI Services</TabsTrigger>
-          <TabsTrigger value="oauth-credentials" className="data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">OAuth Credentials</TabsTrigger>
+        <TabsList className="grid grid-cols-2 mb-8 w-[400px] bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
+          <TabsTrigger value="ai-services" className="text-gray-800 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-600 dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">AI Services</TabsTrigger>
+          <TabsTrigger value="oauth-credentials" className="text-gray-800 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-600 dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">OAuth Credentials</TabsTrigger>
         </TabsList>
         
         {/* AI Services Tab */}
         <TabsContent value="ai-services">
           <div className="grid grid-cols-1 gap-6">
             {/* OpenAI API Key */}
-            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+            <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">OpenAI API</CardTitle>
-                    <CardDescription className="text-gray-400">Configure your OpenAI API key for text generation and image creation</CardDescription>
+                    <CardTitle className="text-gray-900 dark:text-white">OpenAI API</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">Configure your OpenAI API key for text generation and image creation</CardDescription>
                   </div>
                   <div>{renderKeyStatus("openai")}</div>
                 </div>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent className="text-gray-900 dark:text-white">
                 <form onSubmit={handleSaveApiKeys} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="openai-key" className="text-white">OpenAI API Key</Label>
+                    <Label htmlFor="openai-key" className="text-gray-900 dark:text-white">OpenAI API Key</Label>
                     <div className="flex">
                       <Input
                         id="openai-key"
@@ -206,10 +206,10 @@ export function SettingsForm() {
                         placeholder="sk-..."
                         value={openaiKey}
                         onChange={(e) => setOpenaiKey(e.target.value)}
-                        className="flex-1 bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                        className="flex-1 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm"
                       />
                     </div>
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Get your API key from{" "}
                       <a
                         href="https://platform.openai.com/api-keys"
@@ -244,29 +244,29 @@ export function SettingsForm() {
             </Card>
             
             {/* Anthropic API Key */}
-            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+            <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Anthropic API</CardTitle>
-                    <CardDescription className="text-gray-400">Configure your Anthropic API key for Claude models</CardDescription>
+                    <CardTitle className="text-gray-900 dark:text-white">Anthropic API</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">Configure your Anthropic API key for Claude models</CardDescription>
                   </div>
                   <div>{renderKeyStatus("anthropic")}</div>
                 </div>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent className="text-gray-900 dark:text-white">
                 <form onSubmit={handleSaveApiKeys} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="anthropic-key" className="text-white">Anthropic API Key</Label>
+                    <Label htmlFor="anthropic-key" className="text-gray-900 dark:text-white">Anthropic API Key</Label>
                     <Input
                       id="anthropic-key"
                       type="password"
                       placeholder="sk-ant-..."
                       value={anthropicKey}
                       onChange={(e) => setAnthropicKey(e.target.value)}
-                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                      className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm"
                     />
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Get your API key from{" "}
                       <a
                         href="https://console.anthropic.com/settings/keys"
@@ -301,29 +301,29 @@ export function SettingsForm() {
             </Card>
             
             {/* Perplexity API Key */}
-            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+            <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Perplexity API</CardTitle>
-                    <CardDescription className="text-gray-400">Configure your Perplexity API key for web search and research</CardDescription>
+                    <CardTitle className="text-gray-900 dark:text-white">Perplexity API</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">Configure your Perplexity API key for web search and research</CardDescription>
                   </div>
                   <div>{renderKeyStatus("perplexity")}</div>
                 </div>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent className="text-gray-900 dark:text-white">
                 <form onSubmit={handleSaveApiKeys} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="perplexity-key" className="text-white">Perplexity API Key</Label>
+                    <Label htmlFor="perplexity-key" className="text-gray-900 dark:text-white">Perplexity API Key</Label>
                     <Input
                       id="perplexity-key"
                       type="password"
                       placeholder="pplx-..."
                       value={perplexityKey}
                       onChange={(e) => setPerplexityKey(e.target.value)}
-                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                      className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm"
                     />
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Get your API key from{" "}
                       <a
                         href="https://www.perplexity.ai/settings/api"
@@ -363,40 +363,40 @@ export function SettingsForm() {
         <TabsContent value="oauth-credentials">
           <div className="grid grid-cols-1 gap-6">
             {/* Twitter OAuth */}
-            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+            <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Twitter (X) OAuth</CardTitle>
-                    <CardDescription className="text-gray-400">Configure Twitter OAuth credentials for integration</CardDescription>
+                    <CardTitle className="text-gray-900 dark:text-white">Twitter (X) OAuth</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">Configure Twitter OAuth credentials for integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("twitter")}</div>
                 </div>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent className="text-gray-900 dark:text-white">
                 <form onSubmit={handleSaveTwitterCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="twitter-client-id" className="text-white">Client ID</Label>
+                    <Label htmlFor="twitter-client-id" className="text-gray-900 dark:text-white">Client ID</Label>
                     <Input
                       id="twitter-client-id"
                       placeholder="Twitter Client ID"
                       value={twitterClientId}
                       onChange={(e) => setTwitterClientId(e.target.value)}
-                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                      className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="twitter-client-secret" className="text-white">Client Secret</Label>
+                    <Label htmlFor="twitter-client-secret" className="text-gray-900 dark:text-white">Client Secret</Label>
                     <Input
                       id="twitter-client-secret"
                       type="password"
                       placeholder="Twitter Client Secret"
                       value={twitterClientSecret}
                       onChange={(e) => setTwitterClientSecret(e.target.value)}
-                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                      className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://developer.twitter.com/en/portal/dashboard"

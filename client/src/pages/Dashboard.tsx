@@ -140,16 +140,16 @@ const Dashboard = () => {
       
       {/* Popular Templates Section */}
       <div className="py-4 px-6">
-        <h2 className="text-lg font-medium text-white mb-4">Popular Templates</h2>
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Popular Templates</h2>
         
-        <div className="bg-[#0f0f0f] border border-[#2a2a2a] shadow rounded-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] shadow rounded-sm overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {loadingTemplates ? (
                 // Loading skeleton
                 Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="border border-[#2a2a2a] rounded-sm overflow-hidden bg-[#181818]">
-                    <div className="px-4 py-3 bg-[#1f1f1f] border-b border-[#2a2a2a]">
+                  <div key={i} className="border border-gray-200 dark:border-[#2a2a2a] rounded-sm overflow-hidden bg-gray-50 dark:bg-[#181818]">
+                    <div className="px-4 py-3 bg-gray-100 dark:bg-[#1f1f1f] border-b border-gray-200 dark:border-[#2a2a2a]">
                       <Skeleton className="h-5 w-3/4" />
                     </div>
                     <div className="p-4">
@@ -177,7 +177,7 @@ const Dashboard = () => {
             
             <div className="mt-6 text-center">
               <Link href="/templates">
-                <a className="inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
+                <a className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
                   View all templates
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </a>
@@ -189,9 +189,9 @@ const Dashboard = () => {
       
       {/* Recent Activity Section */}
       <div className="py-4 px-6 pb-12">
-        <h2 className="text-lg font-medium text-white mb-4">Recent Activity</h2>
+        <h2 className="text-lg font-medium text-gray-900 dark:text-white mb-4">Recent Activity</h2>
         
-        <div className="bg-[#0f0f0f] border border-[#2a2a2a] shadow rounded-sm overflow-hidden">
+        <div className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] shadow rounded-sm overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             {loadingHistories ? (
               <div className="space-y-8">
@@ -216,7 +216,7 @@ const Dashboard = () => {
                 
                 <div className="mt-6 text-center">
                   <Link href="/history">
-                    <a className="inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
+                    <a className="inline-flex items-center text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300">
                       View all activity
                       <ArrowRight className="ml-1 h-4 w-4" />
                     </a>
