@@ -17,6 +17,7 @@ import AuthPage from "@/pages/auth-page";
 import MainLayout from "@/layouts/MainLayout";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
+import { ThemeProvider } from "@/contexts/ThemeContext";
 
 function Router() {
   return (
@@ -40,12 +41,14 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <DndProvider backend={HTML5Backend}>
-        <AuthProvider>
-          <MainLayout>
-            <Router />
-          </MainLayout>
-          <Toaster />
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <MainLayout>
+              <Router />
+            </MainLayout>
+            <Toaster />
+          </AuthProvider>
+        </ThemeProvider>
       </DndProvider>
     </QueryClientProvider>
   );

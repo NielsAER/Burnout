@@ -1,6 +1,8 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldIcon, ServerIcon, KeyIcon } from "lucide-react";
+import { UserIcon, ServerIcon, KeyIcon } from "lucide-react";
 import { SettingsForm } from "@/components/settings/SettingsForm";
+import { GeneralSettings } from "@/components/settings/GeneralSettings";
+import { AccountSettings } from "@/components/settings/AccountSettings";
 
 export default function Settings() {
   return (
@@ -8,7 +10,7 @@ export default function Settings() {
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">Settings</h1>
         <p className="text-muted-foreground text-lg">
-          Configure your FlowConnect settings and API keys
+          Configure your BRNOUT settings and account preferences
         </p>
       </header>
 
@@ -19,7 +21,7 @@ export default function Settings() {
             API Credentials
           </TabsTrigger>
           <TabsTrigger value="account" className="flex items-center gap-2">
-            <ShieldIcon className="h-4 w-4" />
+            <UserIcon className="h-4 w-4" />
             Account
           </TabsTrigger>
           <TabsTrigger value="general" className="flex items-center gap-2">
@@ -33,21 +35,11 @@ export default function Settings() {
         </TabsContent>
 
         <TabsContent value="account">
-          <div className="rounded-md border p-8 text-center">
-            <h3 className="text-lg font-medium mb-2">Account Settings</h3>
-            <p className="text-muted-foreground">
-              Account settings will be available in a future update.
-            </p>
-          </div>
+          <AccountSettings />
         </TabsContent>
 
         <TabsContent value="general">
-          <div className="rounded-md border p-8 text-center">
-            <h3 className="text-lg font-medium mb-2">General Settings</h3>
-            <p className="text-muted-foreground">
-              General application settings will be available in a future update.
-            </p>
-          </div>
+          <GeneralSettings />
         </TabsContent>
       </Tabs>
     </div>
