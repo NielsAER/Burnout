@@ -8,7 +8,8 @@ import {
   Settings, 
   LogOut,
   BrainCircuit,
-  ExternalLink
+  ExternalLink,
+  User
 } from "lucide-react";
 
 interface SidebarProps {
@@ -129,9 +130,16 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             <p className="text-sm font-medium">John Smith</p>
             <p className="text-xs text-gray-500">Pro Plan</p>
           </div>
-          <button className="ml-auto text-gray-400 hover:text-gray-500">
-            <LogOut className="h-4 w-4" />
-          </button>
+          <div className="ml-auto flex gap-2">
+            <Link href="/profile">
+              <button className="text-gray-400 hover:text-gray-500">
+                <User className="h-4 w-4" />
+              </button>
+            </Link>
+            <button className="text-gray-400 hover:text-gray-500">
+              <LogOut className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
     </aside>
