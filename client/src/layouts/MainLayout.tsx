@@ -63,15 +63,15 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
       </div>
 
       {/* Main content */}
-      <main className="flex-1 overflow-y-auto bg-[#0f0f0f]">
+      <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0f0f0f]">
         {/* Header */}
-        <header className="bg-[#0f0f0f] border-b border-[#2a2a2a] shadow-sm">
+        <header className="bg-white dark:bg-[#0f0f0f] border-b border-gray-200 dark:border-[#2a2a2a] shadow-sm">
           <div className="py-4 px-6 flex items-center justify-between">
             <div className="flex items-center">
               <Logo size="md" className="mr-4 hidden md:block" />
               <div>
-                <h1 className="text-2xl font-semibold text-white">{getPageTitle()}</h1>
-                <p className="text-sm text-gray-400">Manage your automation workflows</p>
+                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{getPageTitle()}</h1>
+                <p className="text-sm text-gray-500 dark:text-gray-400">Manage your automation workflows</p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
@@ -87,14 +87,14 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-sm"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-sm"
               >
                 <Search className="h-5 w-5" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-400 hover:text-white hover:bg-[#2a2a2a] rounded-sm"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-sm"
               >
                 <Bell className="h-5 w-5" />
               </Button>

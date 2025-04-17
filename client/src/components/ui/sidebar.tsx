@@ -37,9 +37,9 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
   };
 
   return (
-    <aside className="w-64 flex flex-col z-20 h-full bg-[#181818] border-r border-[#2a2a2a] transition-colors duration-200">
+    <aside className="w-64 flex flex-col z-20 h-full bg-white dark:bg-[#181818] border-r border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
       {/* Logo */}
-      <div className="p-4 border-b border-[#2a2a2a] transition-colors duration-200">
+      <div className="p-4 border-b border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
         <div className="flex items-center">
           <Logo size="sm" />
         </div>
@@ -54,8 +54,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/") 
-                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
-                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white border-l-[3px] border-blue-600" 
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
             )}
           >
             <LayoutDashboard className="mr-3 h-5 w-5" />
@@ -67,8 +67,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/automations") 
-                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
-                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white border-l-[3px] border-blue-600" 
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
             )}
           >
             <ChartGantt className="mr-3 h-5 w-5" />
@@ -80,8 +80,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/app-connections") 
-                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
-                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white border-l-[3px] border-blue-600" 
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
             )}
           >
             <ExternalLink className="mr-3 h-5 w-5" />
@@ -93,8 +93,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/history") 
-                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
-                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white border-l-[3px] border-blue-600" 
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
             )}
           >
             <History className="mr-3 h-5 w-5" />
@@ -106,8 +106,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/ai-services") 
-                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
-                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white border-l-[3px] border-blue-600" 
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
             )}
           >
             <BrainCircuit className="mr-3 h-5 w-5" />
@@ -119,8 +119,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/settings") 
-                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
-                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                ? "bg-gray-100 dark:bg-[#2a2a2a] text-gray-900 dark:text-white border-l-[3px] border-blue-600" 
+                : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
             )}
           >
             <Settings className="mr-3 h-5 w-5" />
@@ -129,17 +129,17 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
         </div>
         
         <div className="mt-8">
-          <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
+          <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">
             Recent Templates
           </h3>
           <div className="mt-2 space-y-1">
-            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]">
               <span className="truncate">Gmail to Slack Notifications</span>
             </a>
-            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]">
               <span className="truncate">Twitter to CRM Lead</span>
             </a>
-            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]">
               <span className="truncate">Form Submission to Google Sheet</span>
             </a>
           </div>
@@ -147,29 +147,29 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       </nav>
       
       {/* User Profile */}
-      <div className="border-t border-[#2a2a2a] p-4 transition-colors duration-200">
+      <div className="border-t border-gray-200 dark:border-[#2a2a2a] p-4 transition-colors duration-200">
         {user && (
           <div className="flex items-center">
-            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-blue-600/20">
-              <span className="text-sm font-medium text-blue-400">
+            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-600/20">
+              <span className="text-sm font-medium text-blue-600 dark:text-blue-400">
                 {user.fullName 
                   ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
                   : user.username.substring(0, 2).toUpperCase()}
               </span>
             </div>
             <div className="ml-3">
-              <p className="text-sm font-medium text-white">{user.fullName || user.username}</p>
-              <p className="text-xs text-gray-400">Pro Plan</p>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{user.fullName || user.username}</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Pro Plan</p>
             </div>
             <div className="ml-auto flex gap-2">
               <Link 
                 href="/profile"
-                className="p-1 rounded-sm text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                className="p-1 rounded-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
               >
                 <User className="h-4 w-4" />
               </Link>
               <button 
-                className="p-1 rounded-sm text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
+                className="p-1 rounded-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a]"
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
               >
