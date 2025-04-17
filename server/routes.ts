@@ -1093,15 +1093,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           } else {
             // Generate state for CSRF protection
             const state = generateState();
-            if (!req.session.oauthStates) {
-              req.session.oauthStates = {};
-            }
-            req.session.oauthStates['trello'] = state;
+            storeOAuthState(req, 'trello', state);
             
             const redirectUri = `${baseUrl}/api/callback/trello`;
             
             // Trello OAuth URL with proper CSRF protection
             oauthUrl = `https://trello.com/1/authorize?expiration=never&name=BRNOUT&scope=read,write&response_type=code&client_id=${process.env.TRELLO_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&state=${state}`;
+          }
+          break;
+          
+        case 'notion':
+          if (!process.env.NOTION_CLIENT_ID || !process.env.NOTION_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['NOTION_CLIENT_ID', 'NOTION_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Notion OAuth credentials", 
+              requiredSecrets
+            });
+          } else {
+            // Generate state for CSRF protection
+            const state = generateState();
+            storeOAuthState(req, 'notion', state);
+            
+            const redirectUri = `${baseUrl}/api/callback/notion`;
+            
+            // Notion OAuth URL with proper CSRF protection
+            oauthUrl = `https://api.notion.com/v1/oauth/authorize?client_id=${process.env.NOTION_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&owner=user&state=${state}`;
+          }
+          break;
+          
+        case 'microsoft':
+          if (!process.env.MICROSOFT_CLIENT_ID || !process.env.MICROSOFT_CLIENT_SECRET) {
+            // Missing credentials - ask user to provide them
+            requiredSecrets = ['MICROSOFT_CLIENT_ID', 'MICROSOFT_CLIENT_SECRET'];
+            return res.status(400).json({ 
+              error: "Missing Microsoft OAuth credentials", 
+              requiredSecrets
+            });
+          } else {
+            // Generate state for CSRF protection
+            const state = generateState();
+            storeOAuthState(req, 'microsoft', state);
+            
+            const redirectUri = `${baseUrl}/api/callback/microsoft`;
+            
+            // Microsoft OAuth URL (Microsoft Graph) with proper CSRF protection
+            const scopes = 'offline_access User.Read Files.ReadWrite';
+            oauthUrl = `https://login.microsoftonline.com/common/oauth2/v2.0/authorize?client_id=${process.env.MICROSOFT_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=${encodeURIComponent(scopes)}&state=${state}`;
           }
           break;
           
@@ -1432,6 +1470,70 @@ export async function registerRoutes(app: Express): Promise<Server> {
               requestHeaders = {};
               break;
               
+            case 'notion':
+              clientId = process.env.NOTION_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.NOTION_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Notion token exchange
+              tokenUrl = 'https://api.notion.com/v1/oauth/token';
+              
+              // Notion uses JSON request body
+              requestBody = JSON.stringify({
+                grant_type: 'authorization_code',
+                code: code.toString(),
+                redirect_uri: redirectUri
+              });
+              
+              // Notion uses Basic auth for client ID/secret
+              const notionAuth = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+              requestHeaders = {
+                'Content-Type': 'application/json',
+                'Authorization': `Basic ${notionAuth}`
+              };
+              break;
+              
+            case 'trello':
+              clientId = process.env.TRELLO_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.TRELLO_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Trello token exchange
+              tokenUrl = 'https://trello.com/1/OAuthGetAccessToken';
+              
+              // Trello requires form-urlencoded
+              requestBody = new URLSearchParams({
+                code: code.toString(),
+                client_id: clientId,
+                client_secret: clientSecret,
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+              });
+              
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              };
+              break;
+              
+            case 'microsoft':
+              clientId = process.env.MICROSOFT_CLIENT_ID || 'YOUR_APP_ID';
+              clientSecret = process.env.MICROSOFT_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Microsoft token exchange
+              tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
+              
+              // Microsoft requires form-urlencoded
+              requestBody = new URLSearchParams({
+                client_id: clientId,
+                client_secret: clientSecret,
+                code: code.toString(),
+                redirect_uri: redirectUri,
+                grant_type: 'authorization_code'
+              });
+              
+              requestHeaders = {
+                'Content-Type': 'application/x-www-form-urlencoded'
+              };
+              break;
+              
             default:
               // For other services where we don't have specific code, use a mock token
               console.log(`Using mock token for ${service} as no token exchange implementation exists`);
@@ -1486,6 +1588,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   case 'twitter':
                     userEndpoint = 'https://api.twitter.com/2/users/me';
                     break;
+                  case 'notion':
+                    userEndpoint = 'https://api.notion.com/v1/users/me';
+                    userHeaders = {
+                      'Authorization': `Bearer ${accessToken}`,
+                      'Notion-Version': '2022-06-28'
+                    };
+                    break;
+                  case 'trello':
+                    userEndpoint = 'https://api.trello.com/1/members/me?key=${clientId}&token=${accessToken}';
+                    break;
+                  case 'microsoft':
+                    userEndpoint = 'https://graph.microsoft.com/v1.0/me';
+                    break;
                 }
                 
                 // If we have a user endpoint, make the request
@@ -1510,6 +1625,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
                         username = userData.user.name;
                       } else if (service === 'twitter' && userData.data && userData.data.username) {
                         username = userData.data.username;
+                      } else if (service === 'notion' && userData.name) {
+                        username = userData.name;
+                      } else if (service === 'trello' && userData.username) {
+                        username = userData.username;
+                      } else if (service === 'microsoft' && userData.displayName) {
+                        username = userData.displayName;
                       }
                     }
                   } else {
