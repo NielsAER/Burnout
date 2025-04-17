@@ -1,139 +1,154 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { AchievementCard } from './AchievementCard';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useQuery, useMutation } from "@tanstack/react-query";
-
-interface Achievement {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  icon: string;
-  threshold: number;
-  unlockedAt: string | null;
-  createdAt: string;
-}
+import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { AchievementCard } from "./AchievementCard";
+import { Achievement } from "@shared/schema";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Loader2, Trophy } from "lucide-react";
 
 interface AchievementsPanelProps {
-  automationId: number;
+  automationId?: number;
+  className?: string;
 }
 
-export function AchievementsPanel({ automationId }: AchievementsPanelProps) {
-  const { toast } = useToast();
-  const [showAllAchievements, setShowAllAchievements] = useState(false);
+export function AchievementsPanel({ automationId, className }: AchievementsPanelProps) {
+  const [activeTab, setActiveTab] = useState<string>("unlocked");
   
-  // Get unlocked achievements for this automation
-  const { 
-    data: unlockedAchievements = [], 
-    isLoading: loadingUnlocked,
-    refetch: refetchUnlocked 
-  } = useQuery<Achievement[]>({
-    queryKey: [`/api/automations/${automationId}/achievements`],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/automations/${automationId}/achievements`);
-      return res.json();
+  // Fetch all achievements
+  const { data: allAchievements, isLoading: loadingAll } = useQuery<Achievement[]>({
+    queryKey: ["/api/achievements"],
+    enabled: true,
+  });
+  
+  // Fetch unlocked achievements for this automation
+  const { data: unlockedAchievements, isLoading: loadingUnlocked } = useQuery<Achievement[]>({
+    queryKey: ["/api/achievements/automation", automationId],
+    enabled: !!automationId,
+  });
+  
+  // If no automation is selected, only show all achievements in one tab
+  useEffect(() => {
+    if (!automationId) {
+      setActiveTab("all");
     }
-  });
+  }, [automationId]);
   
-  // Get all possible achievements when viewing all
-  const { 
-    data: allAchievements = [], 
-    isLoading: loadingAll 
-  } = useQuery<Achievement[]>({
-    queryKey: ['/api/achievements'],
-    queryFn: async () => {
-      const res = await apiRequest('GET', '/api/achievements');
-      return res.json();
-    },
-    enabled: showAllAchievements, // Only fetch when viewing all
-  });
+  // Loading state
+  if (loadingAll || (loadingUnlocked && automationId)) {
+    return (
+      <div className="h-48 flex items-center justify-center">
+        <Loader2 className="animate-spin text-primary w-8 h-8" />
+      </div>
+    );
+  }
   
-  // Mutation for unlocking achievements
-  const unlockMutation = useMutation({
-    mutationFn: async (achievementId: number) => {
-      const res = await apiRequest(
-        'POST', 
-        `/api/automations/${automationId}/unlock-achievement`,
-        { achievementId }
-      );
-      return res.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Achievement unlocked!",
-        description: "You've unlocked a new achievement for this workflow.",
-      });
-      // Refresh the unlocked achievements
-      refetchUnlocked();
-      // Invalidate related queries
-      queryClient.invalidateQueries({ queryKey: [`/api/automations/${automationId}/achievements`] });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to unlock achievement",
-        description: "There was an error unlocking the achievement.",
-        variant: "destructive",
-      });
-    }
-  });
+  // Check if achievements are present
+  const hasAchievements = allAchievements && allAchievements.length > 0;
   
-  const handleUnlock = (achievementId: number) => {
-    unlockMutation.mutate(achievementId);
-  };
+  // If no automation is selected or no unlocked achievements, show all achievements
+  const lockedAchievements = automationId && allAchievements && unlockedAchievements
+    ? allAchievements.filter(
+        achievement => !unlockedAchievements.some(ua => ua.id === achievement.id)
+      )
+    : [];
   
-  // Calculate which achievements to show based on current view
-  const displayedAchievements = showAllAchievements ? allAchievements : unlockedAchievements;
-  const isLoading = showAllAchievements ? loadingAll : loadingUnlocked;
-  
-  // Get the unlocked achievement IDs for filtering when viewing all
-  const unlockedIds = unlockedAchievements.map(a => a.id);
+  // If there are no achievements at all
+  if (!hasAchievements) {
+    return (
+      <div className="h-48 flex flex-col items-center justify-center text-center p-4">
+        <Trophy className="text-muted-foreground w-12 h-12 mb-4" />
+        <h3 className="text-lg font-semibold">No Achievements Available</h3>
+        <p className="text-muted-foreground text-sm">
+          Achievement system is being set up. Check back soon!
+        </p>
+      </div>
+    );
+  }
   
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex justify-between items-center">
-          <CardTitle className="text-xl">Achievements</CardTitle>
-          <Button 
-            variant="outline"
-            size="sm"
-            onClick={() => setShowAllAchievements(!showAllAchievements)}
-          >
-            {showAllAchievements ? 'Show Unlocked' : 'Show All'}
-          </Button>
-        </div>
-        <CardDescription>
-          {showAllAchievements 
-            ? 'All possible achievements for your automations' 
-            : 'Achievements unlocked by this automation workflow'}
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin h-8 w-8 border-4 border-primary border-t-transparent rounded-full"></div>
-          </div>
-        ) : displayedAchievements.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
-            {showAllAchievements 
-              ? 'No achievements available yet.'
-              : 'No achievements unlocked yet. Keep improving your workflow!'}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {displayedAchievements.map(achievement => (
-              <AchievementCard
-                key={achievement.id}
-                {...achievement}
-                showUnlockButton={showAllAchievements && !unlockedIds.includes(achievement.id)}
-                onUnlock={handleUnlock}
-              />
-            ))}
+    <div className={className}>
+      <Tabs 
+        defaultValue={activeTab} 
+        value={activeTab} 
+        onValueChange={setActiveTab}
+        className="w-full"
+      >
+        {automationId && (
+          <TabsList className="grid w-full grid-cols-2 mb-4">
+            <TabsTrigger value="unlocked">
+              Unlocked ({unlockedAchievements?.length || 0})
+            </TabsTrigger>
+            <TabsTrigger value="locked">
+              Locked ({lockedAchievements.length})
+            </TabsTrigger>
+          </TabsList>
+        )}
+        
+        {!automationId && (
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-bold">All Platform Achievements</h2>
+            <div className="text-sm text-muted-foreground">
+              Total: {allAchievements?.length || 0}
+            </div>
           </div>
         )}
-      </CardContent>
-    </Card>
+        
+        {automationId && (
+          <>
+            <TabsContent value="unlocked" className="mt-0">
+              {unlockedAchievements?.length === 0 ? (
+                <div className="h-48 flex flex-col items-center justify-center text-center p-4">
+                  <Trophy className="text-muted-foreground w-12 h-12 mb-4" />
+                  <h3 className="text-lg font-semibold">No Achievements Unlocked Yet</h3>
+                  <p className="text-muted-foreground text-sm">
+                    Enhance your workflow to unlock achievements!
+                  </p>
+                </div>
+              ) : (
+                <ScrollArea className="h-[400px] pr-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {unlockedAchievements?.map((achievement) => (
+                      <AchievementCard 
+                        key={achievement.id} 
+                        achievement={achievement} 
+                        unlocked={true}
+                      />
+                    ))}
+                  </div>
+                </ScrollArea>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="locked" className="mt-0">
+              <ScrollArea className="h-[400px] pr-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {lockedAchievements.map((achievement) => (
+                    <AchievementCard 
+                      key={achievement.id} 
+                      achievement={achievement} 
+                      unlocked={false}
+                    />
+                  ))}
+                </div>
+              </ScrollArea>
+            </TabsContent>
+          </>
+        )}
+        
+        {!automationId && (
+          <ScrollArea className="h-[500px] pr-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {allAchievements?.map((achievement) => (
+                <AchievementCard 
+                  key={achievement.id} 
+                  achievement={achievement} 
+                  unlocked={false}
+                />
+              ))}
+            </div>
+          </ScrollArea>
+        )}
+      </Tabs>
+    </div>
   );
 }

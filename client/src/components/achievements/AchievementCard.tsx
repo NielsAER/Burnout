@@ -1,128 +1,86 @@
-import React from 'react';
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { Unlock, Lock, Rocket, BadgeCheck, GitBranch, Zap, Clock } from "lucide-react";
-import { formatDistanceToNow } from 'date-fns';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Achievement } from "@shared/schema";
+import { LucideIcon } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+
+// Map category to color
+const categoryColors: Record<string, string> = {
+  innovation: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
+  reliability: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
+  complexity: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
+  volume: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300",
+};
 
 interface AchievementCardProps {
-  id: number;
-  name: string;
-  description: string;
-  category: string;
-  icon: string;
-  threshold: number;
-  unlockedAt: string | null;
-  showUnlockButton?: boolean;
-  onUnlock?: (achievementId: number) => void;
+  achievement: Achievement;
+  unlocked?: boolean;
+  className?: string;
 }
 
-export function AchievementCard({ 
-  id,
-  name, 
-  description, 
-  category, 
-  icon, 
-  threshold,
-  unlockedAt,
-  showUnlockButton = false,
-  onUnlock
-}: AchievementCardProps) {
-  
-  // Get icon component based on icon name
-  const getIconComponent = () => {
-    switch (icon) {
-      case 'rocket':
-        return <Rocket className="h-6 w-6" />;
-      case 'badge-check':
-        return <BadgeCheck className="h-6 w-6" />;
-      case 'git-branch':
-        return <GitBranch className="h-6 w-6" />;
-      case 'zap':
-        return <Zap className="h-6 w-6" />;
-      case 'clock':
-        return <Clock className="h-6 w-6" />;
-      default:
-        return <Rocket className="h-6 w-6" />;
-    }
-  };
-  
-  // Get category color
-  const getCategoryColor = () => {
-    switch (category) {
-      case 'innovation':
-        return 'bg-blue-500';
-      case 'reliability':
-        return 'bg-green-500';
-      case 'complexity':
-        return 'bg-purple-500';
-      case 'volume':
-        return 'bg-amber-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
-  
-  // Format unlocked date
-  const getUnlockedDate = () => {
-    if (!unlockedAt) return null;
-    
-    try {
-      return formatDistanceToNow(new Date(unlockedAt), { addSuffix: true });
-    } catch (error) {
-      return 'recently';
-    }
-  };
-  
-  const isUnlocked = !!unlockedAt;
-  
+export function AchievementCard({ achievement, unlocked = false, className }: AchievementCardProps) {
+  // Dynamically get icon from Lucide
+  const IconComponent = (LucideIcons as Record<string, LucideIcon>)[
+    achievement.icon.charAt(0).toUpperCase() + achievement.icon.slice(1)
+  ] || LucideIcons.Award;
+
   return (
-    <Card className={`border ${isUnlocked ? 'border-primary/50' : 'border-muted/50'} overflow-hidden transition-all duration-200 hover:shadow-md relative`}>
-      <div className={`absolute top-0 right-0 w-16 h-16 ${isUnlocked ? 'bg-primary/10' : 'bg-muted/10'} rounded-bl-full flex items-start justify-end pt-2 pr-2`}>
-        {isUnlocked ? (
-          <Unlock className="h-4 w-4 text-primary" />
-        ) : (
-          <Lock className="h-4 w-4 text-muted-foreground" />
-        )}
-      </div>
-      
-      <CardContent className="pt-6">
-        <div className="flex items-start gap-4">
-          <div className={`p-3 rounded-lg ${isUnlocked ? 'bg-primary/10' : 'bg-muted'}`}>
-            {getIconComponent()}
-          </div>
-          
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="font-semibold">{name}</h3>
-              <Badge variant="outline" className={`${getCategoryColor()} text-white text-xs capitalize`}>
-                {category}
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">{description}</p>
-            
-            {isUnlocked && (
-              <p className="text-xs text-primary font-medium pt-1">
-                Unlocked {getUnlockedDate()}
-              </p>
+    <Card 
+      className={cn(
+        "transition-all duration-300 h-full flex flex-col",
+        unlocked 
+          ? "border-2 border-primary shadow-md" 
+          : "opacity-75 grayscale hover:opacity-90 hover:grayscale-[0.5]",
+        className
+      )}
+    >
+      <CardHeader className="pb-2">
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-lg font-bold">{achievement.name}</CardTitle>
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "ml-2 font-normal", 
+              categoryColors[achievement.category] || "bg-slate-100"
             )}
+          >
+            {achievement.category}
+          </Badge>
+        </div>
+      </CardHeader>
+      <CardContent className="flex-1 flex flex-col justify-between">
+        <p className="text-sm text-muted-foreground">{achievement.description}</p>
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center">
+            <div 
+              className={cn(
+                "p-2 rounded-full mr-2", 
+                unlocked 
+                  ? "bg-primary text-primary-foreground" 
+                  : "bg-muted"
+              )}
+            >
+              <IconComponent size={18} />
+            </div>
+            <div>
+              <p className="text-xs font-medium">
+                {unlocked ? "Unlocked" : "Locked"}
+              </p>
+              {achievement.unlockedAt && (
+                <p className="text-xs text-muted-foreground">
+                  {new Date(achievement.unlockedAt).toLocaleDateString()}
+                </p>
+              )}
+            </div>
           </div>
+          {achievement.threshold && (
+            <Badge variant={unlocked ? "default" : "outline"}>
+              {unlocked ? "Complete" : `Threshold: ${achievement.threshold}`}
+            </Badge>
+          )}
         </div>
       </CardContent>
-      
-      {showUnlockButton && onUnlock && (
-        <CardFooter className="pt-0 pb-4">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            className="w-full"
-            onClick={() => onUnlock(id)}
-          >
-            <Unlock className="h-3 w-3 mr-1" />
-            Unlock Achievement
-          </Button>
-        </CardFooter>
-      )}
     </Card>
   );
 }

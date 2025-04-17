@@ -1,168 +1,117 @@
-import { useEffect, useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from 'react';
+import { Automation } from '@shared/schema';
+import { useQuery } from '@tanstack/react-query';
 
-export interface Suggestion {
-  category: string;
-  message: string;
-  priority: 'high' | 'medium' | 'low';
-}
-
-export interface Reliability {
-  successRate: number;
-  errorCount: number;
-  totalRuns: number;
-}
-
-export interface HealthReport {
+interface WorkflowHealth {
   score: number;
-  reliability: Reliability;
   complexity: number;
-  lastCheckedAt: string;
-  improvementSuggestions: Suggestion[];
+  status: string;
+  statusColor: string;
+  recommendation: string;
+  reliability: {
+    successRate: number;
+    errorCount: number;
+    totalRuns: number;
+  };
 }
 
-interface UseWorkflowHealthOptions {
-  automationId: number;
-  autoRefresh?: boolean;
-  refreshInterval?: number;
-}
-
-export function useWorkflowHealth({ 
-  automationId, 
-  autoRefresh = false, 
-  refreshInterval = 60000 
-}: UseWorkflowHealthOptions) {
-  const { toast } = useToast();
-  const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(autoRefresh);
-  
-  // Fetch health report
-  const { 
-    data: healthReport,
-    isLoading,
-    error,
-    refetch,
-    isRefetching
-  } = useQuery<HealthReport>({
-    queryKey: [`/api/automations/${automationId}/health`],
-    queryFn: async () => {
-      const res = await apiRequest('GET', `/api/automations/${automationId}/health`);
-      return res.json();
-    },
-    refetchInterval: autoRefreshEnabled ? refreshInterval : false,
-  });
-  
-  // Update health score mutation
-  const updateHealthScoreMutation = useMutation({
-    mutationFn: async (healthScore: number) => {
-      const res = await apiRequest(
-        'PATCH', 
-        `/api/automations/${automationId}/health-score`,
-        { healthScore }
-      );
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/automations/${automationId}/health`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/automations/${automationId}`] });
-      toast({
-        title: "Health score updated",
-        description: "The workflow health score has been updated successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to update health score",
-        description: "There was an error updating the health score",
-        variant: "destructive",
-      });
+/**
+ * Hook to calculate and track automation workflow health
+ * 
+ * @param automationId The ID of the automation to analyze
+ * @returns WorkflowHealth object with score, complexity and recommendations
+ */
+export function useWorkflowHealth(automationId?: number): WorkflowHealth {
+  const [health, setHealth] = useState<WorkflowHealth>({
+    score: 0,
+    complexity: 0,
+    status: 'Unknown',
+    statusColor: 'bg-slate-300',
+    recommendation: 'Loading workflow data...',
+    reliability: {
+      successRate: 0,
+      errorCount: 0,
+      totalRuns: 0
     }
   });
   
-  // Update complexity mutation
-  const updateComplexityMutation = useMutation({
-    mutationFn: async (complexity: number) => {
-      const res = await apiRequest(
-        'PATCH', 
-        `/api/automations/${automationId}/complexity`,
-        { complexity }
-      );
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/automations/${automationId}/health`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/automations/${automationId}`] });
-      toast({
-        title: "Complexity updated",
-        description: "The workflow complexity has been updated successfully",
-      });
-    },
-    onError: (error) => {
-      toast({
-        title: "Failed to update complexity",
-        description: "There was an error updating the complexity",
-        variant: "destructive",
-      });
-    }
+  // Fetch automation data
+  const { data: automation, isLoading } = useQuery<Automation>({
+    queryKey: ['/api/automations', automationId],
+    enabled: !!automationId,
   });
   
-  // Automatically check which achievements are unlocked based on health metrics
+  // Fetch execution history for this automation
+  const { data: executionHistory } = useQuery<any[]>({
+    queryKey: ['/api/execution-history/automation', automationId],
+    enabled: !!automationId,
+  });
+  
+  // Fetch achievements for this automation
+  const { data: achievements } = useQuery<any[]>({
+    queryKey: ['/api/achievements/automation', automationId],
+    enabled: !!automationId,
+  });
+
   useEffect(() => {
-    if (!healthReport) return;
+    if (!automation) return;
     
-    const checkAchievements = async () => {
-      // This would typically make API calls to check if new achievements
-      // should be unlocked based on the health metrics
-      
-      // For example, if reliability is high, unlock the reliability achievement
-      if (healthReport.reliability.successRate >= 95) {
-        try {
-          // Find the achievement ID for 100% uptime (you would need to fetch all achievements first)
-          // For now, we'll assume the ID is 2 based on our seeded data
-          await apiRequest(
-            'POST',
-            `/api/automations/${automationId}/unlock-achievement`,
-            { achievementId: 2 }
-          );
-        } catch (error) {
-          // Silent error - may already be unlocked
-        }
-      }
-      
-      // If complexity is high enough, unlock the complexity achievement
-      if (healthReport.complexity >= 3) {
-        try {
-          // For workflow architect achievement (ID 3 in our seed data)
-          await apiRequest(
-            'POST',
-            `/api/automations/${automationId}/unlock-achievement`,
-            { achievementId: 3 }
-          );
-        } catch (error) {
-          // Silent error - may already be unlocked
-        }
-      }
+    // Get basic health metrics from the automation
+    const healthScore = automation.healthScore || 0;
+    const complexity = automation.complexity || 1;
+    const reliability = automation.reliability || {
+      successRate: 100,
+      errorCount: 0,
+      totalRuns: 0
     };
     
-    // Automatically check achievements when health report changes
-    checkAchievements();
-  }, [healthReport, automationId]);
+    // Determine status based on health score
+    let status = 'Excellent';
+    let statusColor = 'bg-green-500';
+    let recommendation = 'Your workflow is running optimally.';
+    
+    if (healthScore < 40) {
+      status = 'Critical';
+      statusColor = 'bg-red-500';
+      recommendation = 'This workflow needs immediate attention. Check error logs and fix configuration issues.';
+    } else if (healthScore < 70) {
+      status = 'Warning';
+      statusColor = 'bg-yellow-500';
+      recommendation = 'Your workflow is experiencing some issues. Consider reviewing the error logs.';
+    } else if (healthScore < 90) {
+      status = 'Good';
+      statusColor = 'bg-blue-500';
+      recommendation = 'Your workflow is functioning well but could be improved.';
+    }
+    
+    // Add achievement-specific recommendations
+    if (achievements && achievements.length > 0) {
+      // Has unlocked achievements
+      if (complexity < 5 && !achievements.some(a => a.name === "Complexity Wizard")) {
+        recommendation += ' Try adding more complexity to your workflow to unlock achievements.';
+      }
+    } else {
+      // No achievements unlocked yet
+      recommendation += ' This workflow hasn\'t unlocked any achievements yet. Add more complexity to earn them.';
+    }
+    
+    // Special recommendations based on execution history
+    if (executionHistory && executionHistory.length > 0) {
+      const recentErrors = executionHistory.filter(h => h.status === 'error').slice(0, 3);
+      if (recentErrors.length > 0) {
+        recommendation += ' Review recent errors to improve reliability.';
+      }
+    }
+    
+    setHealth({
+      score: healthScore,
+      complexity,
+      status,
+      statusColor,
+      recommendation,
+      reliability
+    });
+  }, [automation, executionHistory, achievements]);
   
-  // Helper to toggle auto-refresh
-  const toggleAutoRefresh = () => {
-    setAutoRefreshEnabled(prev => !prev);
-  };
-  
-  return {
-    healthReport,
-    isLoading,
-    error,
-    isRefetching,
-    refetchHealth: refetch,
-    updateHealthScore: updateHealthScoreMutation.mutate,
-    updateComplexity: updateComplexityMutation.mutate,
-    autoRefreshEnabled,
-    toggleAutoRefresh
-  };
+  return health;
 }
