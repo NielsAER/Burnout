@@ -109,19 +109,19 @@ export function GeneralSettings() {
           <div className="space-y-2">
             <Label htmlFor="language" className="text-white">Language</Label>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger id="language" className="w-full">
+              <SelectTrigger id="language" className="w-full bg-[#181818] border-[#2a2a2a] text-white rounded-sm focus:ring-blue-600 focus:ring-offset-0">
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="english">English</SelectItem>
-                <SelectItem value="spanish">Spanish</SelectItem>
-                <SelectItem value="french">French</SelectItem>
-                <SelectItem value="german">German</SelectItem>
-                <SelectItem value="japanese">Japanese</SelectItem>
-                <SelectItem value="chinese">Chinese</SelectItem>
+              <SelectContent className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm">
+                <SelectItem value="english" className="focus:bg-[#2a2a2a] focus:text-white">English</SelectItem>
+                <SelectItem value="spanish" className="focus:bg-[#2a2a2a] focus:text-white">Spanish</SelectItem>
+                <SelectItem value="french" className="focus:bg-[#2a2a2a] focus:text-white">French</SelectItem>
+                <SelectItem value="german" className="focus:bg-[#2a2a2a] focus:text-white">German</SelectItem>
+                <SelectItem value="japanese" className="focus:bg-[#2a2a2a] focus:text-white">Japanese</SelectItem>
+                <SelectItem value="chinese" className="focus:bg-[#2a2a2a] focus:text-white">Chinese</SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-xs text-gray-500 mt-1">
               More languages coming soon
             </p>
           </div>

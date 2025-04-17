@@ -9,30 +9,30 @@ export default function Settings() {
     <div className="container py-6 max-w-5xl">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2 text-white">Settings</h1>
-        <p className="text-zinc-400 text-lg">
+        <p className="text-gray-400 text-lg">
           Configure your BRNOUT settings and account preferences
         </p>
       </header>
 
       <Tabs defaultValue="api-credentials" className="space-y-8">
-        <TabsList className="grid grid-cols-3 max-w-lg p-1 bg-zinc-800 rounded-xl">
+        <TabsList className="grid grid-cols-3 max-w-lg p-1 bg-[#181818] border border-[#2a2a2a] rounded-sm">
           <TabsTrigger 
             value="api-credentials" 
-            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-zinc-900 data-[state=active]:text-coral-400 data-[state=active]:shadow-md rounded-lg transition-all"
+            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none rounded-sm text-white transition-all"
           >
             <KeyIcon className="h-4 w-4" />
             API Credentials
           </TabsTrigger>
           <TabsTrigger 
             value="account" 
-            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-zinc-900 data-[state=active]:text-coral-400 data-[state=active]:shadow-md rounded-lg transition-all"
+            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none rounded-sm text-white transition-all"
           >
             <UserIcon className="h-4 w-4" />
             Account
           </TabsTrigger>
           <TabsTrigger 
             value="general" 
-            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-zinc-900 data-[state=active]:text-coral-400 data-[state=active]:shadow-md rounded-lg transition-all"
+            className="flex items-center gap-2 px-4 py-3 data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none rounded-sm text-white transition-all"
           >
             <ServerIcon className="h-4 w-4" />
             General
