@@ -536,6 +536,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: `Unsupported service: ${service}` });
     }
     
+    // Generate and store a state parameter for CSRF protection
+    const state = generateState();
+    
+    // Make sure the service is a valid OAuthService
+    if (isValidOAuthService(service as string)) {
+      storeOAuthState(req, service as string, state);
+    }
+    
+    // Redirect to callback with the generated state
+    res.redirect(`/api/auth/${service}/callback?code=fake_code_${Date.now()}&state=${state}`);
+  });
+  
+  // Simulated OAuth callback for development/testing
+  app.get('/api/auth/:service/simulated-callback', (req, res) => {
+    const { service } = req.params;
+    const { state } = req.query;
+    
+    if (!isValidOAuthService(service)) {
+      return res.status(400).json({ error: `Unsupported service: ${service}` });
+    }
+    
+    // Verify the state parameter
+    if (!state || !verifyOAuthState(req, service, state as string)) {
+      return res.status(400).json({ error: 'Invalid state parameter' });
+    }
+    
     // Create a fake profile and credentials
     const profile = {
       id: `${service}_123456`,
@@ -551,13 +577,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     };
     
     // Store the credentials in the session
-    storeOAuthCredentials(req, service as string, credentials);
+    storeOAuthCredentials(req, service, credentials);
     
     // Save the connection if the user is authenticated
     if (req.isAuthenticated()) {
-      saveConnection(req, service as string, profile, credentials)
+      saveConnection(req, service, profile, credentials)
         .then(() => {
-          res.redirect(redirect as string || '/app-connections?success=true');
+          res.redirect('/app-connections?success=' + service);
         })
         .catch(error => {
           console.error('Error in simulated login:', error);
