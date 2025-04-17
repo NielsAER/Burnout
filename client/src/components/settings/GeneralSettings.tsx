@@ -58,10 +58,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-light"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-zinc-700 bg-zinc-800 p-4 hover:bg-zinc-700 peer-data-[state=checked]:border-coral-500 [&:has([data-state=checked])]:border-coral-500 cursor-pointer transition-all"
+                  className="flex flex-col items-center justify-between rounded-sm border-2 border-[#2a2a2a] bg-[#181818] p-4 hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
                 >
-                  <SunIcon className="mb-3 h-6 w-6 text-zinc-300" />
-                  <span className="text-zinc-300">Light</span>
+                  <SunIcon className="mb-3 h-6 w-6 text-white" />
+                  <span className="text-white">Light</span>
                 </Label>
               </div>
               <div>
@@ -72,10 +72,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-dark"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-zinc-700 bg-zinc-800 p-4 hover:bg-zinc-700 peer-data-[state=checked]:border-coral-500 [&:has([data-state=checked])]:border-coral-500 cursor-pointer transition-all"
+                  className="flex flex-col items-center justify-between rounded-sm border-2 border-[#2a2a2a] bg-[#181818] p-4 hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
                 >
-                  <MoonIcon className="mb-3 h-6 w-6 text-zinc-300" />
-                  <span className="text-zinc-300">Dark</span>
+                  <MoonIcon className="mb-3 h-6 w-6 text-white" />
+                  <span className="text-white">Dark</span>
                 </Label>
               </div>
               <div>
@@ -86,10 +86,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-system"
-                  className="flex flex-col items-center justify-between rounded-md border-2 border-zinc-700 bg-zinc-800 p-4 hover:bg-zinc-700 peer-data-[state=checked]:border-coral-500 [&:has([data-state=checked])]:border-coral-500 cursor-pointer transition-all"
+                  className="flex flex-col items-center justify-between rounded-sm border-2 border-[#2a2a2a] bg-[#181818] p-4 hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
                 >
-                  <MonitorIcon className="mb-3 h-6 w-6 text-zinc-300" />
-                  <span className="text-zinc-300">System</span>
+                  <MonitorIcon className="mb-3 h-6 w-6 text-white" />
+                  <span className="text-white">System</span>
                 </Label>
               </div>
             </RadioGroup>
@@ -148,7 +148,7 @@ export function GeneralSettings() {
               id="notifications"
               checked={notifications}
               onCheckedChange={handleNotificationsChange}
-              className="data-[state=checked]:bg-coral-500"
+              className="data-[state=checked]:bg-blue-600"
             />
           </div>
           
@@ -164,7 +164,7 @@ export function GeneralSettings() {
                 id="auto-refresh"
                 checked={autoRefresh}
                 onCheckedChange={handleAutoRefreshChange}
-                className="data-[state=checked]:bg-coral-500"
+                className="data-[state=checked]:bg-blue-600"
               />
             </div>
             

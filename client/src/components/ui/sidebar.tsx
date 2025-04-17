@@ -65,10 +65,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             href="/automations" 
             onClick={onClose}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+              "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/automations") 
-                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
             )}
           >
             <ChartGantt className="mr-3 h-5 w-5" />
@@ -78,10 +78,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             href="/app-connections" 
             onClick={onClose}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+              "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/app-connections") 
-                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
             )}
           >
             <ExternalLink className="mr-3 h-5 w-5" />
@@ -91,10 +91,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             href="/history" 
             onClick={onClose}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+              "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/history") 
-                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
             )}
           >
             <History className="mr-3 h-5 w-5" />
@@ -104,10 +104,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             href="/ai-services" 
             onClick={onClose}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+              "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/ai-services") 
-                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
             )}
           >
             <BrainCircuit className="mr-3 h-5 w-5" />
@@ -117,10 +117,10 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             href="/settings" 
             onClick={onClose}
             className={cn(
-              "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+              "flex items-center px-3 py-2 text-sm font-medium",
               isActive("/settings") 
-                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
-                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
+                ? "bg-[#2a2a2a] text-white border-l-[3px] border-blue-600" 
+                : "text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
             )}
           >
             <Settings className="mr-3 h-5 w-5" />
@@ -129,17 +129,17 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
         </div>
         
         <div className="mt-8">
-          <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <h3 className="px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
             Recent Templates
           </h3>
           <div className="mt-2 space-y-1">
-            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
               <span className="truncate">Gmail to Slack Notifications</span>
             </a>
-            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
               <span className="truncate">Twitter to CRM Lead</span>
             </a>
-            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium rounded-md text-zinc-400 hover:text-white hover:bg-zinc-800">
+            <a href="#" className="group flex items-center px-3 py-2 text-sm font-medium text-gray-400 hover:text-white hover:bg-[#2a2a2a]">
               <span className="truncate">Form Submission to Google Sheet</span>
             </a>
           </div>
@@ -147,11 +147,11 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       </nav>
       
       {/* User Profile */}
-      <div className="border-t border-zinc-800 p-4 transition-colors duration-200">
+      <div className="border-t border-[#2a2a2a] p-4 transition-colors duration-200">
         {user && (
           <div className="flex items-center">
-            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-coral-500/20">
-              <span className="text-sm font-medium text-coral-400">
+            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-blue-600/20">
+              <span className="text-sm font-medium text-blue-400">
                 {user.fullName 
                   ? user.fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2)
                   : user.username.substring(0, 2).toUpperCase()}
@@ -159,17 +159,17 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             </div>
             <div className="ml-3">
               <p className="text-sm font-medium text-white">{user.fullName || user.username}</p>
-              <p className="text-xs text-zinc-400">Pro Plan</p>
+              <p className="text-xs text-gray-400">Pro Plan</p>
             </div>
             <div className="ml-auto flex gap-2">
               <Link 
                 href="/profile"
-                className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800"
+                className="p-1 rounded-sm text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
               >
                 <User className="h-4 w-4" />
               </Link>
               <button 
-                className="p-1 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800"
+                className="p-1 rounded-sm text-gray-400 hover:text-white hover:bg-[#2a2a2a]"
                 onClick={handleLogout}
                 disabled={logoutMutation.isPending}
               >
