@@ -3,6 +3,8 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertAutomationSchema, insertExecutionHistorySchema } from "@shared/schema";
 import { z } from "zod";
+import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 
 // Import LLM service modules
 import * as openaiService from "./services/openai";
@@ -332,20 +334,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // POST /api/settings/api-keys - Save API keys
-  app.post("/api/settings/api-keys", (req, res) => {
+  app.post("/api/settings/api-keys", async (req, res) => {
     try {
-      // Save the API keys in session storage
+      // Initialize API keys in session if needed
       if (!req.session.apiKeys) {
         req.session.apiKeys = {};
       }
       
-      // Merge the new API keys with any existing ones
+      const newKeys = req.body;
+      const validationResults = {};
+      
+      // Validate OpenAI key if provided
+      if (newKeys.openai && newKeys.openai !== req.session.apiKeys.openai) {
+        try {
+          const openai = new OpenAI({ apiKey: newKeys.openai });
+          // Try a simple request to verify the key
+          await openai.models.list();
+          validationResults['openai'] = 'valid';
+        } catch (error) {
+          console.error("Invalid OpenAI API key:", error);
+          validationResults['openai'] = 'invalid';
+          return res.status(400).json({ 
+            message: "Invalid OpenAI API key. Please check your key and try again.",
+            service: "openai" 
+          });
+        }
+      }
+      
+      // Validate Anthropic key if provided
+      if (newKeys.anthropic && newKeys.anthropic !== req.session.apiKeys.anthropic) {
+        try {
+          const anthropic = new Anthropic({ apiKey: newKeys.anthropic });
+          // Simple request to verify key
+          await anthropic.models.list();
+          validationResults['anthropic'] = 'valid';
+        } catch (error) {
+          console.error("Invalid Anthropic API key:", error);
+          validationResults['anthropic'] = 'invalid';
+          return res.status(400).json({ 
+            message: "Invalid Anthropic API key. Please check your key and try again.",
+            service: "anthropic" 
+          });
+        }
+      }
+      
+      // Perplexity API validation
+      if (newKeys.perplexity && newKeys.perplexity !== req.session.apiKeys.perplexity) {
+        try {
+          const response = await fetch('https://api.perplexity.ai/chat/completions', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${newKeys.perplexity}`
+            },
+            body: JSON.stringify({
+              model: 'llama-3.1-sonar-small-128k-online',
+              messages: [{ role: 'user', content: 'Hello' }],
+              max_tokens: 5
+            })
+          });
+          
+          if (!response.ok) {
+            validationResults['perplexity'] = 'invalid';
+            return res.status(400).json({ 
+              message: "Invalid Perplexity API key. Please check your key and try again.",
+              service: "perplexity" 
+            });
+          }
+          
+          validationResults['perplexity'] = 'valid';
+        } catch (error) {
+          console.error("Invalid Perplexity API key:", error);
+          validationResults['perplexity'] = 'invalid';
+          return res.status(400).json({ 
+            message: "Invalid Perplexity API key. Please check your key and try again.",
+            service: "perplexity" 
+          });
+        }
+      }
+      
+      // Merge the new validated API keys with existing ones
       req.session.apiKeys = {
         ...req.session.apiKeys,
-        ...req.body
+        ...newKeys
       };
       
-      res.status(200).json({ message: "API keys saved successfully" });
+      res.status(200).json({ 
+        message: "API keys saved successfully",
+        validationResults: validationResults
+      });
     } catch (error) {
       console.error("Error saving API keys:", error);
       res.status(500).json({ message: "Failed to save API keys" });

@@ -13,23 +13,27 @@ export function getOpenAIInstance(req?: Request): OpenAI {
     throw new Error("OpenAI API key is not set. Please provide an API key via settings.");
   }
   
-  // If we have a request with a session key, always create a fresh instance
-  // to use the session-provided key
+  // Always create a fresh instance if we have a request with session key
+  // This ensures we always use the most current key from the session
   if (req?.session?.apiKeys?.openai) {
-    return new OpenAI({ apiKey });
+    console.log("Using OpenAI API key from session");
+    return new OpenAI({ apiKey: req.session.apiKeys.openai });
   }
   
-  // Otherwise, use/create the singleton instance with the env variable
+  // For environment variable keys, use/create a singleton instance for efficiency
   if (!openaiInstance && process.env.OPENAI_API_KEY) {
+    console.log("Creating new OpenAI instance with environment key");
     openaiInstance = new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
     });
     return openaiInstance;
-  } else if (openaiInstance) {
+  } else if (openaiInstance && process.env.OPENAI_API_KEY === apiKey) {
+    // Return existing instance if the environment key hasn't changed
     return openaiInstance;
   }
   
-  // Fallback to creating a new instance with the key we found
+  // If we got here, we have no cached instance or the key has changed
+  console.log("Creating new OpenAI instance with provided key");
   return new OpenAI({ apiKey });
 }
 
