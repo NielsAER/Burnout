@@ -530,22 +530,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Simulated login for development/testing
   app.get('/api/simulated-login', (req, res) => {
-    const { service, redirect } = req.query;
+    const { service, redirect, state } = req.query;
     
     if (!isValidOAuthService(service as string)) {
       return res.status(400).json({ error: `Unsupported service: ${service}` });
     }
     
-    // Generate and store a state parameter for CSRF protection
-    const state = generateState();
+    // Create a fake profile and credentials
+    const profile = {
+      id: `${service}_123456`,
+      username: `${service}_user`,
+      name: `${service.toString().charAt(0).toUpperCase() + service.toString().slice(1)} User`
+    };
     
-    // Make sure the service is a valid OAuthService
-    if (isValidOAuthService(service as string)) {
-      storeOAuthState(req, service as string, state);
+    const credentials = {
+      access_token: `fake_token_${service}_${Date.now()}`,
+      refresh_token: `fake_refresh_${service}_${Date.now()}`,
+      expires_in: 3600,
+      created_at: new Date()
+    };
+    
+    // Store the credentials in the session
+    storeOAuthCredentials(req, service as string, credentials);
+    
+    // Save the connection if the user is authenticated
+    if (req.isAuthenticated()) {
+      saveConnection(req, service as string, profile, credentials)
+        .then(() => {
+          res.redirect('/app-connections?success=' + service);
+        })
+        .catch(error => {
+          console.error('Error in simulated login:', error);
+          res.redirect('/app-connections?error=true');
+        });
+    } else {
+      res.redirect('/auth');
     }
-    
-    // Redirect to callback with the generated state
-    res.redirect(`/api/auth/${service}/callback?code=fake_code_${Date.now()}&state=${state}`);
   });
   
   // Simulated OAuth callback for development/testing
