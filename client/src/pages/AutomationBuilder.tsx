@@ -6,6 +6,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { v4 as uuidv4 } from "uuid";
 import { apiRequest } from "@/lib/queryClient";
 import { queryClient } from "@/lib/queryClient";
+import { checkApiKeyAvailability } from "@/lib/apiKeyUtils";
 import { Automation } from "@shared/schema";
 import BuilderCanvas, { BuilderStep } from "@/components/automation/BuilderCanvas";
 import AppSelector from "@/components/automation/AppSelector";
@@ -272,7 +273,7 @@ const AutomationBuilder = () => {
             // No API key, use simulated data
             triggerResult = generateTriggerTestData(trigger);
           }
-        } catch (error) {
+        } catch (error: unknown) {
           console.error("Error making API call:", error);
           // On error, fall back to simulated data
           triggerResult = generateTriggerTestData(trigger);
@@ -333,7 +334,7 @@ const AutomationBuilder = () => {
               // No API key, use simulated data
               actionResult = generateActionTestData(action);
             }
-          } catch (error) {
+          } catch (error: unknown) {
             console.error("Error making API call:", error);
             // On error, fall back to simulated data
             actionResult = generateActionTestData(action);
@@ -361,7 +362,7 @@ const AutomationBuilder = () => {
         title: "Test successful",
         description: "Your workflow executed successfully. See the results in the preview.",
       });
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Workflow test error:", error);
       setTestStatus('error');
       setIsRunningWorkflow(false);
@@ -369,7 +370,7 @@ const AutomationBuilder = () => {
       toast({
         variant: "destructive",
         title: "Test failed",
-        description: error.message || "An error occurred while testing your workflow.",
+        description: (error as Error)?.message || "An error occurred while testing your workflow.",
       });
     }
   };

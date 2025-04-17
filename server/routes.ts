@@ -244,6 +244,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ available: !!ollamaHost });
   });
   
+  // Unified AI service endpoint for easier automation usage
+  app.post("/api/services/:service/generate", async (req, res) => {
+    try {
+      const { service } = req.params;
+      const { prompt, systemMessage, model, maxTokens = 500, temperature = 0.7 } = req.body;
+      
+      if (!prompt) {
+        return res.status(400).json({ message: "Prompt is required" });
+      }
+      
+      let result;
+      
+      switch (service) {
+        case "openai":
+          result = await openaiService.generateText(
+            prompt, 
+            maxTokens, 
+            temperature, 
+            model || "gpt-4o", 
+            systemMessage,
+            req
+          );
+          break;
+          
+        case "anthropic":
+          result = await anthropicService.generateText(
+            prompt,
+            model || "claude-3-7-sonnet-20250219",
+            maxTokens,
+            temperature,
+            systemMessage,
+            req
+          );
+          break;
+          
+        case "perplexity":
+          // For perplexity, we'll use the research question function which is most similar
+          result = await perplexityService.researchQuestion(
+            prompt,
+            model || "llama-3.1-sonar-small-128k-online",
+            maxTokens,
+            req
+          );
+          break;
+          
+        case "ollama":
+          result = await ollamaService.generateText(
+            prompt,
+            model || "llama2",
+            maxTokens,
+            temperature,
+            req
+          );
+          break;
+          
+        default:
+          return res.status(400).json({ message: "Unknown AI service" });
+      }
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error(`Error in /${req.params.service}/generate:`, error);
+      res.status(500).json({ 
+        message: error.message || "An error occurred during text generation",
+        service: req.params.service
+      });
+    }
+  });
+  
   // Generic API key check endpoint
   app.get("/api/settings/check-api-key", (req, res) => {
     const service = req.query.service as string;
