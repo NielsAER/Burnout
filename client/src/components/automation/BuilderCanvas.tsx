@@ -228,7 +228,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       const step = getStepById(configStepId);
       if (step) {
         // Add the selected option and any AI config to the config
-        const updatedConfig = { 
+        const updatedConfig: Record<string, any> = { 
           ...currentConfig,
           optionName: selectedOption 
         };
@@ -367,10 +367,10 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               </button>
             </div>
           </div>
-          <div className="text-xs bg-blue-50 p-2 rounded border border-blue-100 flex items-center">
+          <div className="text-xs bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-100 dark:border-blue-800 flex items-center dark:text-gray-300">
             {trigger.config?.scheduleType === 'timer' ? (
               <>
-                <TimerIcon className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+                <TimerIcon className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 mr-1.5" />
                 {trigger.config.timerConfig ? (
                   <span>
                     Every {trigger.config.timerConfig.interval} {trigger.config.timerConfig.unit}
@@ -381,7 +381,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               </>
             ) : (
               <>
-                <Calendar className="h-3.5 w-3.5 text-blue-500 mr-1.5" />
+                <Calendar className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 mr-1.5" />
                 {trigger.config && trigger.config.time ? (
                   <span>
                     {trigger.config.frequency === 'daily' && `Every day at ${trigger.config.time}`}
@@ -390,7 +390,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                     {!trigger.config.frequency && trigger.config.scheduleType !== 'timer' && `One time at ${trigger.config.time} on ${trigger.config.date || 'today'}`}
                   </span>
                 ) : (
-                  <span>Click to schedule...</span>
+                  <span>Click to configure timer...</span>
                 )}
               </>
             )}

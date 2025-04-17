@@ -216,14 +216,14 @@ export const WorkflowPreviewPanel: React.FC<WorkflowPreviewPanelProps> = ({
               {previewSteps.map((step, index) => (
                 <div key={step.id} className="relative">
                   {index > 0 && (
-                    <div className="absolute left-2.5 -top-3 w-0.5 h-3 bg-gray-200" />
+                    <div className="absolute left-2.5 -top-3 w-0.5 h-3 bg-gray-200 dark:bg-[#2a2a2a]" />
                   )}
                   <div 
                     className={`flex items-start p-2 rounded-md border ${
-                      step.status === 'running' ? 'bg-blue-50 border-blue-200' :
-                      step.status === 'success' ? 'bg-green-50 border-green-100' :
-                      step.status === 'error' ? 'bg-red-50 border-red-100' :
-                      'bg-gray-50 border-gray-100'
+                      step.status === 'running' ? 'bg-blue-50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-800' :
+                      step.status === 'success' ? 'bg-green-50 dark:bg-green-950/30 border-green-100 dark:border-green-800' :
+                      step.status === 'error' ? 'bg-red-50 dark:bg-red-950/30 border-red-100 dark:border-red-800' :
+                      'bg-gray-50 dark:bg-[#181818] border-gray-100 dark:border-[#2a2a2a]'
                     } cursor-pointer`}
                     onClick={() => setShowDetails(showDetails === step.id ? null : step.id)}
                   >
@@ -236,11 +236,11 @@ export const WorkflowPreviewPanel: React.FC<WorkflowPreviewPanelProps> = ({
                           {step.name}
                         </div>
                         {step.stepType === 'trigger' ? (
-                          <Badge variant="outline" className="ml-2 bg-purple-50 text-purple-700 border-purple-200">
+                          <Badge variant="outline" className="ml-2 bg-purple-50 dark:bg-purple-950/30 text-purple-700 dark:text-purple-400 border-purple-200 dark:border-purple-800">
                             Trigger
                           </Badge>
                         ) : (
-                          <Badge variant="outline" className="ml-2 bg-indigo-50 text-indigo-700 border-indigo-200">
+                          <Badge variant="outline" className="ml-2 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-700 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800">
                             Action
                           </Badge>
                         )}
@@ -260,8 +260,8 @@ export const WorkflowPreviewPanel: React.FC<WorkflowPreviewPanelProps> = ({
                   
                   {/* Result details */}
                   {showDetails === step.id && step.result && (
-                    <div className="mt-2 ml-10 p-3 bg-gray-50 rounded-md border text-xs font-mono overflow-auto max-h-40">
-                      <pre className="whitespace-pre-wrap text-xs">
+                    <div className="mt-2 ml-10 p-3 bg-gray-50 dark:bg-[#181818] rounded-md border border-gray-200 dark:border-[#2a2a2a] text-xs font-mono overflow-auto max-h-40">
+                      <pre className="whitespace-pre-wrap text-xs dark:text-gray-300">
                         {JSON.stringify(step.result, null, 2)}
                       </pre>
                     </div>
