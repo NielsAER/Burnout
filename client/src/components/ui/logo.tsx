@@ -38,8 +38,12 @@ export const Logo = ({
       </div>
       {showTagline && (
         <p className={cn(
-          "text-coral-500 font-semibold mt-1",
-          taglineSizeClasses[size]
+          "font-semibold mt-1 text-coral-500",
+          taglineSizeClasses[size],
+          {
+            "text-coral-500": !isDarkMode,
+            "text-coral-400": isDarkMode
+          }
         )}>
           LESS STRESS, MORE SUCCESS
         </p>
