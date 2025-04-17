@@ -10,7 +10,8 @@ const MemoryStore = createMemoryStore(session);
 // Extend the Express session interface
 declare module 'express-session' {
   interface SessionData {
-    oauthCredentials?: Record<string, string>;
+    oauthCredentials?: Record<string, any>;
+    oauthStates?: Record<string, string>;
     apiKeys?: Record<string, string>;
   }
 }

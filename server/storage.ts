@@ -25,7 +25,7 @@ import {
 import session from "express-session";
 import createMemoryStore from "memorystore";
 import connectPg from "connect-pg-simple";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import { db, pool } from "./db";
 
 const MemoryStore = createMemoryStore(session);
