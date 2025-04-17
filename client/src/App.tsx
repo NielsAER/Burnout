@@ -12,19 +12,23 @@ import AutomationDetails from "@/pages/AutomationDetails";
 import AIServices from "@/pages/AIServices";
 import AppConnections from "@/pages/AppConnections";
 import Settings from "@/pages/Settings";
+import AuthPage from "@/pages/auth-page";
 import MainLayout from "@/layouts/MainLayout";
+import { AuthProvider } from "@/hooks/use-auth";
+import { ProtectedRoute } from "@/lib/protected-route";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/automations" component={MyAutomations} />
-      <Route path="/automations/:id" component={AutomationDetails} />
-      <Route path="/builder" component={AutomationBuilder} />
-      <Route path="/builder/:id" component={AutomationBuilder} />
-      <Route path="/app-connections" component={AppConnections} />
-      <Route path="/ai-services" component={AIServices} />
-      <Route path="/settings" component={Settings} />
+      <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/automations" component={MyAutomations} />
+      <ProtectedRoute path="/automations/:id" component={AutomationDetails} />
+      <ProtectedRoute path="/builder" component={AutomationBuilder} />
+      <ProtectedRoute path="/builder/:id" component={AutomationBuilder} />
+      <ProtectedRoute path="/app-connections" component={AppConnections} />
+      <ProtectedRoute path="/ai-services" component={AIServices} />
+      <ProtectedRoute path="/settings" component={Settings} />
+      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -34,10 +38,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <DndProvider backend={HTML5Backend}>
-        <MainLayout>
-          <Router />
-        </MainLayout>
-        <Toaster />
+        <AuthProvider>
+          <MainLayout>
+            <Router />
+          </MainLayout>
+          <Toaster />
+        </AuthProvider>
       </DndProvider>
     </QueryClientProvider>
   );
