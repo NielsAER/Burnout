@@ -864,9 +864,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let oauthUrl = '';
       let useSimulatedLogin = false;
 
-      // Check if we're in development mode or if secrets are missing
-      // This helps avoid API errors when credentials aren't fully set up
-      const inDevelopmentMode = true; // Set to false in production
+      // Check if we're in a production environment
+      // This determines if we should use real OAuth or fallback to simulated
+      const inDevelopmentMode = process.env.NODE_ENV !== 'production';
       
       // Handle different OAuth providers
       switch (appId) {
