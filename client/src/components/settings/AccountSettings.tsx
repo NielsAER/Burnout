@@ -46,10 +46,10 @@ export function AccountSettings() {
   
   return (
     <div className="grid grid-cols-1 gap-6">
-      <Card>
+      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
         <CardHeader>
-          <CardTitle>Profile Information</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Profile Information</CardTitle>
+          <CardDescription className="text-gray-400">
             Update your account's profile information
           </CardDescription>
         </CardHeader>
@@ -69,7 +69,7 @@ export function AccountSettings() {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="username">
+                <Label htmlFor="username" className="text-white">
                   <span className="flex items-center gap-2">
                     <AtSign className="h-4 w-4" />
                     Username
@@ -79,14 +79,15 @@ export function AccountSettings() {
                   id="username"
                   value={user?.username || ""}
                   disabled
+                  className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Your username cannot be changed
                 </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="full-name">
+                <Label htmlFor="full-name" className="text-white">
                   <span className="flex items-center gap-2">
                     <User2 className="h-4 w-4" />
                     Full Name
@@ -97,11 +98,12 @@ export function AccountSettings() {
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder="Enter your full name"
+                  className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="email">
+                <Label htmlFor="email" className="text-white">
                   <span className="flex items-center gap-2">
                     <Mail className="h-4 w-4" />
                     Email Address
@@ -113,11 +115,12 @@ export function AccountSettings() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="Enter your email address"
+                  className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                 />
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="company-name">
+                <Label htmlFor="company-name" className="text-white">
                   <span className="flex items-center gap-2">
                     <Building2 className="h-4 w-4" />
                     Company Name
@@ -128,6 +131,7 @@ export function AccountSettings() {
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
                   placeholder="Enter your company name"
+                  className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                 />
               </div>
               
@@ -150,7 +154,7 @@ export function AccountSettings() {
                   placeholder="Write a short bio about yourself"
                   rows={4}
                 />
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-gray-500">
                   Brief description for your profile
                 </p>
               </div>
@@ -172,18 +176,18 @@ export function AccountSettings() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
         <CardHeader>
-          <CardTitle>Security Settings</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-white">Security Settings</CardTitle>
+          <CardDescription className="text-gray-400">
             Manage your account's security settings
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-sm text-gray-400">
             Security settings will be available in a future update, including:
           </p>
-          <ul className="list-disc list-inside mt-2 text-sm text-muted-foreground">
+          <ul className="list-disc list-inside mt-2 text-sm text-gray-400">
             <li>Password changes</li>
             <li>Two-factor authentication</li>
             <li>Login session management</li>
