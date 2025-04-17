@@ -40,13 +40,13 @@ const DraggableApp: FC<DraggableAppProps> = ({ appId, type, onClick }) => {
   return (
     <div
       ref={drag}
-      className={`p-2 bg-gray-50 rounded border ${isDragging ? 'border-primary shadow-md' : 'border-gray-200'} 
-                 flex items-center cursor-move hover:bg-gray-100 transition-all duration-200
-                 ${isDragging ? 'opacity-50 ring-2 ring-primary/20' : 'opacity-100'}`}
+      className={`p-2 bg-gray-50 dark:bg-[#181818] rounded border ${isDragging ? 'border-primary dark:border-blue-600 shadow-md' : 'border-gray-200 dark:border-[#2a2a2a]'} 
+                 flex items-center cursor-move hover:bg-gray-100 dark:hover:bg-[#21212b] transition-all duration-200
+                 ${isDragging ? 'opacity-50 ring-2 ring-primary/20 dark:ring-blue-600/20' : 'opacity-100'}`}
       onClick={onClick}
     >
       <AppIconMap appId={appId} />
-      <span className="ml-2 text-sm flex-1">{app.name}</span>
+      <span className="ml-2 text-sm flex-1 text-gray-900 dark:text-gray-300">{app.name}</span>
       <ArrowRight className="h-3.5 w-3.5 text-gray-400 ml-1.5" />
     </div>
   );
@@ -117,7 +117,7 @@ const AppSelector: FC<AppSelectorProps> = ({ onSelectTrigger, onSelectAction }) 
   }, {});
   
   return (
-    <div className="w-72 border-r border-gray-200 pr-4">
+    <div className="w-72 border-r border-gray-200 dark:border-[#2a2a2a] pr-4">
       {/* Search input */}
       <div className="relative mb-4">
         <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -128,31 +128,31 @@ const AppSelector: FC<AppSelectorProps> = ({ onSelectTrigger, onSelectAction }) 
           placeholder="Search apps..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 text-sm bg-gray-50"
+          className="pl-10 text-sm bg-gray-50 dark:bg-[#1f1f1f] dark:border-[#2a2a2a] dark:placeholder:text-gray-500"
         />
       </div>
       
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "triggers" | "actions")}>
-        <TabsList className="w-full mb-4">
-          <TabsTrigger value="triggers" className="flex-1 gap-2">
+        <TabsList className="w-full mb-4 dark:bg-[#1f1f1f]">
+          <TabsTrigger value="triggers" className="flex-1 gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-[#181818]">
             <Zap className="h-4 w-4" />
             Triggers
           </TabsTrigger>
-          <TabsTrigger value="actions" className="flex-1 gap-2">
+          <TabsTrigger value="actions" className="flex-1 gap-2 data-[state=active]:bg-white dark:data-[state=active]:bg-[#181818]">
             <Layers className="h-4 w-4" />
             Actions
           </TabsTrigger>
         </TabsList>
         
         <TabsContent value="triggers" className="m-0">
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
             Drag or click an app to add as a trigger
           </p>
           <ScrollArea className="h-[calc(100vh-280px)] pr-3">
             {Object.entries(triggerAppsByCategory).map(([category, appIds]) => (
               <div key={category} className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {category}
                 </h3>
                 <div className="space-y-2">
@@ -168,7 +168,7 @@ const AppSelector: FC<AppSelectorProps> = ({ onSelectTrigger, onSelectAction }) 
               </div>
             ))}
             {Object.keys(triggerAppsByCategory).length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <p>No matching triggers found</p>
               </div>
             )}
@@ -176,13 +176,13 @@ const AppSelector: FC<AppSelectorProps> = ({ onSelectTrigger, onSelectAction }) 
         </TabsContent>
         
         <TabsContent value="actions" className="m-0">
-          <p className="text-xs text-gray-500 mb-3">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">
             Drag or click an app to add as an action
           </p>
           <ScrollArea className="h-[calc(100vh-280px)] pr-3">
             {Object.entries(actionAppsByCategory).map(([category, appIds]) => (
               <div key={category} className="mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-2">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   {category}
                 </h3>
                 <div className="space-y-2">
@@ -198,7 +198,7 @@ const AppSelector: FC<AppSelectorProps> = ({ onSelectTrigger, onSelectAction }) 
               </div>
             ))}
             {Object.keys(actionAppsByCategory).length === 0 && (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                 <p>No matching actions found</p>
               </div>
             )}

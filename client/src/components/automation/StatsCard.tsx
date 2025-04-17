@@ -63,17 +63,17 @@ const StatsCard: FC<StatsCardProps> = ({
 
   if (isLoading) {
     return (
-      <Card className="bg-[#0f0f0f] overflow-hidden shadow border border-[#2a2a2a] rounded-sm">
+      <Card className="bg-white dark:bg-[#0f0f0f] overflow-hidden shadow border border-gray-200 dark:border-[#2a2a2a] rounded-lg dark:rounded-sm">
         <div className="p-5">
           <div className="flex items-center">
-            <Skeleton className="flex-shrink-0 rounded-sm p-3 h-12 w-12" />
+            <Skeleton className="flex-shrink-0 rounded-md dark:rounded-sm p-3 h-12 w-12" />
             <div className="ml-5 w-0 flex-1">
               <Skeleton className="h-5 w-24 mb-2" />
               <Skeleton className="h-8 w-12" />
             </div>
           </div>
         </div>
-        <div className="bg-[#181818] border-t border-[#2a2a2a] px-5 py-3">
+        <div className="bg-gray-50 dark:bg-[#181818] border-t border-gray-200 dark:border-[#2a2a2a] px-5 py-3">
           <Skeleton className="h-5 w-16" />
         </div>
       </Card>
@@ -81,20 +81,20 @@ const StatsCard: FC<StatsCardProps> = ({
   }
 
   return (
-    <Card className="bg-[#0f0f0f] overflow-hidden shadow border border-[#2a2a2a] rounded-sm">
+    <Card className="bg-white dark:bg-[#0f0f0f] overflow-hidden shadow border border-gray-200 dark:border-[#2a2a2a] rounded-lg dark:rounded-sm">
       <div className="p-5">
         <div className="flex items-center">
-          <div className={`flex-shrink-0 ${colorMap[color].bg} rounded-sm p-3`}>
+          <div className={`flex-shrink-0 ${colorMap[color].bg} rounded-md dark:rounded-sm p-3`}>
             {renderIcon()}
           </div>
           <div className="ml-5 w-0 flex-1">
             <dl>
-              <dt className="text-sm font-medium text-gray-400 truncate">{title}</dt>
+              <dt className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">{title}</dt>
               <dd className="flex items-baseline">
-                <div className="text-2xl font-semibold text-white">{value}</div>
+                <div className="text-2xl font-semibold text-gray-900 dark:text-white">{value}</div>
                 {change && (
                   <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                    changeDirection === "up" ? "text-emerald-400" : "text-red-400"
+                    changeDirection === "up" ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
                   }`}>
                     {changeDirection === "up" ? (
                       <ArrowUp className="h-4 w-4" />
@@ -111,10 +111,10 @@ const StatsCard: FC<StatsCardProps> = ({
         </div>
       </div>
       {link && linkText && (
-        <div className="bg-[#181818] border-t border-[#2a2a2a] px-5 py-3">
+        <div className="bg-gray-50 dark:bg-[#181818] border-t border-gray-200 dark:border-[#2a2a2a] px-5 py-3">
           <div className="text-sm">
             <Link href={link}>
-              <a className="font-medium text-blue-400 hover:text-blue-300">
+              <a className="font-medium text-primary dark:text-blue-400 hover:text-primary/90 dark:hover:text-blue-300">
                 {linkText}
               </a>
             </Link>
