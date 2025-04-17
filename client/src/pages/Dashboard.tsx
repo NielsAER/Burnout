@@ -93,10 +93,10 @@ const Dashboard = () => {
       {/* My Automations Section */}
       <div className="py-4 px-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-medium text-gray-900">My Automations</h2>
+          <h2 className="text-lg font-medium text-white">My Automations</h2>
           <div className="flex">
             <Link href="/automations">
-              <a className="text-sm font-medium text-primary hover:text-primary/80 flex items-center">
+              <a className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center">
                 View all <ArrowRight className="ml-1 h-4 w-4" />
               </a>
             </Link>
@@ -107,15 +107,15 @@ const Dashboard = () => {
           {loadingAutomations ? (
             // Loading skeleton
             Array(3).fill(0).map((_, i) => (
-              <div key={i} className="bg-white shadow rounded-lg overflow-hidden">
-                <div className="p-4 border-b border-gray-200">
+              <div key={i} className="bg-[#0f0f0f] border border-[#2a2a2a] shadow rounded-sm overflow-hidden">
+                <div className="p-4 border-b border-[#2a2a2a]">
                   <Skeleton className="h-6 w-3/4" />
                 </div>
                 <div className="p-4">
                   <div className="flex items-center mb-4">
-                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-sm" />
                     <Skeleton className="h-5 w-5 mx-3" />
-                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <Skeleton className="h-10 w-10 rounded-sm" />
                   </div>
                   <Skeleton className="h-4 w-full mb-4" />
                   <div className="flex justify-between mt-4">
@@ -140,26 +140,26 @@ const Dashboard = () => {
       
       {/* Popular Templates Section */}
       <div className="py-4 px-6">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Popular Templates</h2>
+        <h2 className="text-lg font-medium text-white mb-4">Popular Templates</h2>
         
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-[#0f0f0f] border border-[#2a2a2a] shadow rounded-sm overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
               {loadingTemplates ? (
                 // Loading skeleton
                 Array(4).fill(0).map((_, i) => (
-                  <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
-                    <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <div key={i} className="border border-[#2a2a2a] rounded-sm overflow-hidden bg-[#181818]">
+                    <div className="px-4 py-3 bg-[#1f1f1f] border-b border-[#2a2a2a]">
                       <Skeleton className="h-5 w-3/4" />
                     </div>
                     <div className="p-4">
                       <div className="flex items-center mb-3">
-                        <Skeleton className="h-8 w-8 rounded" />
+                        <Skeleton className="h-8 w-8 rounded-sm" />
                         <Skeleton className="h-5 w-5 mx-2" />
-                        <Skeleton className="h-8 w-8 rounded" />
+                        <Skeleton className="h-8 w-8 rounded-sm" />
                       </div>
                       <Skeleton className="h-4 w-full mb-3" />
-                      <Skeleton className="h-8 w-full rounded-md" />
+                      <Skeleton className="h-8 w-full rounded-sm" />
                     </div>
                   </div>
                 ))
@@ -177,7 +177,7 @@ const Dashboard = () => {
             
             <div className="mt-6 text-center">
               <Link href="/templates">
-                <a className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80">
+                <a className="inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
                   View all templates
                   <ArrowRight className="ml-1 h-4 w-4" />
                 </a>
@@ -189,9 +189,9 @@ const Dashboard = () => {
       
       {/* Recent Activity Section */}
       <div className="py-4 px-6 pb-12">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h2>
+        <h2 className="text-lg font-medium text-white mb-4">Recent Activity</h2>
         
-        <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="bg-[#0f0f0f] border border-[#2a2a2a] shadow rounded-sm overflow-hidden">
           <div className="px-4 py-5 sm:p-6">
             {loadingHistories ? (
               <div className="space-y-8">
@@ -216,7 +216,7 @@ const Dashboard = () => {
                 
                 <div className="mt-6 text-center">
                   <Link href="/history">
-                    <a className="inline-flex items-center text-sm font-medium text-primary hover:text-primary/80">
+                    <a className="inline-flex items-center text-sm font-medium text-blue-400 hover:text-blue-300">
                       View all activity
                       <ArrowRight className="ml-1 h-4 w-4" />
                     </a>

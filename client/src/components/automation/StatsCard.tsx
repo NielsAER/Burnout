@@ -29,20 +29,20 @@ const StatsCard: FC<StatsCardProps> = ({
 }) => {
   const colorMap = {
     primary: {
-      bg: "bg-blue-100",
-      text: "text-primary"
+      bg: "bg-blue-900/30",
+      text: "text-blue-400"
     },
     success: {
-      bg: "bg-green-100",
-      text: "text-emerald-500"
+      bg: "bg-emerald-900/30",
+      text: "text-emerald-400"
     },
     error: {
-      bg: "bg-red-100",
-      text: "text-red-600"
+      bg: "bg-red-900/30",
+      text: "text-red-400"
     },
     secondary: {
-      bg: "bg-purple-100",
-      text: "text-secondary"
+      bg: "bg-purple-900/30",
+      text: "text-purple-400"
     }
   };
 
@@ -63,17 +63,17 @@ const StatsCard: FC<StatsCardProps> = ({
 
   if (isLoading) {
     return (
-      <Card className="bg-white overflow-hidden shadow rounded-lg">
+      <Card className="bg-[#0f0f0f] overflow-hidden shadow border border-[#2a2a2a] rounded-sm">
         <div className="p-5">
           <div className="flex items-center">
-            <Skeleton className="flex-shrink-0 rounded-md p-3 h-12 w-12" />
+            <Skeleton className="flex-shrink-0 rounded-sm p-3 h-12 w-12" />
             <div className="ml-5 w-0 flex-1">
               <Skeleton className="h-5 w-24 mb-2" />
               <Skeleton className="h-8 w-12" />
             </div>
           </div>
         </div>
-        <div className="bg-gray-50 px-5 py-3">
+        <div className="bg-[#181818] border-t border-[#2a2a2a] px-5 py-3">
           <Skeleton className="h-5 w-16" />
         </div>
       </Card>
@@ -81,20 +81,20 @@ const StatsCard: FC<StatsCardProps> = ({
   }
 
   return (
-    <Card className="bg-white overflow-hidden shadow rounded-lg">
+    <Card className="bg-[#0f0f0f] overflow-hidden shadow border border-[#2a2a2a] rounded-sm">
       <div className="p-5">
         <div className="flex items-center">
-          <div className={`flex-shrink-0 ${colorMap[color].bg} rounded-md p-3`}>
+          <div className={`flex-shrink-0 ${colorMap[color].bg} rounded-sm p-3`}>
             {renderIcon()}
           </div>
           <div className="ml-5 w-0 flex-1">
             <dl>
-              <dt className="text-sm font-medium text-gray-500 truncate">{title}</dt>
+              <dt className="text-sm font-medium text-gray-400 truncate">{title}</dt>
               <dd className="flex items-baseline">
-                <div className="text-2xl font-semibold text-gray-900">{value}</div>
+                <div className="text-2xl font-semibold text-white">{value}</div>
                 {change && (
                   <div className={`ml-2 flex items-baseline text-sm font-semibold ${
-                    changeDirection === "up" ? "text-green-600" : "text-red-600"
+                    changeDirection === "up" ? "text-emerald-400" : "text-red-400"
                   }`}>
                     {changeDirection === "up" ? (
                       <ArrowUp className="h-4 w-4" />
@@ -111,10 +111,10 @@ const StatsCard: FC<StatsCardProps> = ({
         </div>
       </div>
       {link && linkText && (
-        <div className="bg-gray-50 px-5 py-3">
+        <div className="bg-[#181818] border-t border-[#2a2a2a] px-5 py-3">
           <div className="text-sm">
             <Link href={link}>
-              <a className="font-medium text-primary hover:text-primary/80">
+              <a className="font-medium text-blue-400 hover:text-blue-300">
                 {linkText}
               </a>
             </Link>
