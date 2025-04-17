@@ -32,17 +32,17 @@ export function GeneralSettings() {
   return (
     <div className="grid grid-cols-1 gap-6">
       {/* Theme Settings */}
-      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+      <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
         <CardHeader>
-          <CardTitle className="text-white">Appearance</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-gray-900 dark:text-white">Appearance</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             Customize how BRNOUT looks on your device
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label className="text-base">Theme</Label>
-            <p className="text-sm text-gray-400">
+            <Label className="text-base text-gray-900 dark:text-white">Theme</Label>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
               Select the theme for the dashboard
             </p>
             <RadioGroup
@@ -58,10 +58,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-light"
-                  className="flex flex-col items-center justify-between rounded-sm border-2 border-[#2a2a2a] bg-[#181818] p-4 hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
+                  className="flex flex-col items-center justify-between rounded-sm border-2 border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#181818] p-4 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
                 >
-                  <SunIcon className="mb-3 h-6 w-6 text-white" />
-                  <span className="text-white">Light</span>
+                  <SunIcon className="mb-3 h-6 w-6 text-gray-900 dark:text-white" />
+                  <span className="text-gray-900 dark:text-white">Light</span>
                 </Label>
               </div>
               <div>
@@ -72,10 +72,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-dark"
-                  className="flex flex-col items-center justify-between rounded-sm border-2 border-[#2a2a2a] bg-[#181818] p-4 hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
+                  className="flex flex-col items-center justify-between rounded-sm border-2 border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#181818] p-4 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
                 >
-                  <MoonIcon className="mb-3 h-6 w-6 text-white" />
-                  <span className="text-white">Dark</span>
+                  <MoonIcon className="mb-3 h-6 w-6 text-gray-900 dark:text-white" />
+                  <span className="text-gray-900 dark:text-white">Dark</span>
                 </Label>
               </div>
               <div>
@@ -86,10 +86,10 @@ export function GeneralSettings() {
                 />
                 <Label
                   htmlFor="theme-system"
-                  className="flex flex-col items-center justify-between rounded-sm border-2 border-[#2a2a2a] bg-[#181818] p-4 hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
+                  className="flex flex-col items-center justify-between rounded-sm border-2 border-gray-200 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#181818] p-4 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] peer-data-[state=checked]:border-blue-600 [&:has([data-state=checked])]:border-blue-600 cursor-pointer transition-all"
                 >
-                  <MonitorIcon className="mb-3 h-6 w-6 text-white" />
-                  <span className="text-white">System</span>
+                  <MonitorIcon className="mb-3 h-6 w-6 text-gray-900 dark:text-white" />
+                  <span className="text-gray-900 dark:text-white">System</span>
                 </Label>
               </div>
             </RadioGroup>
@@ -98,27 +98,27 @@ export function GeneralSettings() {
       </Card>
       
       {/* Language Settings */}
-      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+      <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
         <CardHeader>
-          <CardTitle className="text-white">Language & Region</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-gray-900 dark:text-white">Language & Region</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             Set your preferred language and regional settings
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="language" className="text-white">Language</Label>
+            <Label htmlFor="language" className="text-gray-900 dark:text-white">Language</Label>
             <Select value={language} onValueChange={setLanguage}>
-              <SelectTrigger id="language" className="w-full bg-[#181818] border-[#2a2a2a] text-white rounded-sm focus:ring-blue-600 focus:ring-offset-0">
+              <SelectTrigger id="language" className="w-full bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm focus:ring-blue-600 focus:ring-offset-0">
                 <SelectValue placeholder="Select language" />
               </SelectTrigger>
-              <SelectContent className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm">
-                <SelectItem value="english" className="focus:bg-[#2a2a2a] focus:text-white">English</SelectItem>
-                <SelectItem value="spanish" className="focus:bg-[#2a2a2a] focus:text-white">Spanish</SelectItem>
-                <SelectItem value="french" className="focus:bg-[#2a2a2a] focus:text-white">French</SelectItem>
-                <SelectItem value="german" className="focus:bg-[#2a2a2a] focus:text-white">German</SelectItem>
-                <SelectItem value="japanese" className="focus:bg-[#2a2a2a] focus:text-white">Japanese</SelectItem>
-                <SelectItem value="chinese" className="focus:bg-[#2a2a2a] focus:text-white">Chinese</SelectItem>
+              <SelectContent className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] text-gray-900 dark:text-white rounded-sm">
+                <SelectItem value="english" className="focus:bg-gray-100 dark:focus:bg-[#2a2a2a] focus:text-gray-900 dark:focus:text-white">English</SelectItem>
+                <SelectItem value="spanish" className="focus:bg-gray-100 dark:focus:bg-[#2a2a2a] focus:text-gray-900 dark:focus:text-white">Spanish</SelectItem>
+                <SelectItem value="french" className="focus:bg-gray-100 dark:focus:bg-[#2a2a2a] focus:text-gray-900 dark:focus:text-white">French</SelectItem>
+                <SelectItem value="german" className="focus:bg-gray-100 dark:focus:bg-[#2a2a2a] focus:text-gray-900 dark:focus:text-white">German</SelectItem>
+                <SelectItem value="japanese" className="focus:bg-gray-100 dark:focus:bg-[#2a2a2a] focus:text-gray-900 dark:focus:text-white">Japanese</SelectItem>
+                <SelectItem value="chinese" className="focus:bg-gray-100 dark:focus:bg-[#2a2a2a] focus:text-gray-900 dark:focus:text-white">Chinese</SelectItem>
               </SelectContent>
             </Select>
             <p className="text-xs text-gray-500 mt-1">
@@ -129,18 +129,18 @@ export function GeneralSettings() {
       </Card>
       
       {/* Application Behavior */}
-      <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+      <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
         <CardHeader>
-          <CardTitle className="text-white">Application Behavior</CardTitle>
-          <CardDescription className="text-gray-400">
+          <CardTitle className="text-gray-900 dark:text-white">Application Behavior</CardTitle>
+          <CardDescription className="text-gray-500 dark:text-gray-400">
             Configure how the application works for you
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
-              <Label htmlFor="notifications" className="text-white">Desktop Notifications</Label>
-              <p className="text-sm text-gray-400">
+              <Label htmlFor="notifications" className="text-gray-900 dark:text-white">Desktop Notifications</Label>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
                 Receive notifications when automations execute
               </p>
             </div>
@@ -155,8 +155,8 @@ export function GeneralSettings() {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="space-y-0.5">
-                <Label htmlFor="auto-refresh" className="text-white">Auto Refresh Dashboard</Label>
-                <p className="text-sm text-gray-400">
+                <Label htmlFor="auto-refresh" className="text-gray-900 dark:text-white">Auto Refresh Dashboard</Label>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
                   Automatically refresh dashboard data
                 </p>
               </div>
@@ -171,7 +171,7 @@ export function GeneralSettings() {
             {autoRefresh && (
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <Label htmlFor="refresh-interval" className="text-white">Refresh Interval: {refreshInterval} minutes</Label>
+                  <Label htmlFor="refresh-interval" className="text-gray-900 dark:text-white">Refresh Interval: {refreshInterval} minutes</Label>
                 </div>
                 <Slider
                   id="refresh-interval"
