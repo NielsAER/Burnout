@@ -62,12 +62,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/automations", async (req, res) => {
     try {
       const validatedData = insertAutomationSchema.parse(req.body);
-      const newAutomation = await storage.createAutomation(validatedData);
+      
+      // Calculate complexity score for the new automation
+      const { calculateWorkflowComplexity, countWorkflowConditions } = await import('./utils/complexityCalculator');
+      const complexityScore = calculateWorkflowComplexity(validatedData);
+      
+      // Create the automation
+      const newAutomation = await storage.createAutomation({
+        ...validatedData, 
+        complexity: complexityScore
+      });
+      
+      // Automatically check for and unlock achievements
+      try {
+        const conditionCount = countWorkflowConditions(newAutomation);
+        
+        // Check for Workflow Pioneer achievement (always unlock for first workflow)
+        const allAutomations = await storage.getAllAutomations();
+        if (allAutomations.length === 1) {
+          await storage.unlockAchievement(newAutomation.id, 1); // Pioneer achievement ID
+        }
+        
+        // Check for Workflow Architect achievement (at least 3 conditions)
+        if (conditionCount >= 3) {
+          await storage.unlockAchievement(newAutomation.id, 3); // Workflow Architect achievement ID
+        }
+        
+        // Check for Conditional Logic Pro achievement (at least 5 conditions)
+        if (conditionCount >= 5) {
+          await storage.unlockAchievement(newAutomation.id, 7); // Conditional Logic Pro achievement ID
+        }
+        
+        // Check for Complexity Wizard achievement (complexity score of 5+)
+        if (complexityScore >= 5) {
+          await storage.unlockAchievement(newAutomation.id, 4); // Complexity Wizard achievement ID
+        }
+        
+        // Check for Master Engineer achievement (complexity score of 8+)
+        if (complexityScore >= 8) {
+          await storage.unlockAchievement(newAutomation.id, 5); // Master Engineer achievement ID
+        }
+        
+        // Check for AI Integrator achievement
+        const hasAiService = validatedData.actions?.some((action: any) => 
+          ['openai', 'anthropic', 'perplexity', 'ollama'].includes(action.appId)
+        ) || ['openai', 'anthropic', 'perplexity', 'ollama'].includes(validatedData.actionAppId);
+        
+        if (hasAiService) {
+          await storage.unlockAchievement(newAutomation.id, 6); // AI Integrator achievement ID
+        }
+      } catch (achievementError) {
+        console.error("Error processing achievements:", achievementError);
+        // Continue with the response - achievements are nice-to-have but not critical
+      }
+      
       res.status(201).json(newAutomation);
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid automation data", errors: error.errors });
       }
+      console.error("Error creating automation:", error);
       res.status(500).json({ message: "Failed to create automation" });
     }
   });
@@ -82,6 +136,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Partial validation of update data
       const validatedData = insertAutomationSchema.partial().parse(req.body);
+      
+      // Recalculate complexity score for the updated automation if relevant fields changed
+      if (validatedData.triggerConfig || validatedData.actionConfig || validatedData.actions) {
+        try {
+          // Get the full automation data
+          const existingAutomation = await storage.getAutomation(id);
+          if (existingAutomation) {
+            // Merge existing with changes to calculate new complexity
+            const mergedData = {...existingAutomation, ...validatedData};
+            
+            const { calculateWorkflowComplexity, countWorkflowConditions } = await import('./utils/complexityCalculator');
+            const complexityScore = calculateWorkflowComplexity(mergedData);
+            
+            // Add complexity to the update data
+            validatedData.complexity = complexityScore;
+            
+            // Check if this update unlocks any complexity-based achievements
+            const conditionCount = countWorkflowConditions(mergedData);
+            
+            // Check for Workflow Architect achievement (at least 3 conditions)
+            if (conditionCount >= 3) {
+              await storage.unlockAchievement(id, 3); // Workflow Architect achievement ID
+            }
+            
+            // Check for Conditional Logic Pro achievement (at least 5 conditions)
+            if (conditionCount >= 5) {
+              await storage.unlockAchievement(id, 7); // Conditional Logic Pro achievement ID
+            }
+            
+            // Check for Complexity Wizard achievement (complexity score of 5+)
+            if (complexityScore >= 5) {
+              await storage.unlockAchievement(id, 4); // Complexity Wizard achievement ID
+            }
+            
+            // Check for Master Engineer achievement (complexity score of 8+)
+            if (complexityScore >= 8) {
+              await storage.unlockAchievement(id, 5); // Master Engineer achievement ID
+            }
+            
+            // Check for AI Integrator achievement
+            const hasAiService = mergedData.actions?.some((action: any) => 
+              ['openai', 'anthropic', 'perplexity', 'ollama'].includes(action.appId)
+            ) || ['openai', 'anthropic', 'perplexity', 'ollama'].includes(mergedData.actionAppId);
+            
+            if (hasAiService) {
+              await storage.unlockAchievement(id, 6); // AI Integrator achievement ID
+            }
+          }
+        } catch (complexityError) {
+          console.error("Error calculating complexity:", complexityError);
+          // Continue with the update, just without the complexity recalculation
+        }
+      }
+      
       const updatedAutomation = await storage.updateAutomation(id, validatedData);
 
       if (!updatedAutomation) {
@@ -93,6 +201,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ message: "Invalid automation data", errors: error.errors });
       }
+      console.error("Error updating automation:", error);
       res.status(500).json({ message: "Failed to update automation" });
     }
   });
@@ -195,6 +304,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(templates);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch popular templates" });
+    }
+  });
+  
+  // GET /api/achievements - Get all achievements
+  app.get("/api/achievements", async (req, res) => {
+    try {
+      const achievements = await storage.getAllAchievements();
+      res.json(achievements);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch achievements" });
+    }
+  });
+  
+  // GET /api/achievements/automation/:automationId - Get unlocked achievements for an automation
+  app.get("/api/achievements/automation/:automationId", async (req, res) => {
+    try {
+      const automationId = parseInt(req.params.automationId);
+      if (isNaN(automationId)) {
+        return res.status(400).json({ message: "Invalid automation ID" });
+      }
+      
+      const achievements = await storage.getUnlockedAchievements(automationId);
+      res.json(achievements);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch unlocked achievements" });
     }
   });
 
