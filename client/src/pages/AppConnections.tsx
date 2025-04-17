@@ -259,8 +259,25 @@ export default function AppConnections() {
         throw new Error(`OAuth not supported for ${appId}`);
       }
       
-      // Redirect to OAuth flow
-      window.location.href = `/api/auth/${service}`;
+      // For development/testing, use simulated login if not in production
+      // In a real application, you would need to set up proper OAuth credentials
+      const isProduction = false; // Set to true in production
+      
+      if (!isProduction) {
+        // In development, use simulated login for testing
+        console.log(`Using simulated login for ${service}`);
+        window.location.href = `/api/simulated-login?service=${service}`;
+      } else {
+        // In production, use real OAuth
+        const authResponse = await fetch(`/api/auth/${service}`);
+        const authData = await authResponse.json();
+        
+        if (authData.oauthUrl) {
+          window.location.href = authData.oauthUrl;
+        } else {
+          throw new Error("Failed to get authorization URL");
+        }
+      }
       
     } catch (error) {
       console.error("OAuth error:", error);

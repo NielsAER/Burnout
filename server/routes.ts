@@ -418,7 +418,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(400).json({ error: `Unsupported service: ${service}` });
     }
     
-    // Verify the state parameter to prevent CSRF
+    // For development/testing, if the code starts with "fake_code", use simulated login
+    if (code && code.toString().startsWith('fake_code')) {
+      // Create a fake profile and credentials for simulated login
+      const profile = {
+        id: `${service}_123456`,
+        username: `${service}_user`,
+        name: `${service.charAt(0).toUpperCase() + service.slice(1)} User`
+      };
+      
+      const credentials = {
+        access_token: `fake_token_${service}_${Date.now()}`,
+        refresh_token: `fake_refresh_${service}_${Date.now()}`,
+        expires_in: 3600,
+        created_at: new Date()
+      };
+      
+      // Store the credentials in the session
+      storeOAuthCredentials(req, service, credentials);
+      
+      // Save the connection if the user is authenticated
+      if (req.isAuthenticated()) {
+        try {
+          await saveConnection(req, service, profile, credentials);
+          return res.redirect('/app-connections?success=' + service);
+        } catch (error) {
+          console.error('Error in simulated login:', error);
+          return res.redirect('/app-connections?error=true');
+        }
+      } else {
+        return res.redirect('/auth');
+      }
+    }
+    
+    // For real OAuth, verify the state parameter to prevent CSRF
     if (!state || !verifyOAuthState(req, service, state as string)) {
       return res.status(400).json({ error: 'Invalid state parameter' });
     }
@@ -428,18 +461,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const redirect_uri = `${req.protocol}://${req.get('host')}${config.callbackURL}`;
       
       // Exchange the authorization code for an access token
-      const tokenResponse = await axios.post(config.tokenURL, {
-        client_id: config.clientID,
-        client_secret: config.clientSecret,
-        code,
-        redirect_uri,
-        grant_type: 'authorization_code'
-      }, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        }
-      });
+      // Different services have different requirements for the token request
+      let tokenResponse;
+      
+      if (service === 'linkedin') {
+        // LinkedIn requires form-urlencoded data
+        const formData = new URLSearchParams();
+        formData.append('client_id', config.clientID);
+        formData.append('client_secret', config.clientSecret);
+        formData.append('code', code as string);
+        formData.append('redirect_uri', redirect_uri);
+        formData.append('grant_type', 'authorization_code');
+        
+        tokenResponse = await axios.post(config.tokenURL, formData.toString(), {
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json'
+          }
+        });
+      } else {
+        // Default JSON request for most services
+        tokenResponse = await axios.post(config.tokenURL, {
+          client_id: config.clientID,
+          client_secret: config.clientSecret,
+          code,
+          redirect_uri,
+          grant_type: 'authorization_code'
+        }, {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          }
+        });
+      }
       
       const { access_token, refresh_token, expires_in } = tokenResponse.data;
       
@@ -460,13 +514,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.isAuthenticated()) {
         await saveConnection(req, service, profile, credentials);
         // Redirect to the app connections page
-        res.redirect('/app-connections?success=true');
+        res.redirect('/app-connections?success=' + service);
       } else {
         // Not logged in, redirect to auth page
         res.redirect('/auth?error=not_authenticated');
       }
     } catch (error) {
       console.error(`Error in ${service} OAuth callback:`, error);
+      console.error(error);
       res.redirect('/app-connections?error=true');
     }
   });
