@@ -2,13 +2,10 @@ import { useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Automation } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Clock, Star, Zap } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { AchievementsPanel } from "@/components/achievements/AchievementsPanel";
-import { WorkflowHealthScore } from "@/components/automation/WorkflowHealthScore";
-import { useWorkflowHealth } from "@/hooks/use-workflow-health";
+import { WorkflowHealthCard } from "@/components/workflow-health/WorkflowHealthCard";
 
 const AutomationDetails = () => {
   const { id } = useParams();
@@ -23,16 +20,6 @@ const AutomationDetails = () => {
   } = useQuery<Automation>({
     queryKey: [`/api/automations/${automationId}`],
     enabled: !isNaN(automationId) && automationId > 0,
-  });
-
-  // Fetch health data
-  const { 
-    healthReport: healthData,
-    isLoading: healthLoading,
-    refetchHealth
-  } = useWorkflowHealth({ 
-    automationId,
-    autoRefresh: false,
   });
 
   // If the automation is not found, navigate back to automations list
@@ -128,20 +115,9 @@ const AutomationDetails = () => {
         </div>
       </div>
       
-      {/* Health Score & Achievements */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        {healthData && (
-          <WorkflowHealthScore 
-            score={healthData.score}
-            reliability={healthData.reliability}
-            complexity={healthData.complexity}
-            improvementSuggestions={healthData.improvementSuggestions}
-            automationId={automationId}
-            onRefresh={refetchHealth}
-          />
-        )}
-        
-        <AchievementsPanel automationId={automationId} />
+      {/* New WorkflowHealthCard (includes achievements) */}
+      <div className="mb-6">
+        <WorkflowHealthCard automationId={automationId} />
       </div>
       
       {/* Action Buttons */}
