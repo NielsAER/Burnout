@@ -37,18 +37,9 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
   };
 
   return (
-    <aside className={cn(
-      "w-64 flex flex-col z-20 h-full",
-      "border-r transition-colors duration-200",
-      isDarkMode 
-        ? "bg-background border-border" 
-        : "bg-white border-gray-200"
-    )}>
+    <aside className="w-64 flex flex-col z-20 h-full bg-zinc-950 border-r border-zinc-800 transition-colors duration-200">
       {/* Logo */}
-      <div className={cn(
-        "p-4 border-b transition-colors duration-200",
-        isDarkMode ? "border-border" : "border-gray-200"
-      )}>
+      <div className="p-4 border-b border-zinc-800 transition-colors duration-200">
         <div className="flex items-center">
           <Logo size="sm" />
         </div>
@@ -63,12 +54,8 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
             className={cn(
               "flex items-center px-3 py-2 text-sm font-medium rounded-md",
               isActive("/") 
-                ? "bg-primary/10 text-primary border-l-3 border-primary" 
-                : cn(
-                  isDarkMode
-                    ? "text-foreground/70 hover:text-foreground hover:bg-muted" 
-                    : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
-                )
+                ? "bg-coral-500/20 text-coral-400 border-l-3 border-coral-500" 
+                : "text-zinc-400 hover:text-white hover:bg-zinc-800"
             )}
           >
             <LayoutDashboard className="mr-3 h-5 w-5" />
