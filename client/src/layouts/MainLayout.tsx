@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Menu, Search, Bell, Plus } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/logo";
 
 interface MainLayoutProps {
   children: ReactNode;

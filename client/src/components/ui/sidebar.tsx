@@ -14,6 +14,7 @@ import {
   ExternalLink,
   User
 } from "lucide-react";
+import { Logo } from "./logo";
 
 interface SidebarProps {
   onClose?: () => void;
@@ -49,11 +50,7 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
         isDarkMode ? "border-border" : "border-gray-200"
       )}>
         <div className="flex items-center">
-          <img 
-            src="/brnout-logo.png" 
-            alt="BRNOUT Logo" 
-            className="h-8 object-contain" 
-          />
+          <Logo size="sm" />
         </div>
       </div>
       
