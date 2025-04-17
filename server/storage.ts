@@ -36,6 +36,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: number, data: Partial<Omit<User, 'id' | 'password'>>): Promise<User | undefined>;
   
   // Session store for authentication
   sessionStore: session.Store;
@@ -288,9 +289,29 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
+    const now = new Date();
+    const user: User = { 
+      ...insertUser, 
+      id,
+      createdAt: now,
+      lastLoginAt: now,
+      fullName: insertUser.fullName || null,
+      bio: insertUser.bio || null,
+      avatarUrl: insertUser.avatarUrl || null,
+      email: insertUser.email || null,
+      role: insertUser.role || "user"
+    };
     this.users.set(id, user);
     return user;
+  }
+
+  async updateUser(id: number, data: Partial<Omit<User, 'id' | 'password'>>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+
+    const updatedUser = { ...user, ...data };
+    this.users.set(id, updatedUser);
+    return updatedUser;
   }
 
   // Automation methods
@@ -666,8 +687,30 @@ export class DatabaseStorage implements IStorage {
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db.insert(users).values(insertUser).returning();
+    const now = new Date();
+    const userData = {
+      ...insertUser,
+      createdAt: now,
+      lastLoginAt: now,
+      fullName: insertUser.fullName || null,
+      bio: insertUser.bio || null,
+      avatarUrl: insertUser.avatarUrl || null,
+      email: insertUser.email || null,
+      role: insertUser.role || "user"
+    };
+    
+    const [user] = await db.insert(users).values(userData).returning();
     return user;
+  }
+  
+  async updateUser(id: number, data: Partial<Omit<User, 'id' | 'password'>>): Promise<User | undefined> {
+    const [updatedUser] = await db
+      .update(users)
+      .set(data)
+      .where(eq(users.id, id))
+      .returning();
+    
+    return updatedUser;
   }
 
   // Automation methods

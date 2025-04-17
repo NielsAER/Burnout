@@ -12,6 +12,7 @@ import AutomationDetails from "@/pages/AutomationDetails";
 import AIServices from "@/pages/AIServices";
 import AppConnections from "@/pages/AppConnections";
 import Settings from "@/pages/Settings";
+import UserProfile from "@/pages/UserProfile";
 import AuthPage from "@/pages/auth-page";
 import MainLayout from "@/layouts/MainLayout";
 import { AuthProvider } from "@/hooks/use-auth";
@@ -28,6 +29,7 @@ function Router() {
       <ProtectedRoute path="/app-connections" component={AppConnections} />
       <ProtectedRoute path="/ai-services" component={AIServices} />
       <ProtectedRoute path="/settings" component={Settings} />
+      <ProtectedRoute path="/profile" component={UserProfile} />
       <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
