@@ -301,41 +301,46 @@ export function SettingsForm() {
             </Card>
             
             {/* Perplexity API Key */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Perplexity API</CardTitle>
-                    <CardDescription>Configure your Perplexity API key for web search and research</CardDescription>
+                    <CardTitle className="text-white">Perplexity API</CardTitle>
+                    <CardDescription className="text-gray-400">Configure your Perplexity API key for web search and research</CardDescription>
                   </div>
                   <div>{renderKeyStatus("perplexity")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveApiKeys} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="perplexity-key">Perplexity API Key</Label>
+                    <Label htmlFor="perplexity-key" className="text-white">Perplexity API Key</Label>
                     <Input
                       id="perplexity-key"
                       type="password"
                       placeholder="pplx-..."
                       value={perplexityKey}
                       onChange={(e) => setPerplexityKey(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-400">
                       Get your API key from{" "}
                       <a
                         href="https://www.perplexity.ai/settings/api"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary hover:underline"
+                        className="text-blue-400 hover:underline"
                       >
                         Perplexity API Settings
                       </a>
                     </p>
                   </div>
                   
-                  <Button type="submit" disabled={apiKeysPending || !perplexityKey}>
+                  <Button 
+                    type="submit" 
+                    disabled={apiKeysPending || !perplexityKey}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
+                  >
                     {apiKeysPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -358,44 +363,46 @@ export function SettingsForm() {
         <TabsContent value="oauth-credentials">
           <div className="grid grid-cols-1 gap-6">
             {/* Twitter OAuth */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Twitter (X) OAuth</CardTitle>
-                    <CardDescription>Configure Twitter OAuth credentials for integration</CardDescription>
+                    <CardTitle className="text-white">Twitter (X) OAuth</CardTitle>
+                    <CardDescription className="text-gray-400">Configure Twitter OAuth credentials for integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("twitter")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveTwitterCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="twitter-client-id">Client ID</Label>
+                    <Label htmlFor="twitter-client-id" className="text-white">Client ID</Label>
                     <Input
                       id="twitter-client-id"
                       placeholder="Twitter Client ID"
                       value={twitterClientId}
                       onChange={(e) => setTwitterClientId(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="twitter-client-secret">Client Secret</Label>
+                    <Label htmlFor="twitter-client-secret" className="text-white">Client Secret</Label>
                     <Input
                       id="twitter-client-secret"
                       type="password"
                       placeholder="Twitter Client Secret"
                       value={twitterClientSecret}
                       onChange={(e) => setTwitterClientSecret(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://developer.twitter.com/en/portal/dashboard"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
                       Twitter Developer Portal
                     </a>
@@ -404,6 +411,7 @@ export function SettingsForm() {
                   <Button 
                     type="submit" 
                     disabled={oauthPending || !twitterClientId || !twitterClientSecret}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
                   >
                     {oauthPending ? (
                       <>
@@ -422,44 +430,46 @@ export function SettingsForm() {
             </Card>
             
             {/* Google OAuth */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Google OAuth</CardTitle>
-                    <CardDescription>Configure Google OAuth credentials for Gmail, Drive, and Calendar integration</CardDescription>
+                    <CardTitle className="text-white">Google OAuth</CardTitle>
+                    <CardDescription className="text-gray-400">Configure Google OAuth credentials for Gmail, Drive, and Calendar integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("google")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveGoogleCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="google-client-id">Client ID</Label>
+                    <Label htmlFor="google-client-id" className="text-white">Client ID</Label>
                     <Input
                       id="google-client-id"
                       placeholder="Google Client ID"
                       value={googleClientId}
                       onChange={(e) => setGoogleClientId(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="google-client-secret">Client Secret</Label>
+                    <Label htmlFor="google-client-secret" className="text-white">Client Secret</Label>
                     <Input
                       id="google-client-secret"
                       type="password"
                       placeholder="Google Client Secret"
                       value={googleClientSecret}
                       onChange={(e) => setGoogleClientSecret(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://console.cloud.google.com/apis/credentials"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-primary hover:underline"
+                      className="text-blue-400 hover:underline"
                     >
                       Google Cloud Console
                     </a>
@@ -468,6 +478,7 @@ export function SettingsForm() {
                   <Button 
                     type="submit" 
                     disabled={oauthPending || !googleClientId || !googleClientSecret}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
                   >
                     {oauthPending ? (
                       <>
