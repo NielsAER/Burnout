@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChevronRight, Check, AlertCircle, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
@@ -64,6 +65,7 @@ interface ConnectionStatus {
 export default function AppConnections() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, navigate] = useLocation();
   const [activeCategory, setActiveCategory] = useState<AppCategory>("social");
   const [connectingApp, setConnectingApp] = useState<string | null>(null);
 
