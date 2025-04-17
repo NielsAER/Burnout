@@ -176,29 +176,29 @@ export function SettingsForm() {
   return (
     <div className="w-full max-w-5xl mx-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-2 mb-8 w-[400px]">
-          <TabsTrigger value="ai-services">AI Services</TabsTrigger>
-          <TabsTrigger value="oauth-credentials">OAuth Credentials</TabsTrigger>
+        <TabsList className="grid grid-cols-2 mb-8 w-[400px] bg-[#181818] border border-[#2a2a2a] rounded-sm">
+          <TabsTrigger value="ai-services" className="data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">AI Services</TabsTrigger>
+          <TabsTrigger value="oauth-credentials" className="data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">OAuth Credentials</TabsTrigger>
         </TabsList>
         
         {/* AI Services Tab */}
         <TabsContent value="ai-services">
           <div className="grid grid-cols-1 gap-6">
             {/* OpenAI API Key */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>OpenAI API</CardTitle>
-                    <CardDescription>Configure your OpenAI API key for text generation and image creation</CardDescription>
+                    <CardTitle className="text-white">OpenAI API</CardTitle>
+                    <CardDescription className="text-gray-400">Configure your OpenAI API key for text generation and image creation</CardDescription>
                   </div>
                   <div>{renderKeyStatus("openai")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveApiKeys} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="openai-key">OpenAI API Key</Label>
+                    <Label htmlFor="openai-key" className="text-white">OpenAI API Key</Label>
                     <div className="flex">
                       <Input
                         id="openai-key"
@@ -206,23 +206,27 @@ export function SettingsForm() {
                         placeholder="sk-..."
                         value={openaiKey}
                         onChange={(e) => setOpenaiKey(e.target.value)}
-                        className="flex-1"
+                        className="flex-1 bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                       />
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-400">
                       Get your API key from{" "}
                       <a
                         href="https://platform.openai.com/api-keys"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary hover:underline"
+                        className="text-blue-400 hover:underline"
                       >
                         OpenAI Dashboard
                       </a>
                     </p>
                   </div>
                   
-                  <Button type="submit" disabled={apiKeysPending || !openaiKey}>
+                  <Button 
+                    type="submit" 
+                    disabled={apiKeysPending || !openaiKey}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
+                  >
                     {apiKeysPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -240,41 +244,46 @@ export function SettingsForm() {
             </Card>
             
             {/* Anthropic API Key */}
-            <Card>
+            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle>Anthropic API</CardTitle>
-                    <CardDescription>Configure your Anthropic API key for Claude models</CardDescription>
+                    <CardTitle className="text-white">Anthropic API</CardTitle>
+                    <CardDescription className="text-gray-400">Configure your Anthropic API key for Claude models</CardDescription>
                   </div>
                   <div>{renderKeyStatus("anthropic")}</div>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="text-white">
                 <form onSubmit={handleSaveApiKeys} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="anthropic-key">Anthropic API Key</Label>
+                    <Label htmlFor="anthropic-key" className="text-white">Anthropic API Key</Label>
                     <Input
                       id="anthropic-key"
                       type="password"
                       placeholder="sk-ant-..."
                       value={anthropicKey}
                       onChange={(e) => setAnthropicKey(e.target.value)}
+                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                     />
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-gray-400">
                       Get your API key from{" "}
                       <a
                         href="https://console.anthropic.com/settings/keys"
                         target="_blank"
                         rel="noreferrer"
-                        className="text-primary hover:underline"
+                        className="text-blue-400 hover:underline"
                       >
                         Anthropic Console
                       </a>
                     </p>
                   </div>
                   
-                  <Button type="submit" disabled={apiKeysPending || !anthropicKey}>
+                  <Button 
+                    type="submit" 
+                    disabled={apiKeysPending || !anthropicKey}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm"
+                  >
                     {apiKeysPending ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />

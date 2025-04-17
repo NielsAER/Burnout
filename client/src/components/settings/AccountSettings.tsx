@@ -61,7 +61,7 @@ export function AccountSettings() {
                 <AvatarFallback className="text-lg">{getUserInitials()}</AvatarFallback>
               </Avatar>
               
-              <Button type="button" variant="outline" className="h-10">
+              <Button type="button" variant="outline" className="h-10 bg-[#181818] border-[#2a2a2a] text-white hover:bg-[#2a2a2a] rounded-sm">
                 <UploadCloud className="mr-2 h-4 w-4" />
                 Change Avatar
               </Button>
@@ -136,23 +136,25 @@ export function AccountSettings() {
               </div>
               
               <div className="space-y-2 col-span-2">
-                <Label htmlFor="vat-number">VAT Number (Optional)</Label>
+                <Label htmlFor="vat-number" className="text-white">VAT Number (Optional)</Label>
                 <Input
                   id="vat-number"
                   value={vatNumber}
                   onChange={(e) => setVatNumber(e.target.value)}
                   placeholder="Enter your VAT number"
+                  className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                 />
               </div>
               
               <div className="space-y-2 col-span-2">
-                <Label htmlFor="bio">Bio</Label>
+                <Label htmlFor="bio" className="text-white">Bio</Label>
                 <Textarea
                   id="bio"
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Write a short bio about yourself"
                   rows={4}
+                  className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
                 />
                 <p className="text-xs text-gray-500">
                   Brief description for your profile
@@ -161,7 +163,7 @@ export function AccountSettings() {
             </div>
             
             <div className="flex justify-end">
-              <Button type="submit" disabled={isSubmitting}>
+              <Button type="submit" disabled={isSubmitting} className="bg-blue-600 hover:bg-blue-700 text-white border-0 rounded-sm">
                 {isSubmitting ? (
                   <>Saving...</>
                 ) : (
