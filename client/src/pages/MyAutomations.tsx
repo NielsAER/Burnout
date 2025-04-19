@@ -1,15 +1,18 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
-import { queryClient } from "@/lib/queryClient";
+import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Automation } from "@shared/schema";
 import AutomationCard from "@/components/automation/AutomationCard";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Filter, 
   PlusIcon, 
   SortAsc,
   Clock,
-  AlignStartHorizontal 
+  AlignStartHorizontal,
+  Layers,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +29,7 @@ const MyAutomations = () => {
   const [location, navigate] = useLocation();
   const [sortBy, setSortBy] = useState<SortOption>("recent");
   const [showActive, setShowActive] = useState<boolean | null>(null);
+  const { toast } = useToast();
 
   const { data: automations, isLoading, error } = useQuery<Automation[]>({
     queryKey: ["/api/automations"],
@@ -49,9 +53,33 @@ const MyAutomations = () => {
       queryClient.invalidateQueries({ queryKey: ["/api/automations"] });
     },
   });
+  
+  const deleteAutomationMutation = useMutation({
+    mutationFn: async (id: number) => {
+      return await apiRequest('DELETE', `/api/automations/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/automations"] });
+      toast({
+        title: "Success",
+        description: "Automation has been successfully deleted.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Error",
+        description: `Failed to delete automation: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleToggleStatus = (id: number) => {
     toggleAutomationMutation.mutate(id);
+  };
+  
+  const handleDeleteAutomation = (id: number) => {
+    deleteAutomationMutation.mutate(id);
   };
 
   const handleCreateNew = () => {
