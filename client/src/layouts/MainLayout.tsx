@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Menu, Search, Bell, Plus } from "lucide-react";
 import { useTheme } from "@/contexts/ThemeContext";
+import { useAIAssistant } from "@/contexts/AIAssistantContext";
+import { AIAssistantTooltip } from "@/components/ui/ai-assistant-tooltip";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
 
@@ -15,6 +17,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
   const [location, navigate] = useLocation();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { resolvedTheme } = useTheme();
+  const { currentContext, assistantEnabled } = useAIAssistant();
   const isDarkMode = resolvedTheme === "dark";
 
   // Determine page title based on current route
@@ -104,6 +107,14 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
 
         {/* Page content */}
         {children}
+        
+        {/* AI Assistant */}
+        {assistantEnabled && (
+          <AIAssistantTooltip 
+            contextId={currentContext} 
+            position="bottom-right"
+          />
+        )}
       </main>
     </div>
   );

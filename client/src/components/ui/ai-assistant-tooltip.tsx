@@ -19,6 +19,13 @@ interface AIAssistantResponse {
   suggestions?: string[];
 }
 
+// This interface is specifically for API responses to ensure proper typing
+interface AIAssistantAPIResponse {
+  text: string;
+  context: string;
+  suggestions?: string[];
+}
+
 const characterStates = {
   idle: {
     animation: {
@@ -103,20 +110,27 @@ export function AIAssistantTooltip({
   }, [isOpen, contextId]);
 
   const fetchAssistantResponse = async () => {
+    setCharacterState("thinking");
+    
     try {
-      setCharacterState("thinking");
-      
       // First try to get context-specific help from our API
       try {
-        const result = await apiRequest<AIAssistantResponse>({
+        const result = await apiRequest<AIAssistantAPIResponse>({
           method: "GET",
           url: `/api/assistant/help?contextId=${contextId}`,
         });
         
-        if (result && 'context' in result) {
-          setResponse(result);
-        setCharacterState("excited");
-      } catch (error) {
+        if (result && typeof result === 'object' && 'context' in result) {
+          setResponse({
+            text: result.text,
+            context: result.context,
+            suggestions: result.suggestions
+          });
+          setCharacterState("excited");
+        }
+      } catch (apiError) {
+        console.log("API error, falling back to OpenAI:", apiError);
+        
         // Fallback to OpenAI for generic help based on contextId
         const prompt = `You are a helpful AI assistant for a workflow automation tool called BRNOUT. 
         The user is currently in the "${contextId}" section of the app. 
