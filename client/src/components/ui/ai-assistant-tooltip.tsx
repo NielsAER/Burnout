@@ -273,7 +273,7 @@ export function AIAssistantTooltip({
                 </Button>
               </div>
               
-              {loading ? (
+              {loading || isAsking ? (
                 <div className="text-sm text-center py-2">
                   <div className="flex items-center justify-center space-x-2">
                     <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></div>
@@ -281,6 +281,65 @@ export function AIAssistantTooltip({
                     <div className="h-2 w-2 rounded-full bg-primary animate-bounce"></div>
                   </div>
                   <p className="mt-2 text-muted-foreground">Thinking...</p>
+                </div>
+              ) : showingWorkflowSuggestions ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-sm font-medium">Workflow Suggestions</h5>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 w-6 p-0" 
+                      onClick={resetAssistant}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  
+                  {workflowSuggestions.length > 0 ? (
+                    <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+                      {workflowSuggestions.map((suggestion, index) => (
+                        <div key={index} className="rounded-md border p-2 text-xs">
+                          <div className="font-medium">{suggestion.name}</div>
+                          <p className="text-muted-foreground mt-1">{suggestion.description}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex gap-1">
+                              {suggestion.tags.map((tag: string, tagIndex: number) => (
+                                <span key={tagIndex} className="bg-muted text-[10px] px-1.5 py-0.5 rounded-full">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                            <span className={cn(
+                              "text-[10px] px-1.5 py-0.5 rounded-full",
+                              suggestion.difficulty === "beginner" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
+                              suggestion.difficulty === "intermediate" ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200" :
+                              "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                            )}>
+                              {suggestion.difficulty}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">No workflow suggestions available.</p>
+                  )}
+                </div>
+              ) : answer ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <h5 className="text-sm font-medium">Answer</h5>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 w-6 p-0" 
+                      onClick={resetAssistant}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                  <p className="text-sm">{answer}</p>
                 </div>
               ) : response ? (
                 <div className="space-y-3">
@@ -304,6 +363,36 @@ export function AIAssistantTooltip({
                       </div>
                     </div>
                   )}
+                  
+                  <div className="pt-2 border-t mt-3">
+                    <div className="flex items-center gap-2">
+                      <Input
+                        ref={inputRef}
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder="Ask me anything..."
+                        className="text-xs h-8"
+                      />
+                      <Button 
+                        size="sm"
+                        className="h-8 w-8 p-0"
+                        onClick={() => handleAskQuestion()}
+                        disabled={!question.trim()}
+                      >
+                        <Send className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                    <Button
+                      variant="link"
+                      size="sm"
+                      className="text-xs text-muted-foreground mt-1 h-auto p-0"
+                      onClick={() => fetchWorkflowSuggestions()}
+                    >
+                      <PanelRightOpen className="h-3 w-3 mr-1" />
+                      Show workflow suggestions
+                    </Button>
+                  </div>
                 </div>
               ) : null}
             </motion.div>
