@@ -1,5 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
+import { apiRequest } from '@/lib/queryClient';
+
+interface WorkflowSuggestion {
+  name: string;
+  description: string;
+  difficulty: 'beginner' | 'intermediate' | 'advanced';
+  tags: string[];
+}
 
 interface AIAssistantContextType {
   currentContext: string;
@@ -7,6 +15,8 @@ interface AIAssistantContextType {
   updateContext: (contextId: string, data?: any) => void;
   assistantEnabled: boolean;
   toggleAssistant: () => void;
+  askQuestion: (question: string) => Promise<string>;
+  getWorkflowSuggestions: (category?: string) => Promise<WorkflowSuggestion[]>;
 }
 
 const AIAssistantContext = createContext<AIAssistantContextType | undefined>(undefined);
@@ -69,6 +79,46 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   }, []);
 
+  // Ask a question to the AI assistant
+  const askQuestion = async (question: string): Promise<string> => {
+    try {
+      const response = await fetch('/api/assistant/question', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          question,
+          context: currentContext,
+          contextData: contextData[currentContext] || {}
+        }),
+      });
+      
+      const data = await response.json();
+      return data.answer || "I'm sorry, I couldn't find an answer to that question.";
+    } catch (error) {
+      console.error('Error asking assistant question:', error);
+      return "Sorry, I encountered an error while processing your question.";
+    }
+  };
+  
+  // Get workflow suggestions based on category
+  const getWorkflowSuggestions = async (category?: string): Promise<WorkflowSuggestion[]> => {
+    try {
+      const url = category 
+        ? `/api/assistant/workflow-suggestions?category=${encodeURIComponent(category)}` 
+        : '/api/assistant/workflow-suggestions';
+        
+      const response = await fetch(url);
+      const data = await response.json();
+      
+      return data.suggestions || [];
+    } catch (error) {
+      console.error('Error getting workflow suggestions:', error);
+      return [];
+    }
+  };
+
   return (
     <AIAssistantContext.Provider
       value={{
@@ -76,7 +126,9 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
         contextData,
         updateContext,
         assistantEnabled,
-        toggleAssistant
+        toggleAssistant,
+        askQuestion,
+        getWorkflowSuggestions
       }}
     >
       {children}

@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { X, Sparkles, Bot } from "lucide-react";
+import { X, Sparkles, Bot, Send, PanelRightOpen } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import { useLLMServices } from "@/hooks/use-llm-services";
+import { Input } from "@/components/ui/input";
+import { useAIAssistant } from "@/contexts/AIAssistantContext";
 
 interface AIAssistantTooltipProps {
   contextId: string;
@@ -94,7 +96,15 @@ export function AIAssistantTooltip({
   const [isOpen, setIsOpen] = useState(false);
   const [response, setResponse] = useState<AIAssistantResponse | null>(null);
   const [characterState, setCharacterState] = useState<keyof typeof characterStates>("idle");
+  const [question, setQuestion] = useState("");
+  const [isAsking, setIsAsking] = useState(false);
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [showingWorkflowSuggestions, setShowingWorkflowSuggestions] = useState(false);
+  const [workflowSuggestions, setWorkflowSuggestions] = useState<any[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  
   const { generateTextOpenAI, loading } = useLLMServices();
+  const { askQuestion, getWorkflowSuggestions } = useAIAssistant();
 
   const positionClasses = {
     "bottom-right": "bottom-20 right-6",
@@ -161,9 +171,57 @@ export function AIAssistantTooltip({
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    // Here we would handle suggestion actions
-    console.log("Suggestion clicked:", suggestion);
-    // Future implementation: trigger actions based on suggestion content
+    // Handle specific suggestion actions
+    if (suggestion.toLowerCase().includes('workflow') || 
+        suggestion.toLowerCase().includes('automation')) {
+      fetchWorkflowSuggestions();
+    } else {
+      // Set the suggestion as a question and ask it
+      setQuestion(suggestion);
+      handleAskQuestion(suggestion);
+    }
+  };
+  
+  const handleAskQuestion = async (questionText: string = question) => {
+    if (!questionText.trim()) return;
+    
+    setIsAsking(true);
+    setCharacterState("thinking");
+    setAnswer(null);
+    
+    try {
+      const result = await askQuestion(questionText);
+      setAnswer(result);
+      setCharacterState("excited");
+    } catch (error) {
+      console.error("Error asking question:", error);
+      setAnswer("I encountered an error processing your question. Please try again later.");
+      setCharacterState("confused");
+    } finally {
+      setIsAsking(false);
+      setQuestion("");
+    }
+  };
+  
+  const fetchWorkflowSuggestions = async (category?: string) => {
+    setShowingWorkflowSuggestions(true);
+    setCharacterState("thinking");
+    
+    try {
+      const suggestions = await getWorkflowSuggestions(category);
+      setWorkflowSuggestions(suggestions);
+      setCharacterState("excited");
+    } catch (error) {
+      console.error("Error fetching workflow suggestions:", error);
+      setWorkflowSuggestions([]);
+      setCharacterState("confused");
+    }
+  };
+  
+  const resetAssistant = () => {
+    setAnswer(null);
+    setShowingWorkflowSuggestions(false);
+    setWorkflowSuggestions([]);
   };
 
   const toggleTooltip = () => {
@@ -172,9 +230,16 @@ export function AIAssistantTooltip({
       // Reset to default state after closing
       setTimeout(() => {
         setCharacterState("idle");
+        resetAssistant();
       }, 500);
     } else {
       setIsOpen(true);
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleAskQuestion();
     }
   };
 

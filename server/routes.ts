@@ -2584,6 +2584,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Handle AI Assistant questions
+  app.post("/api/assistant/question", async (req, res) => {
+    try {
+      const { question, context, contextData } = req.body;
+      
+      if (!question) {
+        return res.status(400).json({ message: "Question is required" });
+      }
+      
+      const systemMessage = `You are a friendly, helpful assistant for a workflow automation platform called BRNOUT. 
+      The user is asking you a question in the "${context || 'app'}" section.
+      ${contextData ? `Additional context: ${JSON.stringify(contextData)}` : ''}
+      
+      Respond in a helpful, friendly way with specific and actionable advice. 
+      Keep answers concise and focused on the automation platform functionalities.`;
+      
+      const result = await openaiService.generateText(
+        question,
+        800,
+        0.7,
+        "gpt-4o",
+        systemMessage,
+        req
+      );
+      
+      res.json({
+        answer: result.text,
+        context
+      });
+    } catch (error: any) {
+      console.error("AI Assistant question error:", error);
+      res.status(500).json({ 
+        message: "Failed to answer question", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // Get workflow suggestions from the AI assistant
+  app.get("/api/assistant/workflow-suggestions", async (req, res) => {
+    try {
+      const { category } = req.query;
+      
+      const systemMessage = `You are a workflow suggestions AI for BRNOUT, a workflow automation platform.
+      Generate 3-5 workflow suggestions ${category ? `for the category "${category}"` : ''}. 
+      The suggestions should range from beginner to advanced difficulty.
+      
+      Format your response as a valid JSON array with objects containing:
+      - name: A short descriptive name for the workflow
+      - description: A 1-2 sentence explanation of what the workflow does and its benefits
+      - difficulty: One of "beginner", "intermediate", or "advanced"
+      - tags: An array of 1-3 relevant tags for this workflow (e.g., ["productivity", "social media", "notifications"])`;
+      
+      const prompt = `Generate workflow suggestions ${category ? `for the category "${category}"` : ''}`;
+      
+      const result = await openaiService.generateText(
+        prompt,
+        1000,
+        0.7,
+        "gpt-4o",
+        systemMessage,
+        req
+      );
+      
+      // Parse the JSON response
+      let suggestions = [];
+      try {
+        suggestions = JSON.parse(result.text);
+      } catch (parseError) {
+        console.error("Error parsing AI response:", parseError);
+        
+        // Fallback to some basic suggestions
+        suggestions = [
+          {
+            name: "Social Media Post Scheduler",
+            description: "Schedule posts to multiple social media platforms from a single calendar interface.",
+            difficulty: "beginner",
+            tags: ["social media", "scheduling", "productivity"]
+          },
+          {
+            name: "Document Sentiment Analyzer",
+            description: "Analyze the sentiment of incoming documents or emails and categorize them by priority.",
+            difficulty: "intermediate",
+            tags: ["AI", "productivity", "email"]
+          },
+          {
+            name: "Multi-platform Customer Response System",
+            description: "Consolidate messages from multiple platforms and generate AI-assisted responses.",
+            difficulty: "advanced",
+            tags: ["customer service", "AI", "communication"]
+          }
+        ];
+      }
+      
+      res.json({
+        suggestions,
+        category: category || null
+      });
+    } catch (error: any) {
+      console.error("Workflow suggestions error:", error);
+      res.status(500).json({ 
+        message: "Failed to get workflow suggestions", 
+        error: error.message 
+      });
+    }
+  });
+  
   // Helper function to get static context-specific help
   function getContextHelp(contextId: string): { text: string; context: string; suggestions: string[] } | null {
     const contextHelp: Record<string, { text: string; suggestions: string[] }> = {
