@@ -2635,7 +2635,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       - name: A short descriptive name for the workflow
       - description: A 1-2 sentence explanation of what the workflow does and its benefits
       - difficulty: One of "beginner", "intermediate", or "advanced"
-      - tags: An array of 1-3 relevant tags for this workflow (e.g., ["productivity", "social media", "notifications"])`;
+      - tags: An array of 1-3 relevant tags for this workflow (e.g., ["productivity", "social media", "notifications"])
+      - triggerAppId: The type of trigger (e.g., "schedule", "gmail", "twitter", "webhook")
+      - actionAppId: The type of action (e.g., "openai", "gmail", "slack", "notion")`;
       
       const prompt = `Generate workflow suggestions ${category ? `for the category "${category}"` : ''}`;
       
@@ -2661,19 +2663,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             name: "Social Media Post Scheduler",
             description: "Schedule posts to multiple social media platforms from a single calendar interface.",
             difficulty: "beginner",
-            tags: ["social media", "scheduling", "productivity"]
+            tags: ["social media", "scheduling", "productivity"],
+            triggerAppId: "schedule",
+            actionAppId: "twitter"
           },
           {
             name: "Document Sentiment Analyzer",
             description: "Analyze the sentiment of incoming documents or emails and categorize them by priority.",
             difficulty: "intermediate",
-            tags: ["AI", "productivity", "email"]
+            tags: ["AI", "productivity", "email"],
+            triggerAppId: "gmail",
+            actionAppId: "openai"
           },
           {
             name: "Multi-platform Customer Response System",
             description: "Consolidate messages from multiple platforms and generate AI-assisted responses.",
             difficulty: "advanced",
-            tags: ["customer service", "AI", "communication"]
+            tags: ["customer service", "AI", "communication"],
+            triggerAppId: "webhook",
+            actionAppId: "slack"
           }
         ];
       }
@@ -2686,6 +2694,72 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Workflow suggestions error:", error);
       res.status(500).json({ 
         message: "Failed to get workflow suggestions", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // Create a workflow from a suggestion
+  app.post("/api/assistant/create-workflow", async (req, res) => {
+    try {
+      const { name, description, triggerAppId, actionAppId, tags } = req.body;
+      
+      if (!name || !triggerAppId || !actionAppId) {
+        return res.status(400).json({ message: "Missing required workflow information" });
+      }
+      
+      // Generate default configurations based on the trigger and action types
+      const systemMessage = `You are an AI assistant helping to create a workflow configuration for an automation platform.
+      Create appropriate default configurations for a workflow with the following details:
+      - Name: "${name}"
+      - Description: "${description || 'No description provided'}"
+      - Trigger app: "${triggerAppId}"
+      - Action app: "${actionAppId}"
+      
+      Format the response as a valid JSON object with the following structure:
+      {
+        "triggerConfig": { /* Configuration specific to the trigger type */ },
+        "actionConfig": { /* Configuration specific to the action type */ }
+      }
+
+      The configuration should be simple but realistic for a first-time user.`;
+      
+      const result = await openaiService.generateText(
+        `Generate configurations for ${triggerAppId} trigger and ${actionAppId} action`,
+        800,
+        0.7,
+        "gpt-4o",
+        systemMessage,
+        req
+      );
+      
+      let configs;
+      try {
+        configs = JSON.parse(result.text);
+      } catch (parseError) {
+        console.error("Error parsing AI config response:", parseError);
+        // Fallback to basic configs
+        configs = {
+          triggerConfig: { schedule: "0 9 * * *" },
+          actionConfig: { template: "Default template" }
+        };
+      }
+      
+      // Create the automation
+      const newAutomation = await storage.createAutomation({
+        name,
+        triggerAppId,
+        triggerConfig: configs.triggerConfig,
+        actionAppId,
+        actionConfig: configs.actionConfig,
+        active: false,
+      });
+      
+      res.status(201).json(newAutomation);
+    } catch (error: any) {
+      console.error("Create workflow error:", error);
+      res.status(500).json({ 
+        message: "Failed to create workflow", 
         error: error.message 
       });
     }

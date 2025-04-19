@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { X, Sparkles, Bot, Send, PanelRightOpen } from "lucide-react";
+import { X, Sparkles, Bot, Send, PanelRightOpen, Maximize, Minimize, Plus } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { cn } from "@/lib/utils";
 import { useLLMServices } from "@/hooks/use-llm-services";
 import { Input } from "@/components/ui/input";
 import { useAIAssistant } from "@/contexts/AIAssistantContext";
+import { useToast } from "@/hooks/use-toast";
 
 interface AIAssistantTooltipProps {
   contextId: string;
@@ -99,8 +100,10 @@ export function AIAssistantTooltip({
   const [question, setQuestion] = useState("");
   const [isAsking, setIsAsking] = useState(false);
   const [answer, setAnswer] = useState<string | null>(null);
+  const [isCreatingWorkflow, setIsCreatingWorkflow] = useState(false);
   const [showingWorkflowSuggestions, setShowingWorkflowSuggestions] = useState(false);
   const [workflowSuggestions, setWorkflowSuggestions] = useState<any[]>([]);
+  const [isExpanded, setIsExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   
   const { generateTextOpenAI, loading } = useLLMServices();
@@ -255,22 +258,40 @@ export function AIAssistantTooltip({
               initial={{ opacity: 0, y: 20, scale: 0.8 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 20, scale: 0.8 }}
-              className="bg-card text-card-foreground border rounded-xl shadow-lg p-4 mb-3 w-80"
+              className={cn(
+                "bg-card text-card-foreground border rounded-xl shadow-lg p-4 mb-3 transition-all duration-300",
+                isExpanded ? "w-96 md:w-[500px] h-[400px] overflow-y-auto" : "w-80"
+              )}
             >
               <div className="flex justify-between items-start mb-3">
                 <h4 className="font-semibold text-sm flex items-center">
                   <Sparkles className="h-4 w-4 mr-2 text-primary" />
                   Assistant
                 </h4>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 w-6 p-0"
-                  onClick={toggleTooltip}
-                >
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Close</span>
-                </Button>
+                <div className="flex items-center space-x-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={() => setIsExpanded(!isExpanded)}
+                    title={isExpanded ? "Collapse" : "Expand"}
+                  >
+                    {isExpanded ? 
+                      <Minimize className="h-3.5 w-3.5" /> : 
+                      <Maximize className="h-3.5 w-3.5" />
+                    }
+                    <span className="sr-only">{isExpanded ? "Collapse" : "Expand"}</span>
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0"
+                    onClick={toggleTooltip}
+                  >
+                    <X className="h-4 w-4" />
+                    <span className="sr-only">Close</span>
+                  </Button>
+                </div>
               </div>
               
               {loading || isAsking ? (
