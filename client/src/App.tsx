@@ -18,6 +18,7 @@ import MainLayout from "@/layouts/MainLayout";
 import { AuthProvider } from "@/hooks/use-auth";
 import { ProtectedRoute } from "@/lib/protected-route";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { AIAssistantProvider } from "@/contexts/AIAssistantContext";
 
 function Router() {
   return (
@@ -43,10 +44,12 @@ function App() {
       <DndProvider backend={HTML5Backend}>
         <ThemeProvider>
           <AuthProvider>
-            <MainLayout>
-              <Router />
-            </MainLayout>
-            <Toaster />
+            <AIAssistantProvider>
+              <MainLayout>
+                <Router />
+              </MainLayout>
+              <Toaster />
+            </AIAssistantProvider>
           </AuthProvider>
         </ThemeProvider>
       </DndProvider>

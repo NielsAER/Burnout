@@ -2531,6 +2531,92 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // AI Assistant endpoints
+  app.get("/api/assistant/help", async (req, res) => {
+    try {
+      const { contextId } = req.query;
+      
+      if (!contextId) {
+        return res.status(400).json({ message: "Context ID is required" });
+      }
+      
+      // First check for static context-specific help
+      const contextHelp = getContextHelp(contextId as string);
+      
+      if (contextHelp) {
+        return res.json(contextHelp);
+      }
+      
+      // Fallback to AI-generated help
+      const systemMessage = `You are a friendly, helpful assistant for a workflow automation platform called BRNOUT. 
+      The user is currently in the "${contextId}" section of the app. 
+      In a casual and friendly tone, provide a brief (max 2 sentences) tip that would be helpful for this context.
+      Also suggest 2-3 quick actions they might want to take in bullet points.`;
+      
+      const prompt = `Generate help for the ${contextId} context`;
+      
+      const result = await openaiService.generateText(
+        prompt,
+        400,
+        0.7,
+        "gpt-4o",
+        systemMessage,
+        req
+      );
+      
+      // Parse the response to extract text and suggestions
+      const lines = result.text.split('\n').filter(line => line.trim() !== '');
+      const text = lines.filter(line => !line.includes('•') && !line.includes('-')).join(' ');
+      const suggestions = lines.filter(line => line.includes('•') || line.includes('-'))
+        .map(line => line.replace(/^[•-]\s*/, '').trim());
+      
+      res.json({
+        text,
+        context: contextId,
+        suggestions
+      });
+    } catch (error: any) {
+      console.error("AI Assistant help error:", error);
+      res.status(500).json({ 
+        message: "Failed to get assistant help", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // Helper function to get static context-specific help
+  function getContextHelp(contextId: string): { text: string; context: string; suggestions: string[] } | null {
+    const contextHelp: Record<string, { text: string; suggestions: string[] }> = {
+      'dashboard': {
+        text: 'Welcome to your dashboard! Here you can see all your active automations and their performance.',
+        suggestions: ['Create new automation', 'View analytics', 'Check connections']
+      },
+      'automations-list': {
+        text: 'Here you can see all your automations. Click on any automation to edit or view its details.',
+        suggestions: ['Create new automation', 'Filter automations', 'Sort by status']
+      },
+      'automation-editor': {
+        text: 'This is where the magic happens! Connect triggers and actions to build your automation workflow.',
+        suggestions: ['Add trigger', 'Add action', 'Test workflow', 'Save automation']
+      },
+      'connections': {
+        text: 'Manage your connected apps and services here. Connect new apps to use in your automations.',
+        suggestions: ['Connect new service', 'Refresh connections', 'View available integrations']
+      },
+      'ai-services': {
+        text: 'Explore AI capabilities to enhance your automations with text analysis, image generation, and more.',
+        suggestions: ['Try text analysis', 'Explore web search', 'Check API key status']
+      },
+      'settings': {
+        text: 'Configure your account settings and preferences. Manage API keys for various services.',
+        suggestions: ['Update profile', 'Configure API keys', 'Change theme']
+      }
+    };
+    
+    const help = contextHelp[contextId];
+    return help ? { text: help.text, context: contextId, suggestions: help.suggestions } : null;
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }

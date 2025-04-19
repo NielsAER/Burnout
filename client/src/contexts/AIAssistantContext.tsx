@@ -1,0 +1,95 @@
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useLocation } from 'wouter';
+
+interface AIAssistantContextType {
+  currentContext: string;
+  contextData: Record<string, any>;
+  updateContext: (contextId: string, data?: any) => void;
+  assistantEnabled: boolean;
+  toggleAssistant: () => void;
+}
+
+const AIAssistantContext = createContext<AIAssistantContextType | undefined>(undefined);
+
+// Map routes to context IDs
+const routeToContextMap: Record<string, string> = {
+  '/': 'dashboard',
+  '/automations': 'automations-list',
+  '/automations/new': 'automation-editor',
+  '/automations/edit': 'automation-editor',
+  '/analytics': 'analytics',
+  '/connections': 'connections',
+  '/ai-services': 'ai-services',
+  '/settings': 'settings',
+};
+
+export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [location] = useLocation();
+  const [currentContext, setCurrentContext] = useState<string>('dashboard');
+  const [contextData, setContextData] = useState<Record<string, any>>({});
+  const [assistantEnabled, setAssistantEnabled] = useState<boolean>(true);
+
+  // Update context based on route changes
+  useEffect(() => {
+    // Get the base path (e.g., /automations/123 -> /automations)
+    const basePath = '/' + location.split('/').slice(1, 2).join('/');
+    
+    // Find matching context or default to current path
+    const newContext = routeToContextMap[location] || 
+                     routeToContextMap[basePath] || 
+                     'unknown';
+    
+    setCurrentContext(newContext);
+  }, [location]);
+
+  const updateContext = (contextId: string, data?: any) => {
+    setCurrentContext(contextId);
+    if (data) {
+      setContextData(prev => ({
+        ...prev,
+        [contextId]: {
+          ...(prev[contextId] || {}),
+          ...data
+        }
+      }));
+    }
+  };
+
+  const toggleAssistant = () => {
+    setAssistantEnabled(prev => !prev);
+    // Store preference in localStorage
+    localStorage.setItem('assistantEnabled', (!assistantEnabled).toString());
+  };
+
+  // Load assistant preference from localStorage on mount
+  useEffect(() => {
+    const storedPreference = localStorage.getItem('assistantEnabled');
+    if (storedPreference !== null) {
+      setAssistantEnabled(storedPreference === 'true');
+    }
+  }, []);
+
+  return (
+    <AIAssistantContext.Provider
+      value={{
+        currentContext,
+        contextData,
+        updateContext,
+        assistantEnabled,
+        toggleAssistant
+      }}
+    >
+      {children}
+    </AIAssistantContext.Provider>
+  );
+};
+
+export const useAIAssistant = () => {
+  const context = useContext(AIAssistantContext);
+  
+  if (context === undefined) {
+    throw new Error('useAIAssistant must be used within an AIAssistantProvider');
+  }
+  
+  return context;
+};
