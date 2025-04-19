@@ -740,18 +740,25 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
 
   return (
     <div className="flex-1">
-      <div className="bg-gray-50 dark:bg-[#111111] border border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-lg p-6 min-h-[500px] relative flex flex-col">
+      <div className="bg-white dark:bg-[#111111] border border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-xl p-6 min-h-[500px] relative flex flex-col shadow-sm">
         {/* Top toolbar */}
         <div className="flex justify-between items-center mb-6">
-          <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Workflow Builder</h3>
+          <div className="flex items-center">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary/20 to-primary/5 dark:from-primary/30 dark:to-primary/10 rounded-full flex items-center justify-center mr-3">
+              <Zap className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-base font-medium text-gray-800 dark:text-gray-200">Workflow Builder</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400">Connect apps to automate your tasks</p>
+            </div>
+          </div>
           <div className="flex space-x-2">
             <Button 
-              variant="outline" 
               size="sm"
               onClick={handleTestWorkflow}
-              className="flex items-center dark:text-gray-300 dark:border-[#2a2a2a] dark:hover:bg-[#1a1a1a]"
+              className="bg-gradient-to-r from-primary to-primary/90 text-white hover:shadow-md hover:shadow-primary/20 transition-all duration-300 group"
             >
-              <Play className="h-3.5 w-3.5 mr-1.5" />
+              <Play className="h-3.5 w-3.5 mr-1.5 group-hover:animate-pulse" />
               Test Workflow
             </Button>
           </div>
@@ -759,8 +766,11 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         
         {/* Title Text if no trigger or actions */}
         {!trigger && actions.length === 0 && (
-          <div className="text-center text-sm text-gray-500 dark:text-gray-400 mb-6">
-            <p>Start by adding a trigger, then add one or more actions</p>
+          <div className="text-center rounded-lg bg-gradient-to-r from-blue-50/50 to-indigo-50/50 dark:from-blue-900/10 dark:to-indigo-900/10 p-4 shadow-sm mb-6">
+            <div className="bg-white dark:bg-[#181818] rounded-lg p-4 border border-blue-100 dark:border-blue-900/30">
+              <p className="text-sm text-gray-700 dark:text-gray-300 font-medium">Start building your workflow</p>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">First add a trigger, then connect actions to automate tasks</p>
+            </div>
           </div>
         )}
         
