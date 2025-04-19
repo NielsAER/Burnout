@@ -106,7 +106,7 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus, o
           {/* Flow visualization */}
           <div className="flex items-center justify-center gap-4 p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
             <div className="relative h-14 w-14 flex items-center justify-center rounded-lg p-2 bg-primary/10 text-primary">
-              <AppIconMap appId={triggerAppId} size={24} />
+              <AppIconMap appId={triggerAppId} />
               <div className="absolute -bottom-1 -right-1 text-[0.65rem] font-semibold bg-primary/80 text-white px-1 rounded-sm">
                 TRIGGER
               </div>
@@ -118,7 +118,7 @@ const AutomationCard: FC<AutomationCardProps> = ({ automation, onToggleStatus, o
             </div>
             
             <div className="relative h-14 w-14 flex items-center justify-center rounded-lg p-2 bg-primary/10 text-primary">
-              <AppIconMap appId={actionAppId} size={24} />
+              <AppIconMap appId={actionAppId} />
               <div className="absolute -bottom-1 -right-1 text-[0.65rem] font-semibold bg-primary/80 text-white px-1 rounded-sm">
                 ACTION
               </div>
