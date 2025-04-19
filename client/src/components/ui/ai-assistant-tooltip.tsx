@@ -108,6 +108,7 @@ export function AIAssistantTooltip({
   
   const { generateTextOpenAI, loading } = useLLMServices();
   const { askQuestion, getWorkflowSuggestions } = useAIAssistant();
+  const { toast } = useToast();
 
   const positionClasses = {
     "bottom-right": "bottom-20 right-6",
@@ -221,6 +222,50 @@ export function AIAssistantTooltip({
     }
   };
   
+  const handleCreateWorkflow = async (suggestion: any) => {
+    try {
+      setIsCreatingWorkflow(true);
+      setCharacterState("thinking");
+      
+      const response = await apiRequest("POST", "/api/assistant/create-workflow", {
+        name: suggestion.name,
+        description: suggestion.description,
+        triggerAppId: suggestion.triggerAppId || "schedule",
+        actionAppId: suggestion.actionAppId || "openai",
+        tags: suggestion.tags || []
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to create workflow");
+      }
+      
+      const workflow = await response.json();
+      
+      toast({
+        title: "Workflow Created",
+        description: `"${suggestion.name}" was successfully created!`,
+        variant: "default",
+      });
+      
+      setCharacterState("excited");
+      setTimeout(() => {
+        resetAssistant();
+        setIsOpen(false);
+      }, 2000);
+      
+    } catch (error) {
+      console.error("Error creating workflow:", error);
+      toast({
+        title: "Creation Failed",
+        description: `Could not create "${suggestion.name}". Please try again.`,
+        variant: "destructive",
+      });
+      setCharacterState("confused");
+    } finally {
+      setIsCreatingWorkflow(false);
+    }
+  };
+  
   const resetAssistant = () => {
     setAnswer(null);
     setShowingWorkflowSuggestions(false);
@@ -294,14 +339,16 @@ export function AIAssistantTooltip({
                 </div>
               </div>
               
-              {loading || isAsking ? (
+              {loading || isAsking || isCreatingWorkflow ? (
                 <div className="text-sm text-center py-2">
                   <div className="flex items-center justify-center space-x-2">
                     <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.3s]"></div>
                     <div className="h-2 w-2 rounded-full bg-primary animate-bounce [animation-delay:-0.15s]"></div>
                     <div className="h-2 w-2 rounded-full bg-primary animate-bounce"></div>
                   </div>
-                  <p className="mt-2 text-muted-foreground">Thinking...</p>
+                  <p className="mt-2 text-muted-foreground">
+                    {isCreatingWorkflow ? "Creating workflow..." : isAsking ? "Finding answer..." : "Thinking..."}
+                  </p>
                 </div>
               ) : showingWorkflowSuggestions ? (
                 <div className="space-y-3">
@@ -320,17 +367,13 @@ export function AIAssistantTooltip({
                   {workflowSuggestions.length > 0 ? (
                     <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
                       {workflowSuggestions.map((suggestion, index) => (
-                        <div key={index} className="rounded-md border p-2 text-xs">
-                          <div className="font-medium">{suggestion.name}</div>
-                          <p className="text-muted-foreground mt-1">{suggestion.description}</p>
-                          <div className="flex items-center justify-between mt-2">
-                            <div className="flex gap-1">
-                              {suggestion.tags.map((tag: string, tagIndex: number) => (
-                                <span key={tagIndex} className="bg-muted text-[10px] px-1.5 py-0.5 rounded-full">
-                                  {tag}
-                                </span>
-                              ))}
-                            </div>
+                        <div 
+                          key={index} 
+                          className="rounded-md border p-3 text-xs relative hover:border-primary transition-colors group cursor-pointer"
+                          onClick={() => handleCreateWorkflow(suggestion)}
+                        >
+                          <div className="flex justify-between items-start mb-1">
+                            <div className="font-medium pr-6">{suggestion.name}</div>
                             <span className={cn(
                               "text-[10px] px-1.5 py-0.5 rounded-full",
                               suggestion.difficulty === "beginner" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
@@ -340,6 +383,28 @@ export function AIAssistantTooltip({
                               {suggestion.difficulty}
                             </span>
                           </div>
+                          <p className="text-muted-foreground mt-1 leading-relaxed">{suggestion.description}</p>
+                          <div className="flex items-center justify-between mt-2">
+                            <div className="flex flex-wrap gap-1">
+                              {suggestion.tags.map((tag: string, tagIndex: number) => (
+                                <span key={tagIndex} className="bg-muted text-[10px] px-1.5 py-0.5 rounded-full">
+                                  {tag}
+                                </span>
+                              ))}
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity h-6 w-6 p-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleCreateWorkflow(suggestion);
+                              }}
+                            >
+                              <Plus className="h-3.5 w-3.5 text-primary" />
+                            </Button>
+                          </div>
+                          <div className="absolute top-0 right-0 bottom-0 left-0 bg-primary hover:bg-opacity-5 opacity-0 group-hover:opacity-100 transition-opacity rounded pointer-events-none"></div>
                         </div>
                       ))}
                     </div>
@@ -360,11 +425,54 @@ export function AIAssistantTooltip({
                       <X className="h-3 w-3" />
                     </Button>
                   </div>
-                  <p className="text-sm">{answer}</p>
+                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                    {answer.split('\n').map((line, i) => {
+                      // Format code blocks
+                      if (line.trim().startsWith('```') && line.trim().length > 3) {
+                        const language = line.trim().substring(3);
+                        return (
+                          <div key={i} className="mt-2 font-mono text-xs">
+                            <div className="bg-muted text-muted-foreground px-2 py-1 rounded-t-md text-[10px]">
+                              {language}
+                            </div>
+                          </div>
+                        );
+                      } else if (line.trim() === '```') {
+                        return null; // Skip the closing code block markers
+                      } else if (line.startsWith('> ')) {
+                        // Format blockquotes
+                        return (
+                          <blockquote key={i} className="border-l-2 border-muted pl-4 text-muted-foreground italic">
+                            {line.substring(2)}
+                          </blockquote>
+                        );
+                      } else if (line.trim().startsWith('- ') || line.trim().startsWith('* ')) {
+                        // Format list items
+                        return (
+                          <div key={i} className="flex space-x-2">
+                            <span>•</span>
+                            <p>{line.trim().substring(2)}</p>
+                          </div>
+                        );
+                      } else if (line.trim() === '') {
+                        // Add spacing for empty lines
+                        return <div key={i} className="h-2"></div>;
+                      } else {
+                        // Regular text
+                        return <p key={i}>{line}</p>;
+                      }
+                    })}
+                  </div>
                 </div>
               ) : response ? (
                 <div className="space-y-3">
-                  <p className="text-sm">{response.text}</p>
+                  <div className="text-sm prose prose-sm dark:prose-invert max-w-none">
+                    {response.text.split('\n').map((line, i) => 
+                      line.trim() === '' ? 
+                        <div key={i} className="h-2"></div> : 
+                        <p key={i}>{line}</p>
+                    )}
+                  </div>
                   
                   {response.suggestions && response.suggestions.length > 0 && (
                     <div className="space-y-2">
