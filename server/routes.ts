@@ -1945,6 +1945,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // OpenAI Web Search Routes
+  app.post("/api/services/openai/search", async (req, res) => {
+    try {
+      const { query, searchRecency, temperature, maxTokens, systemMessage } = req.body;
+      if (!query) {
+        return res.status(400).json({ message: "Query is required" });
+      }
+      
+      const result = await openaiService.performSearch(query, {
+        searchRecency,
+        temperature,
+        maxTokens,
+        systemMessage
+      }, req);
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("OpenAI search error:", error);
+      res.status(500).json({ 
+        message: "Failed to perform search", 
+        error: error.message 
+      });
+    }
+  });
+  
+  app.post("/api/services/openai/analyze-topic", async (req, res) => {
+    try {
+      const { topic, searchRecency, temperature, systemMessage, maxTokens } = req.body;
+      if (!topic) {
+        return res.status(400).json({ message: "Topic is required" });
+      }
+      
+      const result = await openaiService.analyzeTopic(topic, {
+        searchRecency,
+        temperature,
+        systemMessage,
+        maxTokens
+      }, req);
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("OpenAI topic analysis error:", error);
+      res.status(500).json({ 
+        message: "Failed to analyze topic", 
+        error: error.message 
+      });
+    }
+  });
+  
+  app.post("/api/services/openai/research-question", async (req, res) => {
+    try {
+      const { question, searchRecency, temperature, systemMessage, maxTokens } = req.body;
+      if (!question) {
+        return res.status(400).json({ message: "Question is required" });
+      }
+      
+      const result = await openaiService.researchQuestion(question, {
+        searchRecency,
+        temperature,
+        systemMessage,
+        maxTokens
+      }, req);
+      
+      res.json(result);
+    } catch (error: any) {
+      console.error("OpenAI question research error:", error);
+      res.status(500).json({ 
+        message: "Failed to research question", 
+        error: error.message 
+      });
+    }
+  });
+  
   app.post("/api/services/openai/analyze-text", async (req, res) => {
     try {
       const { text, task } = req.body;

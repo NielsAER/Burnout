@@ -42,6 +42,7 @@ interface OpenAIOptions {
   temperature?: number;
   size?: "1024x1024" | "1792x1024" | "1024x1792";
   quality?: "standard" | "hd";
+  searchRecency?: "hour" | "day" | "week" | "month" | "year";
 }
 
 interface AnthropicOptions {
@@ -88,6 +89,9 @@ interface UseLLMServicesReturn {
   generateTextOpenAI: (prompt: string, options?: OpenAIOptions) => Promise<TextGenerationResponse>;
   generateImageOpenAI: (prompt: string, options?: OpenAIOptions) => Promise<ImageGenerationResponse>;
   analyzeTextOpenAI: (text: string, task: string) => Promise<TextAnalysisResponse>;
+  performSearchOpenAI: (query: string, options?: OpenAIOptions) => Promise<SearchResponse>;
+  analyzeTopicOpenAI: (topic: string, options?: OpenAIOptions) => Promise<SearchResponse>;
+  researchQuestionOpenAI: (question: string, options?: OpenAIOptions) => Promise<SearchResponse>;
   
   // Anthropic functions
   generateTextAnthropic: (prompt: string, options?: AnthropicOptions) => Promise<TextGenerationResponse>;
@@ -188,6 +192,85 @@ export function useLLMServices(): UseLLMServicesReturn {
         method: "POST",
         url: "/api/services/openai/analyze-text",
         data: { text, task }
+      });
+      
+      return response;
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // OpenAI Web Search functions
+  const performSearchOpenAI = async (query: string, options?: OpenAIOptions): Promise<SearchResponse> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await apiRequest<SearchResponse>({
+        method: "POST",
+        url: "/api/services/openai/search",
+        data: {
+          query,
+          searchRecency: options?.searchRecency,
+          temperature: options?.temperature,
+          maxTokens: options?.maxTokens
+        }
+      });
+      
+      return response;
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const analyzeTopicOpenAI = async (topic: string, options?: OpenAIOptions): Promise<SearchResponse> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await apiRequest<SearchResponse>({
+        method: "POST",
+        url: "/api/services/openai/analyze-topic",
+        data: {
+          topic,
+          searchRecency: options?.searchRecency,
+          temperature: options?.temperature,
+          maxTokens: options?.maxTokens
+        }
+      });
+      
+      return response;
+    } catch (err) {
+      const errorMessage = handleApiError(err);
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const researchQuestionOpenAI = async (question: string, options?: OpenAIOptions): Promise<SearchResponse> => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await apiRequest<SearchResponse>({
+        method: "POST",
+        url: "/api/services/openai/research-question",
+        data: {
+          question,
+          searchRecency: options?.searchRecency,
+          temperature: options?.temperature,
+          maxTokens: options?.maxTokens
+        }
       });
       
       return response;
@@ -553,6 +636,9 @@ export function useLLMServices(): UseLLMServicesReturn {
     generateTextOpenAI,
     generateImageOpenAI,
     analyzeTextOpenAI,
+    performSearchOpenAI,
+    analyzeTopicOpenAI,
+    researchQuestionOpenAI,
     
     // Anthropic functions
     generateTextAnthropic,

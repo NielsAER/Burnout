@@ -66,7 +66,7 @@ export default function AIServices() {
             <ImageIcon className="h-4 w-4" />
             Image Generation
           </TabsTrigger>
-          <TabsTrigger value="search" className="flex gap-2" disabled={!hasPerplexity}>
+          <TabsTrigger value="search" className="flex gap-2" disabled={!hasOpenAI}>
             <SearchIcon className="h-4 w-4" />
             Web Search
           </TabsTrigger>
@@ -99,7 +99,7 @@ export default function AIServices() {
 
         <TabsContent value="search" className="py-4">
           <div className="grid place-items-center">
-            {!hasPerplexity ? (
+            {!hasOpenAI ? (
               <Card className="w-full max-w-3xl">
                 <CardHeader>
                   <CardTitle>Web Search</CardTitle>
@@ -107,16 +107,16 @@ export default function AIServices() {
                 <CardContent className="py-4 text-center">
                   <Alert className="mb-4">
                     <InfoIcon className="h-4 w-4" />
-                    <AlertTitle>Perplexity API Key Required</AlertTitle>
+                    <AlertTitle>OpenAI API Key Required</AlertTitle>
                     <AlertDescription>
-                      To use web search capabilities, you need to configure a Perplexity API key in the settings.
+                      To use web search capabilities, you need to configure an OpenAI API key in the settings.
                       <Button asChild variant="link" className="h-auto p-0 ml-2">
                         <Link to="/settings">Go to Settings</Link>
                       </Button>
                     </AlertDescription>
                   </Alert>
                   <p className="text-muted-foreground">
-                    Research and retrieve information from the web with Perplexity
+                    Research and retrieve information from the web with OpenAI
                   </p>
                 </CardContent>
               </Card>

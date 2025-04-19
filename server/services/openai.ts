@@ -197,3 +197,140 @@ export async function moderateContent(text: string, req?: Request): Promise<any>
     throw new Error(`Failed to moderate content: ${error.message}`);
   }
 }
+
+// Web search interface
+interface SearchResponse {
+  text: string;
+  modelUsed: string;
+  citations: string[];
+}
+
+// Perform web search using OpenAI
+export async function performSearch(
+  query: string,
+  options: {
+    searchRecency?: "day" | "week" | "month";
+    temperature?: number;
+    maxTokens?: number;
+    systemMessage?: string;
+  } = {},
+  req?: Request
+): Promise<SearchResponse> {
+  try {
+    const openai = getOpenAIInstance(req);
+    
+    // Set default options
+    const {
+      searchRecency = "week",
+      temperature = 0.2,
+      maxTokens = 1000,
+      systemMessage = "You are a helpful assistant that provides accurate information with relevant sources. Always include citations to websites where the information was found. If you don't know or can't find appropriate information, admit it."
+    } = options;
+
+    // Add recency guidance to system message
+    let timeframeMessage = "";
+    if (searchRecency === "day") {
+      timeframeMessage = "Focus on information from the last 24 hours.";
+    } else if (searchRecency === "week") {
+      timeframeMessage = "Focus on information from the last week.";
+    } else if (searchRecency === "month") {
+      timeframeMessage = "Focus on information from the last month.";
+    }
+
+    const enhancedSystemMessage = `${systemMessage} ${timeframeMessage} After your response, list all sources with URLs in a section titled "SOURCES:" with each source on a new line.`;
+    
+    // Add search instruction to query
+    const enhancedQuery = `Please search the web for information about: ${query}`;
+
+    // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: enhancedSystemMessage },
+        { role: "user", content: enhancedQuery }
+      ],
+      max_tokens: maxTokens,
+      temperature: temperature,
+    });
+
+    const content = response.choices[0].message.content || "";
+    
+    // Extract citations from the content
+    const citations: string[] = [];
+    const sourcesMatch = content.match(/SOURCES:[\s\S]*$/i);
+    
+    let cleanedContent = content;
+    
+    if (sourcesMatch) {
+      const sourcesSection = sourcesMatch[0];
+      // Extract URLs from the sources section
+      const urlRegex = /(https?:\/\/[^\s]+)/g;
+      let match;
+      while ((match = urlRegex.exec(sourcesSection)) !== null) {
+        citations.push(match[1]);
+      }
+      
+      // Remove the sources section from the content
+      cleanedContent = content.replace(/SOURCES:[\s\S]*$/i, "").trim();
+    }
+
+    return {
+      text: cleanedContent,
+      modelUsed: response.model,
+      citations: citations
+    };
+  } catch (error: any) {
+    console.error("OpenAI search error:", error);
+    throw new Error(`Failed to perform search: ${error.message}`);
+  }
+}
+
+// Analyze a topic with OpenAI
+export async function analyzeTopic(
+  topic: string,
+  options: {
+    searchRecency?: "day" | "week" | "month";
+    temperature?: number;
+    maxTokens?: number;
+    systemMessage?: string;
+  } = {},
+  req?: Request
+): Promise<SearchResponse> {
+  try {
+    const systemMessage = options.systemMessage || 
+      "You are a helpful assistant that provides detailed analysis on topics. Include relevant sources and citations.";
+    
+    return await performSearch(`Provide a detailed analysis of the following topic: ${topic}`, {
+      ...options,
+      systemMessage
+    }, req);
+  } catch (error: any) {
+    console.error("Topic analysis error:", error);
+    throw new Error(`Failed to analyze topic: ${error.message}`);
+  }
+}
+
+// Research a specific question with OpenAI
+export async function researchQuestion(
+  question: string,
+  options: {
+    searchRecency?: "day" | "week" | "month";
+    temperature?: number;
+    maxTokens?: number;
+    systemMessage?: string;
+  } = {},
+  req?: Request
+): Promise<SearchResponse> {
+  try {
+    const systemMessage = options.systemMessage || 
+      "You are a research assistant that provides detailed, factual answers to questions. Include relevant sources and citations.";
+    
+    return await performSearch(`Research and provide a detailed answer to the following question: ${question}`, {
+      ...options,
+      systemMessage
+    }, req);
+  } catch (error: any) {
+    console.error("Question research error:", error);
+    throw new Error(`Failed to research question: ${error.message}`);
+  }
+}

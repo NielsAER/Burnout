@@ -22,7 +22,14 @@ export function WebSearch() {
   const [searchType, setSearchType] = useState<"search" | "research" | "analyze">("search");
   const [searchRecency, setSearchRecency] = useState<"day" | "week" | "month">("week");
   const [result, setResult] = useState<{ text: string; citations?: string[] } | null>(null);
-  const { loading, error, performSearch, researchQuestion, analyzeTopic } = useLLMServices();
+  const { 
+    loading, 
+    error,
+    // Using OpenAI search functions instead of Perplexity
+    performSearchOpenAI,
+    researchQuestionOpenAI,
+    analyzeTopicOpenAI
+  } = useLLMServices();
 
   const handleSearch = async () => {
     if (!query.trim()) return;
@@ -32,18 +39,18 @@ export function WebSearch() {
       
       switch (searchType) {
         case "search":
-          searchResult = await performSearch(query, {
-            searchRecency
+          searchResult = await performSearchOpenAI(query, {
+            maxTokens: 1000
           });
           break;
         case "research":
-          searchResult = await researchQuestion(query, {
-            searchRecency
+          searchResult = await researchQuestionOpenAI(query, {
+            maxTokens: 1000
           });
           break;
         case "analyze":
-          searchResult = await analyzeTopic(query, {
-            searchRecency
+          searchResult = await analyzeTopicOpenAI(query, {
+            maxTokens: 1000
           });
           break;
       }
