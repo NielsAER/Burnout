@@ -20,7 +20,7 @@ interface AIAssistantResponse {
 }
 
 // This interface is specifically for API responses to ensure proper typing
-interface AIAssistantAPIResponse {
+interface AIAssistantAPIResponse extends Record<string, any> {
   text: string;
   context: string;
   suggestions?: string[];
@@ -115,16 +115,14 @@ export function AIAssistantTooltip({
     try {
       // First try to get context-specific help from our API
       try {
-        const result = await apiRequest<AIAssistantAPIResponse>({
-          method: "GET",
-          url: `/api/assistant/help?contextId=${contextId}`,
-        });
+        const response = await fetch(`/api/assistant/help?contextId=${contextId}`);
+        const result = await response.json();
         
         if (result && typeof result === 'object' && 'context' in result) {
           setResponse({
-            text: result.text,
-            context: result.context,
-            suggestions: result.suggestions
+            text: result.text || "",
+            context: result.context || contextId,
+            suggestions: result.suggestions || []
           });
           setCharacterState("excited");
         }
