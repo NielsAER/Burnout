@@ -1,6 +1,6 @@
 import { FC, useState, useRef } from "react";
 import { useDrop, useDrag } from "react-dnd";
-import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy, Clock, Calendar, Timer as TimerIcon } from "lucide-react";
+import { ArrowDown, PlusIcon, Settings, X, Plus, Play, MoreHorizontal, Copy, Clock, Calendar, Zap, Timer as TimerIcon } from "lucide-react";
 import AppIconMap from "@/components/automation/AppIconMap";
 import { APPS, AppId } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
@@ -34,16 +34,11 @@ interface BuilderCanvasProps {
   onAddTrigger?: (appId: string) => void; // Optional method to add trigger
 }
 
-type ItemTypes = {
-  APP: "app";
-  ACTION: "action";
-};
-
 // Define our drop/drag types
-export const ItemTypes: ItemTypes = {
+const ItemTypes = {
   APP: "app",
   ACTION: "action"
-};
+} as const;
 
 interface DraggableActionProps {
   action: BuilderStep;
@@ -136,32 +131,42 @@ const DraggableAction: FC<DraggableActionProps> = ({
   return (
     <div 
       ref={ref} 
-      className={`workflow-step w-full p-4 mb-4 bg-white dark:bg-[#181818] border ${isDragging ? 'border-dashed border-primary dark:border-blue-600' : 'border-gray-200 dark:border-[#2a2a2a]'} 
-                 rounded-lg shadow-sm transition-all duration-200 ${isOver ? 'border-primary dark:border-blue-600' : ''} 
-                 ${isDragging ? 'shadow-md ring-2 ring-primary/20 dark:ring-blue-600/20' : 'hover:shadow'}`}
+      className={`workflow-step w-full p-4 mb-4 bg-white dark:bg-[#181818] border
+          ${isDragging ? 'border-dashed border-primary/80 dark:border-blue-600' : 'border-gray-200 dark:border-[#2a2a2a]'} 
+          rounded-xl shadow-sm transition-all duration-300 
+          ${isOver ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' : ''} 
+          ${isDragging 
+            ? 'shadow-lg ring-2 ring-primary/20 dark:ring-blue-600/30 scale-[1.02] -rotate-1' 
+            : 'hover:border-primary/30 hover:shadow hover:scale-[1.01]'}`}
       style={{ opacity }}
     >
       <div className="flex items-center mb-3">
-        <div className="cursor-move p-1 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
-          <MoreHorizontal className="h-4 w-4" />
+        <div className="cursor-move p-1 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 group">
+          <MoreHorizontal className="h-4 w-4 group-hover:animate-pulse" />
         </div>
-        <AppIconMap appId={action.appId} />
-        <div className="ml-3">
-          <h4 className="text-sm font-medium dark:text-gray-300">{appDetails.name}</h4>
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            {action.description || "Do this..."}
-          </p>
+        
+        <div className="flex items-center">
+          <div className={`${isDragging ? 'animate-pulse' : ''}`}>
+            <AppIconMap appId={action.appId} />
+          </div>
+          <div className="ml-3">
+            <h4 className="text-sm font-medium dark:text-gray-300 group-hover:text-primary transition-colors">{appDetails.name}</h4>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {action.description || "Do this..."}
+            </p>
+          </div>
         </div>
+        
         <div className="ml-auto flex space-x-2">
           <button 
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
+            className="text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded-full transition-colors" 
             onClick={() => onConfigure(action.id)}
             aria-label="Configure"
           >
             <Settings className="h-4 w-4" />
           </button>
           <button 
-            className="text-gray-400 hover:text-red-500" 
+            className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 p-1 rounded-full transition-colors" 
             onClick={() => onRemove(action.id)}
             aria-label="Remove"
           >
@@ -169,15 +174,28 @@ const DraggableAction: FC<DraggableActionProps> = ({
           </button>
         </div>
       </div>
-      <div className="text-xs text-gray-500 italic">
-        {action.config && Object.keys(action.config).length > 0 
-          ? `${
-              action.config.optionName 
+      
+      {action.config && Object.keys(action.config).length > 0 ? (
+        <div className="mt-2 text-xs px-2.5 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800">
+          <div className="flex items-center text-gray-600 dark:text-gray-300">
+            <div className="flex-1">
+              {action.config.optionName 
                 ? action.config.optionName
-                : action.name || 'Configured action'
-            }`
-          : "Click to configure..."}
-      </div>
+                : action.name || 'Configured action'}
+            </div>
+            <div className="ml-2 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded text-[10px] border border-green-100 dark:border-green-800">
+              Configured
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-2 text-xs px-2.5 py-1.5 bg-orange-50 dark:bg-orange-950/30 rounded-md border border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center">
+          <span className="flex-1">Click to configure this action...</span>
+          <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/50 rounded text-[10px] border border-orange-200 dark:border-orange-800">
+            Required
+          </span>
+        </div>
+      )}
     </div>
   );
 };
@@ -320,17 +338,84 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
       return (
         <div 
           ref={dropTrigger}
-          className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' : 'border-gray-300 dark:border-[#2a2a2a]'} 
-                     rounded-lg flex flex-col items-center justify-center h-32 transition-all duration-200`}
+          className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger 
+            ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' 
+            : 'border-gray-300 dark:border-[#2a2a2a]'} 
+            rounded-xl flex flex-col items-center justify-center h-36 transition-all duration-300
+            ${isOverTrigger && canDropTrigger ? 'shadow-lg shadow-primary/10' : 'hover:border-primary/50 hover:shadow-sm'}`}
         >
           <div className="p-4 text-center">
-            <div className={`w-12 h-12 mx-auto rounded-full ${isOverTrigger && canDropTrigger ? 'bg-primary/10 dark:bg-blue-900/20' : 'bg-gray-100 dark:bg-[#181818]'} 
-                            flex items-center justify-center transition-all duration-200`}>
-              <PlusIcon className={`h-5 w-5 ${isOverTrigger && canDropTrigger ? 'text-primary dark:text-blue-400' : 'text-gray-400'} transition-colors`} />
+            <div className={`w-16 h-16 mx-auto rounded-full 
+              ${isOverTrigger && canDropTrigger 
+                ? 'bg-primary/10 dark:bg-blue-900/20 scale-110' 
+                : 'bg-gradient-to-br from-gray-100 to-gray-50 dark:from-[#181818] dark:to-[#1a1a1a]'} 
+              flex items-center justify-center transition-all duration-300 group-hover:scale-110`}>
+              
+              <div className={`absolute inset-0 rounded-full ${isOverTrigger && canDropTrigger ? 'animate-ping bg-primary/10 opacity-70' : ''}`} 
+                style={{animationDuration: '3s'}} />
+              
+              <PlusIcon className={`h-6 w-6 
+                ${isOverTrigger && canDropTrigger 
+                  ? 'text-primary dark:text-blue-400 animate-pulse' 
+                  : 'text-gray-400 group-hover:text-primary/70'} 
+                transition-colors duration-300`} />
             </div>
-            <p className={`mt-2 text-sm ${isOverTrigger && canDropTrigger ? 'text-primary dark:text-blue-400' : 'text-gray-500 dark:text-gray-400'} transition-colors`}>
-              {isOverTrigger && canDropTrigger ? 'Drop trigger here' : 'Add a trigger to start'}
+            
+            <h4 className={`mt-3 text-sm font-medium 
+              ${isOverTrigger && canDropTrigger 
+                ? 'text-primary dark:text-blue-400' 
+                : 'text-gray-700 dark:text-gray-300'} 
+              transition-colors`}>
+              {isOverTrigger && canDropTrigger ? 'Drop here to add trigger' : 'Start with a trigger'}
+            </h4>
+            
+            <p className={`mt-1 text-xs
+              ${isOverTrigger && canDropTrigger 
+                ? 'text-primary/70 dark:text-blue-400/70' 
+                : 'text-gray-500 dark:text-gray-400'} 
+              transition-colors max-w-xs`}>
+              {isOverTrigger && canDropTrigger 
+                ? 'Release to set up this trigger' 
+                : 'Drag a trigger from the apps panel or select one below'}
             </p>
+            
+            {!isOverTrigger && (
+              <div className="mt-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" size="sm" className="text-xs border-primary/30 bg-primary/5 hover:bg-primary/10 text-primary dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400">
+                      <Plus className="h-3 w-3 mr-1" /> 
+                      Select Trigger
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="center" className="w-64 p-0 dark:bg-[#181818] dark:border-[#2a2a2a]">
+                    <div className="py-2 border-b border-gray-100 dark:border-[#2a2a2a]">
+                      <h4 className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Popular Triggers</h4>
+                    </div>
+                    <div className="py-1 max-h-[300px] overflow-y-auto">
+                      {Object.keys(APPS)
+                        .filter(appId => {
+                          const app = APPS[appId as AppId];
+                          return app.triggerOptions && app.triggerOptions.length > 0;
+                        })
+                        .map(appId => {
+                          const app = APPS[appId as AppId];
+                          return (
+                            <div
+                              key={appId}
+                              className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer group"
+                              onClick={() => handleTriggerDrop(appId)}
+                            >
+                              <AppIconMap appId={appId} size="sm" />
+                              <span className="ml-2 text-sm dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400">{app.name}</span>
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
           </div>
         </div>
       );
@@ -779,9 +864,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         
         {/* Connector */}
         {trigger && (
-          <div className="h-8 w-px bg-gray-300 dark:bg-[#2a2a2a] relative self-center">
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-5 h-5 rounded-full border-2 border-primary dark:border-blue-600 bg-white dark:bg-[#111111]">
-              <ArrowDown className="h-3 w-3 text-primary dark:text-blue-400 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2" />
+          <div className="h-12 w-1 bg-gradient-to-b from-primary/30 to-primary/10 dark:from-primary/40 dark:to-primary/20 relative self-center rounded-full">
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 dark:border-primary/30">
+              <ArrowDown className="h-4 w-4 text-primary animate-pulse" />
+            </div>
+            <div className="absolute -top-0 left-1/2 transform -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 dark:border-primary/30">
+              <div className="h-2 w-2 rounded-full bg-primary animate-ping" style={{animationDuration: '2s'}}></div>
             </div>
           </div>
         )}
@@ -793,47 +881,66 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             ${isOver && canDrop ? 'bg-primary/5 dark:bg-blue-900/20 border-2 border-dashed border-primary dark:border-blue-600 rounded-lg' : ''}`}
         >
           {actions.length === 0 ? (
-            <div className="text-center p-8 border-2 border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-lg w-full">
-              <div className="w-16 h-16 mx-auto rounded-full bg-gray-100 dark:bg-[#181818] flex items-center justify-center mb-2">
-                <Plus className="h-6 w-6 text-gray-400" />
+            <div className="text-center p-8 border-2 border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-xl w-full transform transition-all duration-300 group hover:border-primary/50 hover:shadow-sm">
+              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-gray-100 to-gray-50 dark:from-[#181818] dark:to-[#1a1a1a] flex items-center justify-center mb-3 group-hover:scale-110 transition-transform duration-300 relative">
+                <div className="absolute inset-0 rounded-full bg-primary/5 dark:bg-blue-900/20 opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity" style={{animationDuration: '3s'}} />
+                <Plus className="h-8 w-8 text-gray-400 group-hover:text-primary transition-colors duration-300" />
               </div>
-              <h3 className="text-gray-600 dark:text-gray-300 font-medium mb-1">Add an action</h3>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-4 max-w-xs mx-auto">
-                Drag actions here from the left panel or click the button below to add
+              
+              <h3 className="text-gray-700 dark:text-gray-200 font-medium mb-2 text-base group-hover:text-primary transition-colors duration-300">Add an action</h3>
+              
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-5 max-w-xs mx-auto leading-relaxed">
+                Now that you have a trigger set up, add one or more actions that will run when the trigger is activated
               </p>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" size="sm" className="flex items-center dark:border-[#2a2a2a] dark:text-gray-300 dark:hover:bg-[#1a1a1a]">
-                    <Plus className="h-3.5 w-3.5 mr-1.5" />
-                    Add Action
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent align="center" className="w-64 p-0 dark:bg-[#181818] dark:border-[#2a2a2a]">
-                  <div className="py-2 border-b border-gray-100 dark:border-[#2a2a2a]">
-                    <h4 className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Popular Actions</h4>
-                  </div>
-                  <div className="py-1 max-h-[300px] overflow-y-auto">
-                    {Object.keys(APPS)
-                      .filter(appId => {
-                        const app = APPS[appId as AppId];
-                        return app.actionOptions && app.actionOptions.length > 0;
-                      })
-                      .map(appId => {
-                        const app = APPS[appId as AppId];
-                        return (
-                          <div
-                            key={appId}
-                            className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer"
-                            onClick={() => onAddAction(appId)}
-                          >
-                            <AppIconMap appId={appId} size="sm" />
-                            <span className="ml-2 text-sm dark:text-gray-300">{app.name}</span>
-                          </div>
-                        );
-                      })}
-                  </div>
-                </PopoverContent>
-              </Popover>
+              
+              <div className="flex flex-col items-center space-y-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button size="sm" className="bg-gradient-to-r from-primary to-primary/90 text-white hover:shadow-md hover:shadow-primary/20 transition-all duration-300 group">
+                      <Plus className="h-3.5 w-3.5 mr-1.5 group-hover:rotate-90 transition-transform duration-300" />
+                      Add Action
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent align="center" className="w-72 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl shadow-lg">
+                    <div className="py-2 border-b border-gray-100 dark:border-[#2a2a2a]">
+                      <h4 className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Select an app for your action</h4>
+                    </div>
+                    <ScrollArea className="max-h-[300px]">
+                      <div className="py-2 grid grid-cols-2 gap-0.5">
+                        {Object.keys(APPS)
+                          .filter(appId => {
+                            const app = APPS[appId as AppId];
+                            return app.actionOptions && app.actionOptions.length > 0;
+                          })
+                          .map(appId => {
+                            const app = APPS[appId as AppId];
+                            return (
+                              <div
+                                key={appId}
+                                className="flex flex-col items-center px-3 py-3 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer group/item"
+                                onClick={() => onAddAction(appId)}
+                              >
+                                <div className="mb-1 group-hover/item:scale-110 transition-transform duration-200">
+                                  <AppIconMap appId={appId} />
+                                </div>
+                                <span className="text-xs text-center dark:text-gray-300 group-hover/item:text-primary dark:group-hover/item:text-blue-400 transition-colors duration-200">{app.name}</span>
+                              </div>
+                            );
+                          })}
+                      </div>
+                    </ScrollArea>
+                    <div className="p-2 border-t border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#151515] text-xs text-gray-500 dark:text-gray-400 rounded-b-xl">
+                      You can also drag apps from the left panel directly into this area
+                    </div>
+                  </PopoverContent>
+                </Popover>
+                
+                <p className="text-xs text-gray-400 dark:text-gray-500">or</p>
+                
+                <Button variant="outline" size="sm" onClick={() => window.open('https://docs.brnout.app/actions', '_blank')} className="text-xs border-gray-200 dark:border-[#2a2a2a] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1a1a1a]">
+                  Browse Action Documentation
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="space-y-2 relative">
@@ -854,20 +961,23 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               ))}
               
               {/* Add action button at the end */}
-              <div className="mt-4 flex justify-center">
+              <div className="mt-6 flex justify-center pt-4 border-t border-dashed border-gray-200 dark:border-gray-800">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex items-center dark:border-[#2a2a2a] dark:text-gray-300 dark:hover:bg-[#1a1a1a]">
-                      <Plus className="h-3.5 w-3.5 mr-1.5" />
+                    <Button 
+                      size="sm" 
+                      className="bg-gradient-to-r from-primary/90 to-primary/80 text-white hover:shadow-md hover:shadow-primary/20 transition-all duration-300 group"
+                    >
+                      <Plus className="h-3.5 w-3.5 mr-1.5 group-hover:rotate-90 transition-transform duration-300" />
                       Add Another Action
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent align="center" className="w-64 p-0 dark:bg-[#181818] dark:border-[#2a2a2a]">
+                  <PopoverContent align="center" className="w-72 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl shadow-lg">
                     <div className="py-2 border-b border-gray-100 dark:border-[#2a2a2a]">
                       <h4 className="px-3 text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Add Next Action</h4>
                     </div>
-                    <ScrollArea className="h-[300px]">
-                      <div className="py-1">
+                    <ScrollArea className="max-h-[300px]">
+                      <div className="py-2 grid grid-cols-2 gap-0.5">
                         {Object.keys(APPS)
                           .filter(appId => {
                             const app = APPS[appId as AppId];
@@ -878,16 +988,21 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                             return (
                               <div
                                 key={appId}
-                                className="flex items-center px-3 py-2 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer"
+                                className="flex flex-col items-center px-3 py-3 hover:bg-gray-50 dark:hover:bg-[#21212b] cursor-pointer group/item"
                                 onClick={() => onAddAction(appId)}
                               >
-                                <AppIconMap appId={appId} size="sm" />
-                                <span className="ml-2 text-sm dark:text-gray-300">{app.name}</span>
+                                <div className="mb-1 group-hover/item:scale-110 transition-transform duration-200">
+                                  <AppIconMap appId={appId} />
+                                </div>
+                                <span className="text-xs text-center dark:text-gray-300 group-hover/item:text-primary dark:group-hover/item:text-blue-400 transition-colors duration-200">{app.name}</span>
                               </div>
                             );
                           })}
                       </div>
                     </ScrollArea>
+                    <div className="p-2 border-t border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#151515] text-xs text-gray-500 dark:text-gray-400 rounded-b-xl">
+                      Tip: You can chain multiple actions to create complex workflows
+                    </div>
                   </PopoverContent>
                 </Popover>
               </div>
