@@ -194,7 +194,7 @@ export default function AuthPage() {
                                 onClick={() => field.onChange("researcher")}
                               >
                                 <span className="text-lg font-semibold">Researcher</span>
-                                <span className="text-xs text-muted-foreground mt-1">Full access to all features</span>
+                                <span className="text-xs text-muted-foreground mt-1">For developers</span>
                               </Button>
                               <Button
                                 type="button"
@@ -203,7 +203,7 @@ export default function AuthPage() {
                                 onClick={() => field.onChange("customer")}
                               >
                                 <span className="text-lg font-semibold">Customer</span>
-                                <span className="text-xs text-muted-foreground mt-1">Limited interface</span>
+                                <span className="text-xs text-muted-foreground mt-1">Customer interface</span>
                               </Button>
                             </div>
                             <FormMessage />
@@ -355,7 +355,7 @@ export default function AuthPage() {
                                 onClick={() => field.onChange("researcher")}
                               >
                                 <span className="text-lg font-semibold">Researcher</span>
-                                <span className="text-xs text-muted-foreground mt-1">Full access to all features</span>
+                                <span className="text-xs text-muted-foreground mt-1">For developers</span>
                               </Button>
                               <Button
                                 type="button"
@@ -364,7 +364,7 @@ export default function AuthPage() {
                                 onClick={() => field.onChange("customer")}
                               >
                                 <span className="text-lg font-semibold">Customer</span>
-                                <span className="text-xs text-muted-foreground mt-1">Limited interface</span>
+                                <span className="text-xs text-muted-foreground mt-1">Customer interface</span>
                               </Button>
                             </div>
                             <FormMessage />
