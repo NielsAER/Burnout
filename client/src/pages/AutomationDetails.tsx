@@ -317,11 +317,11 @@ const AutomationDetails = () => {
                   <h3 className="text-lg font-medium mb-4">Reliability Insights</h3>
                   
                   <div className="space-y-4">
-                    <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-transparent dark:border-blue-700/50 shadow-sm">
+                    <div className="bg-blue-50 dark:bg-blue-900/40 p-4 rounded-lg border border-transparent dark:border-blue-500/50 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-200">Health Score</p>
-                          <p className="text-2xl font-semibold text-blue-600 dark:text-blue-300">{automation.healthScore}/100</p>
+                          <p className="text-sm text-gray-600 dark:text-white">Health Score</p>
+                          <p className="text-2xl font-semibold text-blue-600 dark:text-blue-200">{automation.healthScore}/100</p>
                         </div>
                         <div className="p-3 bg-white dark:bg-gray-800 rounded-full">
                           <AlertCircle className={
@@ -333,39 +333,39 @@ const AutomationDetails = () => {
                       </div>
                     </div>
                     
-                    <div className="border border-gray-100 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/40 shadow-sm">
+                    <div className="border border-gray-100 dark:border-gray-500 rounded-lg p-4 bg-gray-50 dark:bg-gray-700/60 shadow-sm">
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Workflow Complexity</span>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{automation.complexity}/10</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-white">Workflow Complexity</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-white">{automation.complexity}/10</span>
                       </div>
                       <Progress 
                         value={automation.complexity * 10} 
-                        className="h-2 bg-gray-200 dark:bg-gray-700"
+                        className="h-2 bg-gray-200 dark:bg-gray-600"
                       />
-                      <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
+                      <p className="text-xs text-gray-600 dark:text-gray-100 mt-1">
                         {automation.complexity <= 2 ? "Simple workflow" : 
                          automation.complexity <= 5 ? "Moderate complexity" : 
                          automation.complexity <= 8 ? "Advanced workflow" : "Expert-level workflow"}
                       </p>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
-                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Recent Activity</p>
+                    <div className="bg-gray-50 dark:bg-gray-700/60 p-4 rounded-lg border border-gray-100 dark:border-gray-500 shadow-sm">
+                      <p className="text-sm font-medium text-gray-700 dark:text-white mb-2">Recent Activity</p>
                       {isLoadingHistory ? (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Loading activity data...</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-100">Loading activity data...</p>
                       ) : executionHistory && executionHistory.length > 0 ? (
                         <div className="space-y-2">
                           {executionHistory.slice(0, 3).map((history, idx) => (
                             <div key={idx} className="flex items-center justify-between text-sm">
-                              <span className="text-gray-600 dark:text-gray-300">{new Date(history.executedAt).toLocaleString()}</span>
-                              <Badge variant={history.status === 'success' ? 'default' : 'destructive'} className={history.status === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : ''}>
+                              <span className="text-gray-600 dark:text-gray-100">{new Date(history.executedAt).toLocaleString()}</span>
+                              <Badge variant={history.status === 'success' ? 'default' : 'destructive'} className={history.status === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-700 dark:text-green-100' : ''}>
                                 {history.status}
                               </Badge>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity recorded</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-100">No recent activity recorded</p>
                       )}
                     </div>
                   </div>
@@ -392,33 +392,33 @@ const AutomationDetails = () => {
                   <h3 className="text-lg font-medium mb-4">Cost Analysis</h3>
                   
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-green-50 to-transparent dark:from-green-950/20 dark:to-transparent p-5 rounded-lg border border-green-100 dark:border-green-700 shadow-sm">
-                      <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Total Cost Savings</h4>
+                    <div className="bg-gradient-to-r from-green-50 to-transparent dark:from-green-700/60 dark:to-green-800/20 p-5 rounded-lg border border-green-100 dark:border-green-500/50 shadow-sm">
+                      <h4 className="font-medium text-gray-800 dark:text-white mb-2">Total Cost Savings</h4>
                       <div className="flex items-baseline">
-                        <span className="text-3xl font-bold text-green-600 dark:text-green-300">${costSavings.moneySaved}</span>
-                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-300">estimated</span>
+                        <span className="text-3xl font-bold text-green-600 dark:text-green-200">${costSavings.moneySaved}</span>
+                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-100">estimated</span>
                       </div>
-                      <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                      <p className="text-sm text-gray-600 dark:text-gray-100 mt-2">
                         Based on {reliabilityData.totalRuns} automated tasks at an average labor rate of $25/hour
                       </p>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-transparent dark:border-blue-700/50 shadow-sm">
-                        <p className="text-sm text-gray-600 dark:text-gray-200">Time Saved</p>
+                      <div className="bg-blue-50 dark:bg-blue-800/60 p-4 rounded-lg border border-transparent dark:border-blue-500/50 shadow-sm">
+                        <p className="text-sm text-gray-600 dark:text-white">Time Saved</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-300">{costSavings.hoursSaved}</p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">hours</span>
+                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-200">{costSavings.hoursSaved}</p>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-100">hours</span>
                         </div>
                       </div>
                       
-                      <div className="bg-purple-50 dark:bg-purple-950/30 p-4 rounded-lg border border-transparent dark:border-purple-700/50 shadow-sm">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">Per Task Savings</p>
+                      <div className="bg-purple-50 dark:bg-purple-800/60 p-4 rounded-lg border border-transparent dark:border-purple-500/50 shadow-sm">
+                        <p className="text-sm text-gray-600 dark:text-white">Per Task Savings</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-purple-600 dark:text-purple-300">
+                          <p className="text-xl font-semibold text-purple-600 dark:text-purple-200">
                             ${((parseFloat(costSavings.moneySaved) / (reliabilityData.totalRuns || 1)) || 0).toFixed(2)}
                           </p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">per task</span>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-100">per task</span>
                         </div>
                       </div>
                     </div>
@@ -429,49 +429,49 @@ const AutomationDetails = () => {
                   <h3 className="text-lg font-medium mb-4">Efficiency Metrics</h3>
                   
                   <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-amber-50 to-transparent dark:from-amber-950/20 dark:to-transparent p-5 rounded-lg border border-amber-100 dark:border-amber-700 shadow-sm">
+                    <div className="bg-gradient-to-r from-amber-50 to-transparent dark:from-amber-700/60 dark:to-amber-800/20 p-5 rounded-lg border border-amber-100 dark:border-amber-500/50 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
-                          <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">Time Efficiency</h4>
-                          <p className="text-3xl font-bold text-amber-600 dark:text-amber-300">{efficiencyMetrics.timeSavingPercent}%</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">faster than manual processing</p>
+                          <h4 className="font-medium text-gray-800 dark:text-white mb-1">Time Efficiency</h4>
+                          <p className="text-3xl font-bold text-amber-600 dark:text-amber-200">{efficiencyMetrics.timeSavingPercent}%</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-100 mt-1">faster than manual processing</p>
                         </div>
-                        <div className="p-3 bg-white dark:bg-gray-800 rounded-full">
-                          <Users className="h-6 w-6 text-amber-600 dark:text-amber-300" />
+                        <div className="p-3 bg-white dark:bg-amber-800 rounded-full">
+                          <Users className="h-6 w-6 text-amber-600 dark:text-amber-200" />
                         </div>
                       </div>
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-transparent dark:border-green-700/50 shadow-sm">
-                        <p className="text-sm text-gray-600 dark:text-gray-200">Error Reduction</p>
+                      <div className="bg-green-50 dark:bg-green-800/60 p-4 rounded-lg border border-transparent dark:border-green-500/50 shadow-sm">
+                        <p className="text-sm text-gray-600 dark:text-white">Error Reduction</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-green-600 dark:text-green-300">{efficiencyMetrics.errorReduction}%</p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">fewer errors</span>
+                          <p className="text-xl font-semibold text-green-600 dark:text-green-200">{efficiencyMetrics.errorReduction}%</p>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-100">fewer errors</span>
                         </div>
                       </div>
                       
-                      <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-transparent dark:border-blue-700/50 shadow-sm">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">Labor Equivalent</p>
+                      <div className="bg-blue-50 dark:bg-blue-800/60 p-4 rounded-lg border border-transparent dark:border-blue-500/50 shadow-sm">
+                        <p className="text-sm text-gray-600 dark:text-white">Labor Equivalent</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-300">
+                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-200">
                             {(parseFloat(costSavings.hoursSaved) / 160).toFixed(2)}
                           </p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">FTE months</span>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-100">FTE months</span>
                         </div>
                       </div>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                    <div className="bg-gray-50 dark:bg-gray-700/60 p-4 rounded-lg border border-gray-100 dark:border-gray-500 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Quality Improvement</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+                          <p className="text-sm font-medium text-gray-700 dark:text-white">Quality Improvement</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-100 mt-1">
                             Consistent quality with {Math.round(reliabilityData.successRate * 100)}% success rate
                           </p>
                         </div>
                         <div>
-                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/80 dark:text-blue-200">
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-600 dark:text-white font-medium">
                             {automation.healthScore >= 80 ? "Excellent" :
                              automation.healthScore >= 60 ? "Good" :
                              automation.healthScore >= 40 ? "Moderate" : "Needs Improvement"}
