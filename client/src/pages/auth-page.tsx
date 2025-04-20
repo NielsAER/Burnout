@@ -25,12 +25,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 const loginSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string().min(6, "Password must be at least 6 characters"),
+  role: z.enum(["researcher", "customer"]).default("researcher"),
 });
 
 // Registration form schema extends the insertUserSchema with password validation
 const registerSchema = insertUserSchema.extend({
   confirmPassword: z.string().min(6, "Please confirm your password"),
   email: z.string().email("Please enter a valid email").optional(),
+  role: z.enum(["researcher", "customer"]).default("researcher"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords don't match",
   path: ["confirmPassword"],
@@ -51,6 +53,7 @@ export default function AuthPage() {
     defaultValues: {
       username: "",
       password: "",
+      role: "researcher",
     },
   });
 
@@ -62,6 +65,7 @@ export default function AuthPage() {
       email: "",
       password: "",
       confirmPassword: "",
+      role: "researcher",
     },
   });
 
@@ -169,6 +173,38 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
+
+                      <FormField
+                        control={loginForm.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Login as</FormLabel>
+                            <div className="grid grid-cols-2 gap-4 pt-2">
+                              <Button
+                                type="button"
+                                variant={field.value === "researcher" ? "default" : "outline"}
+                                className={`flex flex-col h-auto py-4 ${field.value === "researcher" ? "border-2 border-primary" : ""}`}
+                                onClick={() => field.onChange("researcher")}
+                              >
+                                <span className="text-lg font-semibold">Researcher</span>
+                                <span className="text-xs text-muted-foreground mt-1">Full access to all features</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={field.value === "customer" ? "default" : "outline"}
+                                className={`flex flex-col h-auto py-4 ${field.value === "customer" ? "border-2 border-primary" : ""}`}
+                                onClick={() => field.onChange("customer")}
+                              >
+                                <span className="text-lg font-semibold">Customer</span>
+                                <span className="text-xs text-muted-foreground mt-1">Limited interface</span>
+                              </Button>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
                       <Button 
                         type="submit" 
                         className="w-full" 
@@ -298,6 +334,38 @@ export default function AuthPage() {
                           </FormItem>
                         )}
                       />
+                      
+                      <FormField
+                        control={registerForm.control}
+                        name="role"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Register as</FormLabel>
+                            <div className="grid grid-cols-2 gap-4 pt-2">
+                              <Button
+                                type="button"
+                                variant={field.value === "researcher" ? "default" : "outline"}
+                                className={`flex flex-col h-auto py-4 ${field.value === "researcher" ? "border-2 border-primary" : ""}`}
+                                onClick={() => field.onChange("researcher")}
+                              >
+                                <span className="text-lg font-semibold">Researcher</span>
+                                <span className="text-xs text-muted-foreground mt-1">Full access to all features</span>
+                              </Button>
+                              <Button
+                                type="button"
+                                variant={field.value === "customer" ? "default" : "outline"}
+                                className={`flex flex-col h-auto py-4 ${field.value === "customer" ? "border-2 border-primary" : ""}`}
+                                onClick={() => field.onChange("customer")}
+                              >
+                                <span className="text-lg font-semibold">Customer</span>
+                                <span className="text-xs text-muted-foreground mt-1">Limited interface</span>
+                              </Button>
+                            </div>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      
                       <Button 
                         type="submit" 
                         className="w-full" 
