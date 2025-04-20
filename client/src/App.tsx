@@ -50,16 +50,16 @@ const CustomerProtectedRoute = ({ path, component: Component }: { path: string, 
 function DeveloperRouter() {
   return (
     <Switch>
-      <ProtectedRoute path="/" component={Dashboard} />
-      <ProtectedRoute path="/automations" component={MyAutomations} />
-      <ProtectedRoute path="/automations/:id" component={AutomationDetails} />
-      <ProtectedRoute path="/templates" component={Templates} />
-      <ProtectedRoute path="/builder" component={AutomationBuilder} />
-      <ProtectedRoute path="/builder/:id" component={AutomationBuilder} />
-      <ProtectedRoute path="/app-connections" component={AppConnections} />
-      <ProtectedRoute path="/ai-services" component={AIServices} />
-      <ProtectedRoute path="/settings" component={Settings} />
-      <ProtectedRoute path="/profile" component={UserProfile} />
+      <ResearcherRoute path="/" component={Dashboard} />
+      <ResearcherRoute path="/automations" component={MyAutomations} />
+      <ResearcherRoute path="/automations/:id" component={AutomationDetails} />
+      <ResearcherRoute path="/templates" component={Templates} />
+      <ResearcherRoute path="/builder" component={AutomationBuilder} />
+      <ResearcherRoute path="/builder/:id" component={AutomationBuilder} />
+      <ResearcherRoute path="/app-connections" component={AppConnections} />
+      <ResearcherRoute path="/ai-services" component={AIServices} />
+      <ResearcherRoute path="/settings" component={Settings} />
+      <ResearcherRoute path="/profile" component={UserProfile} />
     </Switch>
   );
 }

@@ -42,7 +42,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function AuthPage() {
-  const { user, loginMutation, registerMutation } = useAuth();
+  const { user, userRole, loginMutation, registerMutation } = useAuth();
   const [activeTab, setActiveTab] = useState<string>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -79,8 +79,11 @@ export default function AuthPage() {
     registerMutation.mutate(userData);
   };
 
-  // If user is already logged in, redirect to homepage
-  if (user) {
+  // If user is already logged in, redirect based on role
+  if (user && user.username) {
+    if (userRole === "customer") {
+      return <Redirect to="/customer/dashboard" />;
+    }
     return <Redirect to="/" />;
   }
 
