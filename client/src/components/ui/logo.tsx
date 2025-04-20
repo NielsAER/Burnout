@@ -18,13 +18,13 @@ export const Logo = ({
   const isDarkMode = resolvedTheme === "dark";
   
   const sizeClasses = {
-    sm: "h-8",
-    md: "h-10",
-    lg: "h-16"
+    sm: "h-10",
+    md: "h-14",
+    lg: "h-20"
   };
 
   return (
-    <div className={cn("inline-flex items-center", className)}>
+    <div className={cn("inline-flex items-center py-2", className)}>
       <img 
         src={isDarkMode ? lightLogo : darkLogo}
         alt="BRNOUT Logo" 
