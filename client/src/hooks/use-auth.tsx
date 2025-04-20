@@ -11,6 +11,7 @@ import { useLocation } from "wouter";
 
 type AuthContextType = {
   user: SelectUser | null;
+  userRole: "researcher" | "customer" | null;
   isLoading: boolean;
   error: Error | null;
   loginMutation: UseMutationResult<SelectUser, Error, LoginData>;
@@ -24,6 +25,9 @@ export const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
+  const [userRole, setUserRole] = useState<"researcher" | "customer" | null>(null);
+  
   const {
     data: user,
     error,
@@ -35,6 +39,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const loginMutation = useMutation({
     mutationFn: async (credentials: LoginData) => {
+      // Store the role in local state before sending to server
+      setUserRole(credentials.role);
+      
+      // Store role in session storage for persistence across page refreshes
+      sessionStorage.setItem('userRole', credentials.role);
+      
       const res = await apiRequest("POST", "/api/login", credentials);
       if (!res.ok) {
         const errorData = await res.json();
@@ -44,12 +54,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Redirect based on role
+      if (userRole === "customer") {
+        setLocation("/customer/dashboard");
+      } else {
+        setLocation("/");
+      }
+      
       toast({
         title: "Login successful",
         description: `Welcome back, ${user.username}!`,
       });
     },
     onError: (error: Error) => {
+      // Clear role on error
+      setUserRole(null);
+      sessionStorage.removeItem('userRole');
+      
       toast({
         title: "Login failed",
         description: error.message,
@@ -59,7 +81,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   const registerMutation = useMutation({
-    mutationFn: async (credentials: InsertUser) => {
+    mutationFn: async (credentials: InsertUser & { role?: "researcher" | "customer" }) => {
+      // Store role if provided in registration data
+      if (credentials.role) {
+        setUserRole(credentials.role);
+        sessionStorage.setItem('userRole', credentials.role);
+      }
+      
       const res = await apiRequest("POST", "/api/register", credentials);
       if (!res.ok) {
         const errorData = await res.json();
@@ -69,12 +97,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
     onSuccess: (user: SelectUser) => {
       queryClient.setQueryData(["/api/user"], user);
+      
+      // Redirect based on role
+      if (userRole === "customer") {
+        setLocation("/customer/dashboard");
+      } else {
+        setLocation("/");
+      }
+      
       toast({
         title: "Registration successful",
         description: `Welcome to BRNOUT, ${user.username}!`,
       });
     },
     onError: (error: Error) => {
+      // Clear role on error
+      setUserRole(null);
+      sessionStorage.removeItem('userRole');
+      
       toast({
         title: "Registration failed",
         description: error.message,
@@ -92,7 +132,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     },
     onSuccess: () => {
+      // Clear user data
       queryClient.setQueryData(["/api/user"], null);
+      
+      // Clear role information
+      setUserRole(null);
+      sessionStorage.removeItem('userRole');
+      
+      // Redirect to login page
+      setLocation("/auth");
+      
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
@@ -107,10 +156,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     },
   });
 
+  // Load user role from session storage on initial load and when user changes
+  useEffect(() => {
+    const savedRole = sessionStorage.getItem('userRole') as "researcher" | "customer" | null;
+    if (savedRole) {
+      setUserRole(savedRole);
+    }
+  }, [user]);
+  
   return (
     <AuthContext.Provider
       value={{
         user: user || null,
+        userRole,
         isLoading,
         error,
         loginMutation,

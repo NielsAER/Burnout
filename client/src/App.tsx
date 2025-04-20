@@ -28,14 +28,14 @@ import MainLayout from "@/layouts/MainLayout";
 import CustomerLayout from "@/layouts/CustomerLayout";
 
 import { AuthProvider } from "@/hooks/use-auth";
-import { ProtectedRoute } from "@/lib/protected-route";
+import { ProtectedRoute, ResearcherRoute, CustomerRoute } from "@/lib/protected-route";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AIAssistantProvider } from "@/contexts/AIAssistantContext";
 
 // Customer Portal Protected Route
 const CustomerProtectedRoute = ({ path, component: Component }: { path: string, component: () => React.JSX.Element }) => {
   return (
-    <ProtectedRoute
+    <CustomerRoute
       path={path}
       component={() => (
         <CustomerLayout>
