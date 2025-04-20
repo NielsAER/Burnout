@@ -307,6 +307,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // POST /api/automations/from-template/:templateId - Create automation from template
+  app.post("/api/automations/from-template/:templateId", async (req, res) => {
+    try {
+      const templateId = req.params.templateId;
+      
+      // Create a new automation based on the template ID
+      const newAutomation = {
+        name: `New Automation from Template (${templateId})`,
+        description: "Created from template",
+        active: false,
+        triggerAppId: "trigger-app",
+        actionAppId: "action-app",
+        triggerConfig: {},
+        actionConfig: {},
+        userId: req.user?.id || 1,
+        complexity: 3,
+        healthScore: 85,
+        totalRuns: 0,
+        reliability: {
+          success: 0,
+          failed: 0,
+          total: 0
+        },
+        createdAt: new Date(),
+        updatedAt: new Date()
+      };
+      
+      const automation = await storage.createAutomation(newAutomation);
+      res.status(200).json(automation);
+    } catch (error) {
+      console.error("Failed to create automation from template:", error);
+      res.status(500).json({ message: "Failed to create automation from template" });
+    }
+  });
+  
   // GET /api/achievements - Get all achievements
   app.get("/api/achievements", async (req, res) => {
     try {

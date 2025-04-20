@@ -17,6 +17,7 @@ interface AIAssistantContextType {
   toggleAssistant: () => void;
   askQuestion: (question: string) => Promise<string>;
   getWorkflowSuggestions: (category?: string) => Promise<WorkflowSuggestion[]>;
+  showAssistant: () => void;
 }
 
 const AIAssistantContext = createContext<AIAssistantContextType | undefined>(undefined);
@@ -38,6 +39,7 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
   const [currentContext, setCurrentContext] = useState<string>('dashboard');
   const [contextData, setContextData] = useState<Record<string, any>>({});
   const [assistantEnabled, setAssistantEnabled] = useState<boolean>(true);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   // Update context based on route changes
   useEffect(() => {
@@ -118,6 +120,21 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
       return [];
     }
   };
+  
+  // Show the AI assistant and optionally set a specific context
+  const showAssistant = () => {
+    setIsVisible(true);
+    
+    // Find the assistant component and dispatch an event if needed
+    const assistantElement = document.getElementById('ai-assistant');
+    if (assistantElement) {
+      // Create a custom event to notify the assistant component
+      const event = new CustomEvent('show-assistant', { 
+        detail: { context: currentContext }
+      });
+      assistantElement.dispatchEvent(event);
+    }
+  };
 
   return (
     <AIAssistantContext.Provider
@@ -128,7 +145,8 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
         assistantEnabled,
         toggleAssistant,
         askQuestion,
-        getWorkflowSuggestions
+        getWorkflowSuggestions,
+        showAssistant
       }}
     >
       {children}
