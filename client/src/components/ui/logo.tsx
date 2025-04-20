@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import lightLogo from "@assets/brnout-logo-light.png";
+import darkLogo from "@assets/brnout-header-logo.png";
 
 interface LogoProps {
   className?: string;
@@ -24,7 +26,7 @@ export const Logo = ({
   return (
     <div className={cn("inline-flex items-center", className)}>
       <img 
-        src={isDarkMode ? "/brnout-logo-light.png" : "/brnout-header-logo.png"}
+        src={isDarkMode ? lightLogo : darkLogo}
         alt="BRNOUT Logo" 
         className={cn("object-contain", sizeClasses[size])} 
       />
