@@ -36,6 +36,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAIAssistant } from "@/contexts/AIAssistantContext";
 
 // Template types
 type TemplateCategory = "social" | "productivity" | "communication" | "data" | "all";
@@ -60,6 +61,7 @@ const Templates = () => {
   const [activeCategory, setActiveCategory] = useState<TemplateCategory>("all");
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { showAssistant, updateContext } = useAIAssistant();
 
   const createFromTemplateMutation = useMutation({
     mutationFn: async (templateId: string) => {
@@ -416,7 +418,18 @@ const Templates = () => {
               <Button variant="outline" onClick={() => navigate('/automations')}>
                 Create Custom Workflow
               </Button>
-              <Button className="bg-blue-600 hover:bg-blue-700 text-white" onClick={() => navigate('/assistant')}>
+              <Button 
+                className="bg-blue-600 hover:bg-blue-700 text-white" 
+                onClick={() => {
+                  // Update context with template data
+                  updateContext('templates', {
+                    category: activeCategory,
+                    templates: filteredTemplates
+                  });
+                  // Show assistant with template suggestions context
+                  showAssistant();
+                }}
+              >
                 <Lightbulb className="mr-2 h-4 w-4" />
                 Get AI Suggestions
               </Button>
