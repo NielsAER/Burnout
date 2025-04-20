@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import MyAutomations from "@/pages/MyAutomations";
 import AutomationBuilder from "@/pages/AutomationBuilder";
 import AutomationDetails from "@/pages/AutomationDetails";
+import Templates from "@/pages/Templates";
 import AIServices from "@/pages/AIServices";
 import AppConnections from "@/pages/AppConnections";
 import Settings from "@/pages/Settings";
@@ -26,6 +27,7 @@ function Router() {
       <ProtectedRoute path="/" component={Dashboard} />
       <ProtectedRoute path="/automations" component={MyAutomations} />
       <ProtectedRoute path="/automations/:id" component={AutomationDetails} />
+      <ProtectedRoute path="/templates" component={Templates} />
       <ProtectedRoute path="/builder" component={AutomationBuilder} />
       <ProtectedRoute path="/builder/:id" component={AutomationBuilder} />
       <ProtectedRoute path="/app-connections" component={AppConnections} />
