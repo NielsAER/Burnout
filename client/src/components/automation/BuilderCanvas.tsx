@@ -955,33 +955,31 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </div>
           ) : (
             <div className="space-y-2 relative">
-              {/* Connectors between action steps - rendered separately before each action */}
-              {actions.length > 1 && actions.map((_, index) => {
-                // Skip first action since it connects to the trigger with the "Then Do" connector
-                if (index === 0) return null;
-                
-                return (
-                  <div key={`connector-${index}`} className="relative h-12 mb-2 flex items-center justify-center">
-                    {/* Vertical connector line */}
-                    <div className="h-full w-0.5 bg-gradient-to-b from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30"></div>
-                    
-                    {/* Arrow indicator at bottom of connector */}
-                    <div className="absolute bottom-0 w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center">
-                      <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
-                    </div>
-                  </div>
-                );
-              })}
-              
+              {/* Render actions with proper connector arrows between them */}
               {actions.map((action, index) => (
-                <DraggableAction
-                  key={action.id}
-                  action={action}
-                  index={index}
-                  onRemove={onRemoveAction}
-                  onReorder={onReorderActions}
-                  onConfigure={() => handleConfigureStep(action.id)}
-                />
+                <div key={action.id}>
+                  {/* Render action component */}
+                  <DraggableAction
+                    action={action}
+                    index={index}
+                    onRemove={onRemoveAction}
+                    onReorder={onReorderActions}
+                    onConfigure={() => handleConfigureStep(action.id)}
+                  />
+                  
+                  {/* If there's a next action, render connector between them */}
+                  {index < actions.length - 1 && (
+                    <div className="relative h-12 my-4 flex items-center justify-center">
+                      {/* Vertical connector line */}
+                      <div className="h-full w-0.5 bg-gradient-to-b from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30"></div>
+                      
+                      {/* Arrow indicator at bottom of connector */}
+                      <div className="absolute bottom-0 w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
               
               {/* Add action button at the end */}
