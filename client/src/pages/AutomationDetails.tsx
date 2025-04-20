@@ -66,11 +66,28 @@ const AutomationDetails = () => {
     return null;
   }
 
+  // Get typed reliability data with defaults for type safety
+  const getReliabilityData = () => {
+    const reliability = automation.reliability as { 
+      totalRuns?: number; 
+      errorCount?: number; 
+      successRate?: number;
+    } || { totalRuns: 0, errorCount: 0, successRate: 1 };
+
+    return {
+      totalRuns: reliability.totalRuns || 0,
+      errorCount: reliability.errorCount || 0,
+      successRate: reliability.successRate !== undefined ? reliability.successRate : 1
+    };
+  };
+
+  const reliabilityData = getReliabilityData();
+
   // Calculate various metrics for the dashboard
   const calculateCostSavings = () => {
     const avgTaskTime = 10; // Average minutes per task if done manually
     const hourlyRate = 25; // Assumed hourly rate for manual labor ($)
-    const totalRuns = automation.reliability?.totalRuns || 0;
+    const totalRuns = reliabilityData.totalRuns;
     
     // Total hours saved
     const hoursSaved = (totalRuns * avgTaskTime) / 60;
@@ -87,8 +104,8 @@ const AutomationDetails = () => {
   // Calculate efficiency improvement metrics
   const calculateEfficiencyMetrics = () => {
     const manualErrorRate = 0.05; // 5% human error rate assumption
-    const automationErrorRate = automation.reliability?.errorCount 
-      ? automation.reliability.errorCount / (automation.reliability.totalRuns || 1)
+    const automationErrorRate = reliabilityData.totalRuns > 0
+      ? reliabilityData.errorCount / reliabilityData.totalRuns
       : 0;
     
     // Error reduction percentage (how much the automation reduced errors)
@@ -110,10 +127,8 @@ const AutomationDetails = () => {
   const efficiencyMetrics = calculateEfficiencyMetrics();
   
   // Count successful and failed runs
-  const successfulRuns = automation.reliability?.totalRuns 
-    ? automation.reliability.totalRuns - (automation.reliability.errorCount || 0)
-    : 0;
-  const failedRuns = automation.reliability?.errorCount || 0;
+  const successfulRuns = reliabilityData.totalRuns - reliabilityData.errorCount;
+  const failedRuns = reliabilityData.errorCount;
 
   return (
     <div className="py-6 px-8">
@@ -153,7 +168,7 @@ const AutomationDetails = () => {
                 <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">Automation Runs</h3>
                 <div className="flex items-baseline">
                   <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
-                    {automation.reliability?.totalRuns || 0}
+                    {reliabilityData.totalRuns}
                   </p>
                   <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
                     total runs
@@ -261,16 +276,11 @@ const AutomationDetails = () => {
                       <div className="flex justify-between mb-1">
                         <span className="text-sm">Success Rate</span>
                         <span className="text-sm font-medium">
-                          {automation.reliability?.successRate 
-                            ? Math.round(automation.reliability.successRate * 100) 
-                            : 0}%
+                          {Math.round(reliabilityData.successRate * 100)}%
                         </span>
                       </div>
                       <Progress 
-                        value={automation.reliability?.successRate 
-                          ? Math.round(automation.reliability.successRate * 100) 
-                          : 0
-                        } 
+                        value={Math.round(reliabilityData.successRate * 100)}
                         className="h-2 bg-gray-200 dark:bg-gray-700"
                       />
                     </div>
@@ -389,7 +399,7 @@ const AutomationDetails = () => {
                         <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">estimated</span>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
-                        Based on {automation.reliability?.totalRuns || 0} automated tasks at an average labor rate of $25/hour
+                        Based on {reliabilityData.totalRuns} automated tasks at an average labor rate of $25/hour
                       </p>
                     </div>
                     
@@ -406,7 +416,7 @@ const AutomationDetails = () => {
                         <p className="text-sm text-gray-600 dark:text-gray-300">Per Task Savings</p>
                         <div className="flex items-baseline mt-1">
                           <p className="text-xl font-semibold text-purple-600 dark:text-purple-400">
-                            ${((parseFloat(costSavings.moneySaved) / (automation.reliability?.totalRuns || 1)) || 0).toFixed(2)}
+                            ${((parseFloat(costSavings.moneySaved) / (reliabilityData.totalRuns || 1)) || 0).toFixed(2)}
                           </p>
                           <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">per task</span>
                         </div>
@@ -457,9 +467,7 @@ const AutomationDetails = () => {
                         <div>
                           <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Quality Improvement</p>
                           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                            Consistent quality with {automation.reliability?.successRate 
-                              ? Math.round(automation.reliability.successRate * 100) 
-                              : 0}% success rate
+                            Consistent quality with {Math.round(reliabilityData.successRate * 100)}% success rate
                           </p>
                         </div>
                         <div>
