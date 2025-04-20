@@ -862,25 +862,30 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         {/* Trigger Drop Zone */}
         {renderTriggerZone()}
         
-        {/* Connector with Then Do label */}
+        {/* Enhanced connector with Then Do label */}
         {trigger && (
-          <div className="mb-6 flex flex-col items-center relative">
-            {/* Vertical connector line with gradient */}
-            <div className="h-14 w-1 bg-gradient-to-b from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30 rounded-full"></div>
-            
-            {/* Arrow indicator at bottom of connector */}
-            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center border-2 border-primary/20 dark:border-primary/30 shadow-sm">
-              <div className="w-3 h-3 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
-            </div>
-            
-            {/* "Then Do" label */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#181818] px-4 py-1.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 shadow-sm border border-gray-200 dark:border-gray-700">
-              Then Do
-            </div>
-            
-            {/* Animated ping indicator at top of connector */}
-            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center">
-              <div className="h-2 w-2 rounded-full bg-primary animate-ping" style={{animationDuration: '2s'}}></div>
+          <div className="my-8 flex flex-col items-center relative">
+            {/* Connector container with subtle background */}
+            <div className="h-16 w-24 flex flex-col items-center justify-center relative">
+              
+              {/* Vertical connector line with better gradient */}
+              <div className="h-16 w-1.5 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/20 dark:from-primary/70 dark:via-primary/50 dark:to-primary/30 rounded-full shadow-sm"></div>
+              
+              {/* "Then Do" label with enhanced styling */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#181818] px-5 py-1.5 rounded-full text-xs font-medium text-gray-700 dark:text-gray-200 shadow-sm border border-gray-200 dark:border-gray-700 hover:border-primary/40 dark:hover:border-primary/40 transition-colors duration-200 z-10">
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80 dark:from-primary/90 dark:to-primary/70">Then Do</span>
+              </div>
+              
+              {/* Enhanced arrow at bottom with animated glow */}
+              <div className="absolute -bottom-3 left-1/2 transform -translate-x-1/2 w-9 h-9 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center border-2 border-primary/30 dark:border-primary/40 shadow-md hover:shadow-primary/20 transition-all duration-300 z-10">
+                <div className="absolute inset-0 rounded-full bg-primary/5 dark:bg-primary/10 animate-pulse" style={{animationDuration: '3s'}}></div>
+                <div className="w-3 h-3 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/90 transform translate-y-[-2px]"></div>
+              </div>
+              
+              {/* Animated flow indicator at top */}
+              <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center z-0">
+                <div className="h-2 w-2 rounded-full bg-primary animate-ping" style={{animationDuration: '2s'}}></div>
+              </div>
             </div>
           </div>
         )}
@@ -967,15 +972,19 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                     onConfigure={() => handleConfigureStep(action.id)}
                   />
                   
-                  {/* If there's a next action, render connector between them */}
+                  {/* If there's a next action, render enhanced connector between them */}
                   {index < actions.length - 1 && (
-                    <div className="relative h-12 my-4 flex items-center justify-center">
-                      {/* Vertical connector line */}
-                      <div className="h-full w-0.5 bg-gradient-to-b from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30"></div>
-                      
-                      {/* Arrow indicator at bottom of connector */}
-                      <div className="absolute bottom-0 w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
+                    <div className="relative h-14 my-5 flex items-center justify-center">
+                      {/* Connector container */}
+                      <div className="h-14 w-16 flex flex-col items-center justify-center relative">
+                        {/* Enhanced vertical connector line with better gradient */}
+                        <div className="h-full w-1.5 bg-gradient-to-b from-primary/60 via-primary/40 to-primary/20 dark:from-primary/70 dark:via-primary/50 dark:to-primary/30 rounded-full shadow-sm"></div>
+                        
+                        {/* Enhanced arrow at bottom with animated glow */}
+                        <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center border-2 border-primary/30 dark:border-primary/40 shadow-md z-10">
+                          <div className="absolute inset-0 rounded-full bg-primary/5 dark:bg-primary/10 animate-pulse" style={{animationDuration: '4s'}}></div>
+                          <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/90 transform translate-y-[-2px]"></div>
+                        </div>
                       </div>
                     </div>
                   )}
