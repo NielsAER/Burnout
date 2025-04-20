@@ -317,11 +317,11 @@ const AutomationDetails = () => {
                   <h3 className="text-lg font-medium mb-4">Reliability Insights</h3>
                   
                   <div className="space-y-4">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                    <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-transparent dark:border-blue-700/50 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm text-gray-600 dark:text-gray-300">Health Score</p>
-                          <p className="text-2xl font-semibold text-blue-600 dark:text-blue-400">{automation.healthScore}/100</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-200">Health Score</p>
+                          <p className="text-2xl font-semibold text-blue-600 dark:text-blue-300">{automation.healthScore}/100</p>
                         </div>
                         <div className="p-3 bg-white dark:bg-gray-800 rounded-full">
                           <AlertCircle className={
@@ -333,39 +333,39 @@ const AutomationDetails = () => {
                       </div>
                     </div>
                     
-                    <div>
+                    <div className="border border-gray-100 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800/40 shadow-sm">
                       <div className="flex justify-between mb-1">
-                        <span className="text-sm">Workflow Complexity</span>
-                        <span className="text-sm font-medium">{automation.complexity}/10</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Workflow Complexity</span>
+                        <span className="text-sm font-medium text-gray-700 dark:text-gray-200">{automation.complexity}/10</span>
                       </div>
                       <Progress 
                         value={automation.complexity * 10} 
                         className="h-2 bg-gray-200 dark:bg-gray-700"
                       />
-                      <p className="text-xs text-muted-foreground mt-1">
+                      <p className="text-xs text-gray-600 dark:text-gray-300 mt-1">
                         {automation.complexity <= 2 ? "Simple workflow" : 
                          automation.complexity <= 5 ? "Moderate complexity" : 
                          automation.complexity <= 8 ? "Advanced workflow" : "Expert-level workflow"}
                       </p>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
-                      <p className="text-sm font-medium mb-2">Recent Activity</p>
+                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
+                      <p className="text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Recent Activity</p>
                       {isLoadingHistory ? (
-                        <p className="text-sm text-muted-foreground">Loading activity data...</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">Loading activity data...</p>
                       ) : executionHistory && executionHistory.length > 0 ? (
                         <div className="space-y-2">
                           {executionHistory.slice(0, 3).map((history, idx) => (
                             <div key={idx} className="flex items-center justify-between text-sm">
-                              <span>{new Date(history.executedAt).toLocaleString()}</span>
-                              <Badge variant={history.status === 'success' ? 'default' : 'destructive'}>
+                              <span className="text-gray-600 dark:text-gray-300">{new Date(history.executedAt).toLocaleString()}</span>
+                              <Badge variant={history.status === 'success' ? 'default' : 'destructive'} className={history.status === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : ''}>
                                 {history.status}
                               </Badge>
                             </div>
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-muted-foreground">No recent activity recorded</p>
+                        <p className="text-sm text-gray-500 dark:text-gray-400">No recent activity recorded</p>
                       )}
                     </div>
                   </div>
@@ -404,21 +404,21 @@ const AutomationDetails = () => {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">Time Saved</p>
+                      <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-transparent dark:border-blue-700/50 shadow-sm">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Time Saved</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-400">{costSavings.hoursSaved}</p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">hours</span>
+                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-300">{costSavings.hoursSaved}</p>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">hours</span>
                         </div>
                       </div>
                       
-                      <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                      <div className="bg-purple-50 dark:bg-purple-950/30 p-4 rounded-lg border border-transparent dark:border-purple-700/50 shadow-sm">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Per Task Savings</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-purple-600 dark:text-purple-400">
+                          <p className="text-xl font-semibold text-purple-600 dark:text-purple-300">
                             ${((parseFloat(costSavings.moneySaved) / (reliabilityData.totalRuns || 1)) || 0).toFixed(2)}
                           </p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">per task</span>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">per task</span>
                         </div>
                       </div>
                     </div>
@@ -443,15 +443,15 @@ const AutomationDetails = () => {
                     </div>
                     
                     <div className="grid grid-cols-2 gap-4">
-                      <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
-                        <p className="text-sm text-gray-600 dark:text-gray-300">Error Reduction</p>
+                      <div className="bg-green-50 dark:bg-green-950/30 p-4 rounded-lg border border-transparent dark:border-green-700/50 shadow-sm">
+                        <p className="text-sm text-gray-600 dark:text-gray-200">Error Reduction</p>
                         <div className="flex items-baseline mt-1">
                           <p className="text-xl font-semibold text-green-600 dark:text-green-300">{efficiencyMetrics.errorReduction}%</p>
                           <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">fewer errors</span>
                         </div>
                       </div>
                       
-                      <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                      <div className="bg-blue-50 dark:bg-blue-950/30 p-4 rounded-lg border border-transparent dark:border-blue-700/50 shadow-sm">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Labor Equivalent</p>
                         <div className="flex items-baseline mt-1">
                           <p className="text-xl font-semibold text-blue-600 dark:text-blue-300">
@@ -462,16 +462,16 @@ const AutomationDetails = () => {
                       </div>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                    <div className="bg-gray-50 dark:bg-gray-800/40 p-4 rounded-lg border border-gray-100 dark:border-gray-700 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
-                          <p className="text-sm font-medium text-gray-700 dark:text-gray-300">Quality Improvement</p>
-                          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          <p className="text-sm font-medium text-gray-700 dark:text-gray-200">Quality Improvement</p>
+                          <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                             Consistent quality with {Math.round(reliabilityData.successRate * 100)}% success rate
                           </p>
                         </div>
                         <div>
-                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300">
+                          <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/80 dark:text-blue-200">
                             {automation.healthScore >= 80 ? "Excellent" :
                              automation.healthScore >= 60 ? "Good" :
                              automation.healthScore >= 40 ? "Moderate" : "Needs Improvement"}
