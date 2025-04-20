@@ -158,19 +158,19 @@ const AutomationDetails = () => {
       
       {/* Performance metrics cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/20 border-blue-200 dark:border-blue-800">
+        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/40 border-blue-200 dark:border-blue-700 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center">
               <div className="p-2.5 rounded-full bg-blue-600 text-white dark:bg-blue-500">
                 <Zap className="h-5 w-5" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">Automation Runs</h3>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200">Automation Runs</h3>
                 <div className="flex items-baseline">
-                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-400">
+                  <p className="text-2xl font-bold text-blue-700 dark:text-blue-300">
                     {reliabilityData.totalRuns}
                   </p>
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-300">
                     total runs
                   </span>
                 </div>
@@ -179,7 +179,7 @@ const AutomationDetails = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-900/30 dark:to-green-800/20 border-green-200 dark:border-green-800">
+        <Card className="bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/30 dark:to-green-900/40 border-green-200 dark:border-green-700 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center">
               <div className="p-2.5 rounded-full bg-green-600 text-white dark:bg-green-500">
@@ -200,7 +200,7 @@ const AutomationDetails = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/30 dark:to-purple-800/20 border-purple-200 dark:border-purple-800">
+        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/30 dark:to-purple-900/40 border-purple-200 dark:border-purple-700 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center">
               <div className="p-2.5 rounded-full bg-purple-600 text-white dark:bg-purple-500">
@@ -221,7 +221,7 @@ const AutomationDetails = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/20 border-amber-200 dark:border-amber-800">
+        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/40 border-amber-200 dark:border-amber-700 shadow-sm">
           <CardContent className="pt-6">
             <div className="flex items-center">
               <div className="p-2.5 rounded-full bg-amber-600 text-white dark:bg-amber-500">
