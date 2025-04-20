@@ -124,7 +124,7 @@ export function WorkflowHealthCard({ automationId, className }: WorkflowHealthCa
                         {score}
                       </div>
                     </div>
-                    <div className="absolute -bottom-2 bg-white px-3 py-1 rounded-full border shadow-sm text-sm font-medium">
+                    <div className="absolute -bottom-2 bg-white dark:bg-gray-700 px-3 py-1 rounded-full border dark:border-gray-500 shadow-sm text-sm font-medium dark:text-white">
                       {status}
                     </div>
                   </div>
@@ -163,21 +163,21 @@ export function WorkflowHealthCard({ automationId, className }: WorkflowHealthCa
                       </div>
                     </div>
                     <div className="grid grid-cols-2 gap-2 mt-3">
-                      <div className="bg-gray-50 p-2 rounded">
-                        <div className="text-sm text-gray-500">Total Runs</div>
-                        <div className="font-medium">{reliability?.totalRuns || 0}</div>
+                      <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded border dark:border-gray-600">
+                        <div className="text-sm text-gray-500 dark:text-gray-300">Total Runs</div>
+                        <div className="font-medium dark:text-white">{reliability?.totalRuns || 0}</div>
                       </div>
-                      <div className="bg-gray-50 p-2 rounded">
-                        <div className="text-sm text-gray-500">Errors</div>
-                        <div className="font-medium">{reliability?.errorCount || 0}</div>
+                      <div className="bg-gray-50 dark:bg-gray-700 p-2 rounded border dark:border-gray-600">
+                        <div className="text-sm text-gray-500 dark:text-gray-300">Errors</div>
+                        <div className="font-medium dark:text-white">{reliability?.errorCount || 0}</div>
                       </div>
                     </div>
                   </div>
                   
                   <div>
                     <h3 className="text-lg font-medium mb-2">Recommendation</h3>
-                    <div className="bg-gradient-to-r from-primary/5 to-transparent p-3 rounded-lg">
-                      <p className="text-sm">{recommendation}</p>
+                    <div className="bg-gradient-to-r from-primary/5 to-transparent dark:from-primary/20 dark:to-transparent p-3 rounded-lg border dark:border-primary/30">
+                      <p className="text-sm dark:text-white">{recommendation}</p>
                     </div>
                   </div>
                 </div>
