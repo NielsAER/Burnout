@@ -177,8 +177,18 @@ export function SettingsForm() {
     <div className="w-full max-w-5xl mx-auto">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-2 mb-8 w-[400px] bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
-          <TabsTrigger value="ai-services" className="text-gray-800 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-600 dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">AI Services</TabsTrigger>
-          <TabsTrigger value="oauth-credentials" className="text-gray-800 dark:text-gray-300 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-600 dark:data-[state=active]:text-white data-[state=active]:border-b-2 data-[state=active]:border-blue-600 data-[state=active]:rounded-none">OAuth Credentials</TabsTrigger>
+          <TabsTrigger 
+            value="ai-services" 
+            className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
+          >
+            AI Services
+          </TabsTrigger>
+          <TabsTrigger 
+            value="oauth-credentials" 
+            className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
+          >
+            OAuth Credentials
+          </TabsTrigger>
         </TabsList>
         
         {/* AI Services Tab */}
