@@ -186,12 +186,12 @@ const AutomationDetails = () => {
                 <CreditCard className="h-5 w-5" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">Cost Savings</h3>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200">Cost Savings</h3>
                 <div className="flex items-baseline">
-                  <p className="text-2xl font-bold text-green-700 dark:text-green-400">
+                  <p className="text-2xl font-bold text-green-700 dark:text-green-300">
                     ${costSavings.moneySaved}
                   </p>
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-300">
                     saved
                   </span>
                 </div>
@@ -207,12 +207,12 @@ const AutomationDetails = () => {
                 <Clock className="h-5 w-5" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">Time Saved</h3>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200">Time Saved</h3>
                 <div className="flex items-baseline">
-                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-400">
+                  <p className="text-2xl font-bold text-purple-700 dark:text-purple-300">
                     {costSavings.hoursSaved}
                   </p>
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-300">
                     hours
                   </span>
                 </div>
@@ -228,12 +228,12 @@ const AutomationDetails = () => {
                 <Target className="h-5 w-5" />
               </div>
               <div className="ml-3">
-                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-300">Efficiency Gain</h3>
+                <h3 className="text-sm font-medium text-gray-600 dark:text-gray-200">Efficiency Gain</h3>
                 <div className="flex items-baseline">
-                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-400">
+                  <p className="text-2xl font-bold text-amber-700 dark:text-amber-300">
                     {efficiencyMetrics.timeSavingPercent}%
                   </p>
-                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-400">
+                  <span className="ml-2 text-xs text-gray-500 dark:text-gray-300">
                     faster
                   </span>
                 </div>
@@ -392,11 +392,11 @@ const AutomationDetails = () => {
                   <h3 className="text-lg font-medium mb-4">Cost Analysis</h3>
                   
                   <div className="space-y-6">
-                    <div className="bg-gradient-to-r from-green-50 to-transparent dark:from-green-900/20 p-5 rounded-lg border border-green-100 dark:border-green-800">
+                    <div className="bg-gradient-to-r from-green-50 to-transparent dark:from-green-950/20 dark:to-transparent p-5 rounded-lg border border-green-100 dark:border-green-700 shadow-sm">
                       <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-2">Total Cost Savings</h4>
                       <div className="flex items-baseline">
-                        <span className="text-3xl font-bold text-green-600 dark:text-green-400">${costSavings.moneySaved}</span>
-                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">estimated</span>
+                        <span className="text-3xl font-bold text-green-600 dark:text-green-300">${costSavings.moneySaved}</span>
+                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-300">estimated</span>
                       </div>
                       <p className="text-sm text-gray-600 dark:text-gray-300 mt-2">
                         Based on {reliabilityData.totalRuns} automated tasks at an average labor rate of $25/hour
@@ -429,15 +429,15 @@ const AutomationDetails = () => {
                   <h3 className="text-lg font-medium mb-4">Efficiency Metrics</h3>
                   
                   <div className="space-y-4">
-                    <div className="bg-gradient-to-r from-amber-50 to-transparent dark:from-amber-900/20 p-5 rounded-lg border border-amber-100 dark:border-amber-800">
+                    <div className="bg-gradient-to-r from-amber-50 to-transparent dark:from-amber-950/20 dark:to-transparent p-5 rounded-lg border border-amber-100 dark:border-amber-700 shadow-sm">
                       <div className="flex justify-between items-center">
                         <div>
                           <h4 className="font-medium text-gray-800 dark:text-gray-200 mb-1">Time Efficiency</h4>
-                          <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">{efficiencyMetrics.timeSavingPercent}%</p>
+                          <p className="text-3xl font-bold text-amber-600 dark:text-amber-300">{efficiencyMetrics.timeSavingPercent}%</p>
                           <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">faster than manual processing</p>
                         </div>
                         <div className="p-3 bg-white dark:bg-gray-800 rounded-full">
-                          <Users className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                          <Users className="h-6 w-6 text-amber-600 dark:text-amber-300" />
                         </div>
                       </div>
                     </div>
@@ -446,18 +446,18 @@ const AutomationDetails = () => {
                       <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Error Reduction</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-green-600 dark:text-green-400">{efficiencyMetrics.errorReduction}%</p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">fewer errors</span>
+                          <p className="text-xl font-semibold text-green-600 dark:text-green-300">{efficiencyMetrics.errorReduction}%</p>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">fewer errors</span>
                         </div>
                       </div>
                       
                       <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
                         <p className="text-sm text-gray-600 dark:text-gray-300">Labor Equivalent</p>
                         <div className="flex items-baseline mt-1">
-                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-400">
+                          <p className="text-xl font-semibold text-blue-600 dark:text-blue-300">
                             {(parseFloat(costSavings.hoursSaved) / 160).toFixed(2)}
                           </p>
-                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-400">FTE months</span>
+                          <span className="ml-1 text-xs text-gray-500 dark:text-gray-300">FTE months</span>
                         </div>
                       </div>
                     </div>
