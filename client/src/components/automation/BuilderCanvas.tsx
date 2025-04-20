@@ -957,15 +957,29 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             <div className="space-y-2 relative">
               {/* Visual connector arrows for workflow steps */}
               {actions.length > 0 && (
-                <div className="absolute top-0 bottom-0 left-6 z-0 flex flex-col items-center justify-center w-8">
-                  <div className="h-full w-0.5 bg-primary/30 dark:bg-primary/40"></div>
-                  {actions.map((_, index) => (
-                    <div key={index} className="absolute" style={{ top: `${(index * 100) + 26}px` }}>
-                      <div className="w-4 h-4 flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-4px]"></div>
+                <div className="absolute top-0 bottom-0 left-6 z-0">
+                  {/* Vertical connector line */}
+                  <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30 transform -translate-x-1/2"></div>
+                  
+                  {/* Arrow indicators at each step */}
+                  {actions.map((_, index) => {
+                    // Skip first arrow if it's the first action (we already have the Then Do connector)
+                    if (index === 0) return null;
+                    
+                    return (
+                      <div 
+                        key={index} 
+                        className="absolute left-1/2 transform -translate-x-1/2"
+                        style={{ top: `${(index * 100) - 12}px` }}
+                      >
+                        {/* Circle background for arrow */}
+                        <div className="relative w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center">
+                          {/* Downward pointing arrow */}
+                          <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
               
