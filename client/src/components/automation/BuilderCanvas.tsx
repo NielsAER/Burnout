@@ -862,13 +862,24 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         {/* Trigger Drop Zone */}
         {renderTriggerZone()}
         
-        {/* Connector */}
+        {/* Connector with Then Do label */}
         {trigger && (
-          <div className="h-12 w-1 bg-gradient-to-b from-primary/30 to-primary/10 dark:from-primary/40 dark:to-primary/20 relative self-center rounded-full">
-            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 dark:border-primary/30">
-              <ArrowDown className="h-4 w-4 text-primary animate-pulse" />
+          <div className="mb-6 flex flex-col items-center relative">
+            {/* Vertical connector line with gradient */}
+            <div className="h-14 w-1 bg-gradient-to-b from-primary/40 to-primary/20 dark:from-primary/50 dark:to-primary/30 rounded-full"></div>
+            
+            {/* Arrow indicator at bottom of connector */}
+            <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 -translate-y-2 w-8 h-8 rounded-full bg-gradient-to-r from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 flex items-center justify-center border-2 border-primary/20 dark:border-primary/30 shadow-sm">
+              <div className="w-3 h-3 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
             </div>
-            <div className="absolute -top-0 left-1/2 transform -translate-x-1/2 w-7 h-7 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center border-2 border-primary/20 dark:border-primary/30">
+            
+            {/* "Then Do" label */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white dark:bg-[#181818] px-4 py-1.5 rounded-full text-xs font-medium text-gray-600 dark:text-gray-300 shadow-sm border border-gray-200 dark:border-gray-700">
+              Then Do
+            </div>
+            
+            {/* Animated ping indicator at top of connector */}
+            <div className="absolute -top-1 left-1/2 transform -translate-x-1/2 w-6 h-6 rounded-full bg-gradient-to-r from-primary/20 to-primary/5 flex items-center justify-center">
               <div className="h-2 w-2 rounded-full bg-primary animate-ping" style={{animationDuration: '2s'}}></div>
             </div>
           </div>
@@ -944,9 +955,18 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </div>
           ) : (
             <div className="space-y-2 relative">
-              {/* Visual connector line for multiple actions */}
-              {actions.length > 1 && (
-                <div className="absolute top-0 bottom-0 left-6 w-px bg-gray-200 dark:bg-[#2a2a2a] z-0"></div>
+              {/* Visual connector arrows for workflow steps */}
+              {actions.length > 0 && (
+                <div className="absolute top-0 bottom-0 left-6 z-0 flex flex-col items-center justify-center w-8">
+                  <div className="h-full w-0.5 bg-primary/30 dark:bg-primary/40"></div>
+                  {actions.map((_, index) => (
+                    <div key={index} className="absolute" style={{ top: `${(index * 100) + 26}px` }}>
+                      <div className="w-4 h-4 flex items-center justify-center">
+                        <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-4px]"></div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
               
               {actions.map((action, index) => (
