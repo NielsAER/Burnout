@@ -81,21 +81,20 @@ function CustomerRouter() {
 function Router() {
   const [location] = useLocation();
   
+  // Auth page should be accessible regardless of router
+  if (location === "/auth") {
+    return <AuthPage />;
+  }
+  
   // Render the appropriate router based on the current location
   if (location.startsWith("/customer")) {
     return <CustomerRouter />;
   }
   
   return (
-    <Switch>
-      <Route>
-        <MainLayout>
-          <DeveloperRouter />
-        </MainLayout>
-      </Route>
-      <Route path="/auth" component={AuthPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <MainLayout>
+      <DeveloperRouter />
+    </MainLayout>
   );
 }
 
