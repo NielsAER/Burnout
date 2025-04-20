@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
 import lightLogo from "@assets/brnout-logo-light.png";
-import darkLogo from "@assets/brnout-header-logo.png";
+import darkLogo from "@assets/brnout-logo-dark.png";
 
 interface LogoProps {
   className?: string;
