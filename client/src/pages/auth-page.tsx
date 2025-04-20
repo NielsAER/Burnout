@@ -81,7 +81,10 @@ export default function AuthPage() {
 
   // If user is already logged in, redirect based on role
   if (user && user.username) {
-    if (userRole === "customer") {
+    // Use session storage to get role in case the context hasn't loaded yet
+    const savedRole = sessionStorage.getItem('userRole');
+    
+    if (savedRole === "customer" || userRole === "customer") {
       return <Redirect to="/customer/dashboard" />;
     }
     return <Redirect to="/" />;

@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -27,7 +27,7 @@ import CustomerProfile from "@/pages/customer/CustomerProfile";
 import MainLayout from "@/layouts/MainLayout";
 import CustomerLayout from "@/layouts/CustomerLayout";
 
-import { AuthProvider } from "@/hooks/use-auth";
+import { AuthProvider, useAuth } from "@/hooks/use-auth";
 import { ProtectedRoute, ResearcherRoute, CustomerRoute } from "@/lib/protected-route";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AIAssistantProvider } from "@/contexts/AIAssistantContext";
@@ -80,17 +80,36 @@ function CustomerRouter() {
 // Main Router
 function Router() {
   const [location] = useLocation();
+  const { user, userRole } = useAuth();
   
   // Auth page should be accessible regardless of router
   if (location === "/auth") {
     return <AuthPage />;
   }
   
-  // Render the appropriate router based on the current location
-  if (location.startsWith("/customer")) {
+  // If not on auth page, check if user exists and redirect accordingly
+  if (!user) {
+    return <Redirect to="/auth" />;
+  }
+  
+  // Render the appropriate router based on user role or current location
+  const savedRole = sessionStorage.getItem('userRole');
+  
+  // If user is a customer, always use the customer router
+  if (userRole === "customer" || savedRole === "customer") {
+    // If they're not already on a customer route, redirect them
+    if (!location.startsWith("/customer")) {
+      return <Redirect to="/customer/dashboard" />;
+    }
     return <CustomerRouter />;
   }
   
+  // For researchers, if they somehow end up on a customer route, redirect them
+  if (location.startsWith("/customer")) {
+    return <Redirect to="/" />;
+  }
+  
+  // Default to developer/researcher view
   return (
     <MainLayout>
       <DeveloperRouter />
