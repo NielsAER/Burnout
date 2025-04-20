@@ -312,15 +312,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const templateId = req.params.templateId;
       
-      // Create a new automation based on the template ID
+      // Define trigger and action apps based on the template ID
+      let triggerAppId = "trigger-app";
+      let actionAppId = "action-app";
+      let name = `New Automation from Template (${templateId})`;
+      let description = "Created from template";
+      let triggerConfig = {};
+      let actionConfig = {};
+      
+      // Configure template-specific details
+      switch (templateId) {
+        case "linkedin-ai-post":
+          triggerAppId = "schedule";
+          actionAppId = "linkedin";
+          name = "LinkedIn AI Post Generator";
+          description = "Automatically generate and post content to LinkedIn on a schedule";
+          triggerConfig = { frequency: "daily", time: "09:00" };
+          actionConfig = { postType: "article", useAI: true };
+          break;
+          
+        case "instagram-visual-post":
+          triggerAppId = "schedule";
+          actionAppId = "instagram";
+          name = "Instagram AI Content Creator";
+          description = "Create and post AI-generated images to Instagram";
+          triggerConfig = { frequency: "weekly", days: ["monday", "thursday"] };
+          actionConfig = { mediaType: "image", caption: true };
+          break;
+          
+        case "teams-meeting-summarizer":
+          triggerAppId = "microsoft-teams";
+          actionAppId = "openai";
+          name = "Teams Meeting Summarizer";
+          description = "Generate meeting summaries from Microsoft Teams calls";
+          triggerConfig = { eventType: "meeting-ended" };
+          actionConfig = { model: "gpt-4o", maxTokens: 500 };
+          break;
+          
+        case "mailchimp-newsletter":
+          triggerAppId = "schedule";
+          actionAppId = "mailchimp";
+          name = "AI Newsletter Generator";
+          description = "Create and send personalized newsletters through Mailchimp";
+          triggerConfig = { frequency: "weekly", day: "friday", time: "10:00" };
+          actionConfig = { listId: "primary", templateId: "newsletter-template" };
+          break;
+          
+        case "google-docs-summary":
+          triggerAppId = "google-docs";
+          actionAppId = "openai";
+          name = "Google Docs AI Summarizer";
+          description = "Automatically summarize Google Docs documents";
+          triggerConfig = { eventType: "document-updated" };
+          actionConfig = { model: "gpt-4o", maxTokens: 300 };
+          break;
+          
+        case "slack-daily-updates":
+          triggerAppId = "schedule";
+          actionAppId = "slack";
+          name = "Slack Daily Status Updates";
+          description = "Post daily team updates to Slack channels";
+          triggerConfig = { frequency: "daily", weekdays: true, time: "17:00" };
+          actionConfig = { channel: "team-updates", format: "summary" };
+          break;
+          
+        case "notion-research-assistant":
+          triggerAppId = "notion";
+          actionAppId = "openai";
+          name = "Notion Research Assistant";
+          description = "Research topics and organize findings in Notion";
+          triggerConfig = { database: "research-topics", trigger: "new-item" };
+          actionConfig = { model: "gpt-4o", maxTokens: 1000, output: "notion-page" };
+          break;
+          
+        case "content-scheduler":
+          triggerAppId = "schedule";
+          actionAppId = "multi-platform";
+          name = "Multi-Platform Content Scheduler";
+          description = "Schedule content across multiple social platforms";
+          triggerConfig = { frequency: "weekly", days: ["tuesday", "friday"] };
+          actionConfig = { platforms: ["linkedin", "twitter", "instagram"] };
+          break;
+          
+        case "ai-customer-service":
+          triggerAppId = "email";
+          actionAppId = "openai";
+          name = "AI Customer Service Assistant";
+          description = "Respond to customer inquiries with AI assistance";
+          triggerConfig = { mailbox: "support@company.com", filter: "unread" };
+          actionConfig = { model: "gpt-4o", toneStyle: "helpful", responseTemplate: "customer-service" };
+          break;
+          
+        case "scheduled-reporting":
+          triggerAppId = "schedule";
+          actionAppId = "report-generator";
+          name = "Automated Weekly Reports";
+          description = "Generate and distribute reports on a schedule";
+          triggerConfig = { frequency: "weekly", day: "monday", time: "06:00" };
+          actionConfig = { reportType: "performance", distribution: "email" };
+          break;
+          
+        case "lead-generation":
+          triggerAppId = "web-form";
+          actionAppId = "crm";
+          name = "Intelligent Lead Generator";
+          description = "Identify and qualify sales leads automatically";
+          triggerConfig = { formId: "contact-form", website: "company.com" };
+          actionConfig = { crmPlatform: "salesforce", qualifyWithAI: true };
+          break;
+          
+        case "time-tracker":
+          triggerAppId = "schedule";
+          actionAppId = "time-tracking";
+          name = "Automated Time Tracking";
+          description = "Track time spent on projects and generate reports";
+          triggerConfig = { frequency: "daily", time: "18:00" };
+          actionConfig = { projectTracking: true, reportFrequency: "weekly" };
+          break;
+          
+        default:
+          // Use generic values as fallback
+          break;
+      }
+      
+      // Create a new automation based on the template details
       const newAutomation = {
-        name: `New Automation from Template (${templateId})`,
-        description: "Created from template",
+        name,
+        description,
         active: false,
-        triggerAppId: "trigger-app",
-        actionAppId: "action-app",
-        triggerConfig: {},
-        actionConfig: {},
+        triggerAppId,
+        actionAppId,
+        triggerConfig,
+        actionConfig,
         userId: req.user?.id || 1,
         complexity: 3,
         healthScore: 85,
