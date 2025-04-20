@@ -15,7 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 type ProfileFormValues = {
   username: string;
   email?: string;
-  displayName?: string;
+  fullName?: string;
 };
 
 type PasswordFormValues = {
@@ -33,7 +33,7 @@ export default function CustomerProfile() {
     defaultValues: {
       username: user?.username || "",
       email: user?.email || "",
-      displayName: user?.displayName || "",
+      fullName: user?.fullName || "",
     },
   });
   
@@ -166,10 +166,10 @@ export default function CustomerProfile() {
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="displayName">Display Name</Label>
+                  <Label htmlFor="fullName">Full Name</Label>
                   <Input
-                    id="displayName"
-                    {...profileForm.register("displayName")}
+                    id="fullName"
+                    {...profileForm.register("fullName")}
                     disabled={!isEditing}
                   />
                 </div>
