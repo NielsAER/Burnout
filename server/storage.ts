@@ -11,6 +11,8 @@ import {
   InsertAchievement,
   UserAchievement,
   InsertUserAchievement,
+  WorkflowSuggestion,
+  InsertWorkflowSuggestion,
   users,
   automations,
   executionHistories,
@@ -18,6 +20,7 @@ import {
   templates,
   achievements,
   userAchievements,
+  workflowSuggestions,
   type User,
   type InsertUser
 } from "@shared/schema";
@@ -79,6 +82,14 @@ export interface IStorage {
   createAchievement(achievement: InsertAchievement): Promise<Achievement>;
   getUnlockedAchievements(automationId: number): Promise<Achievement[]>;
   unlockAchievement(automationId: number, achievementId: number): Promise<UserAchievement>;
+
+  // Workflow suggestion methods
+  getAllWorkflowSuggestions(): Promise<WorkflowSuggestion[]>;
+  getPersonalizedWorkflowSuggestions(limit?: number): Promise<WorkflowSuggestion[]>;
+  getWorkflowSuggestionsByCategory(category: string, limit?: number): Promise<WorkflowSuggestion[]>;
+  createWorkflowSuggestion(suggestion: InsertWorkflowSuggestion): Promise<WorkflowSuggestion>;
+  updateWorkflowSuggestion(id: number, data: Partial<InsertWorkflowSuggestion>): Promise<WorkflowSuggestion | undefined>;
+  deleteWorkflowSuggestion(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -89,6 +100,7 @@ export class MemStorage implements IStorage {
   private templates: Map<number, Template>;
   private achievements: Map<number, Achievement>;
   private userAchievements: Map<number, UserAchievement>;
+  private workflowSuggestions: Map<number, WorkflowSuggestion>;
   private currentUserId: number;
   private currentAutomationId: number;
   private currentExecutionHistoryId: number;
@@ -96,6 +108,7 @@ export class MemStorage implements IStorage {
   private currentTemplateId: number;
   private currentAchievementId: number;
   private currentUserAchievementId: number;
+  private currentWorkflowSuggestionId: number;
   
   sessionStore: session.Store;
 
@@ -107,6 +120,7 @@ export class MemStorage implements IStorage {
     this.templates = new Map();
     this.achievements = new Map();
     this.userAchievements = new Map();
+    this.workflowSuggestions = new Map();
     this.currentUserId = 1;
     this.currentAutomationId = 1;
     this.currentExecutionHistoryId = 1;
@@ -114,6 +128,7 @@ export class MemStorage implements IStorage {
     this.currentTemplateId = 1;
     this.currentAchievementId = 1;
     this.currentUserAchievementId = 1;
+    this.currentWorkflowSuggestionId = 1;
     
     // Initialize the session store
     const MemoryStore = createMemoryStore(session);
@@ -129,6 +144,8 @@ export class MemStorage implements IStorage {
     this.seedExecutionHistories();
     // Seed achievements
     this.seedAchievements();
+    // Seed workflow suggestions
+    this.seedWorkflowSuggestions();
   }
   
   // Health score and achievement methods
@@ -500,6 +517,186 @@ export class MemStorage implements IStorage {
     };
     this.templates.set(id, template);
     return template;
+  }
+  
+  // Workflow Suggestion methods
+  async getAllWorkflowSuggestions(): Promise<WorkflowSuggestion[]> {
+    return Array.from(this.workflowSuggestions.values());
+  }
+  
+  async getPersonalizedWorkflowSuggestions(limit: number = 10): Promise<WorkflowSuggestion[]> {
+    return Array.from(this.workflowSuggestions.values())
+      .filter(suggestion => suggestion.personalized)
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, limit);
+  }
+  
+  async getWorkflowSuggestionsByCategory(category: string, limit: number = 10): Promise<WorkflowSuggestion[]> {
+    return Array.from(this.workflowSuggestions.values())
+      .filter(suggestion => suggestion.category === category)
+      .sort((a, b) => b.relevanceScore - a.relevanceScore)
+      .slice(0, limit);
+  }
+  
+  async createWorkflowSuggestion(insertSuggestion: InsertWorkflowSuggestion): Promise<WorkflowSuggestion> {
+    const id = this.currentWorkflowSuggestionId++;
+    const now = new Date();
+    const suggestion: WorkflowSuggestion = {
+      ...insertSuggestion,
+      id,
+      createdAt: now,
+      personalized: insertSuggestion.personalized || false,
+      relevanceScore: insertSuggestion.relevanceScore || 50,
+    };
+    this.workflowSuggestions.set(id, suggestion);
+    return suggestion;
+  }
+  
+  async updateWorkflowSuggestion(id: number, data: Partial<InsertWorkflowSuggestion>): Promise<WorkflowSuggestion | undefined> {
+    const suggestion = this.workflowSuggestions.get(id);
+    if (!suggestion) return undefined;
+    
+    const updatedSuggestion = { ...suggestion, ...data };
+    this.workflowSuggestions.set(id, updatedSuggestion);
+    return updatedSuggestion;
+  }
+  
+  async deleteWorkflowSuggestion(id: number): Promise<boolean> {
+    return this.workflowSuggestions.delete(id);
+  }
+  
+  // Seed method for workflow suggestions
+  private seedWorkflowSuggestions() {
+    const suggestions: InsertWorkflowSuggestion[] = [
+      {
+        name: "Daily Social Media Summary",
+        description: "Get a daily summary of your social media posts and engagement",
+        triggerAppId: "schedule",
+        actionAppId: "openai",
+        config: {
+          triggers: {
+            schedule: {
+              frequency: "daily",
+              time: "18:00"
+            }
+          },
+          actions: {
+            openai: {
+              model: "gpt-4o",
+              prompt: "Summarize my social media activities for today"
+            }
+          }
+        },
+        category: "social",
+        personalized: true,
+        relevanceScore: 85
+      },
+      {
+        name: "Tweet When Blog Published",
+        description: "Automatically create a tweet when you publish a new blog post",
+        triggerAppId: "rss",
+        actionAppId: "twitter",
+        config: {
+          triggers: {
+            rss: {
+              url: "https://yourblog.com/feed"
+            }
+          },
+          actions: {
+            twitter: {
+              message: "New blog post: {{title}} {{url}}"
+            }
+          }
+        },
+        category: "social",
+        personalized: false,
+        relevanceScore: 75
+      },
+      {
+        name: "Email Summarizer",
+        description: "Automatically summarize long emails for quick review",
+        triggerAppId: "gmail",
+        actionAppId: "openai",
+        config: {
+          triggers: {
+            gmail: {
+              label: "inbox",
+              filter: "from:important OR subject:urgent"
+            }
+          },
+          actions: {
+            openai: {
+              model: "gpt-4o",
+              prompt: "Summarize this email in 3 bullet points: {{email_body}}"
+            }
+          }
+        },
+        category: "productivity",
+        personalized: true,
+        relevanceScore: 90
+      },
+      {
+        name: "Meeting Notes to Notion",
+        description: "Send meeting notes to your Notion workspace",
+        triggerAppId: "googlecalendar",
+        actionAppId: "notion",
+        config: {
+          triggers: {
+            googlecalendar: {
+              eventType: "ended"
+            }
+          },
+          actions: {
+            notion: {
+              database: "Meeting Notes",
+              properties: {
+                title: "{{event_title}}",
+                date: "{{event_date}}",
+                participants: "{{attendees}}"
+              }
+            }
+          }
+        },
+        category: "productivity",
+        personalized: false,
+        relevanceScore: 80
+      },
+      {
+        name: "Content Idea Generator",
+        description: "Generate content ideas based on trending topics",
+        triggerAppId: "schedule",
+        actionAppId: "anthropic",
+        config: {
+          triggers: {
+            schedule: {
+              frequency: "weekly",
+              day: "Monday",
+              time: "09:00"
+            }
+          },
+          actions: {
+            anthropic: {
+              model: "claude-3-7-sonnet-20250219",
+              prompt: "Generate 5 content ideas for {{industry}} based on current trends"
+            }
+          }
+        },
+        category: "content",
+        personalized: true,
+        relevanceScore: 85
+      }
+    ];
+    
+    suggestions.forEach(suggestion => {
+      const id = this.currentWorkflowSuggestionId++;
+      this.workflowSuggestions.set(id, {
+        ...suggestion,
+        id,
+        createdAt: new Date(),
+        personalized: suggestion.personalized || false,
+        relevanceScore: suggestion.relevanceScore || 50
+      });
+    });
   }
 
   // Seed methods for initial data

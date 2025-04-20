@@ -160,3 +160,25 @@ export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
 
 export type UserAchievement = typeof userAchievements.$inferSelect;
 export type InsertUserAchievement = z.infer<typeof insertUserAchievementSchema>;
+
+// Workflow suggestions table schema
+export const workflowSuggestions = pgTable("workflow_suggestions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  triggerAppId: text("trigger_app_id").notNull(),
+  actionAppId: text("action_app_id").notNull(),
+  config: json("config").default({}),
+  category: text("category").notNull(), // 'productivity', 'social', 'analytics', 'content', 'custom'
+  personalized: boolean("personalized").default(false),
+  relevanceScore: integer("relevance_score").default(50),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertWorkflowSuggestionSchema = createInsertSchema(workflowSuggestions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type WorkflowSuggestion = typeof workflowSuggestions.$inferSelect;
+export type InsertWorkflowSuggestion = z.infer<typeof insertWorkflowSuggestionSchema>;
