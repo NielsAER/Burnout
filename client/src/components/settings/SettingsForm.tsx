@@ -430,46 +430,46 @@ export function SettingsForm() {
             </Card>
             
             {/* Google OAuth */}
-            <Card className="bg-[#0f0f0f] border border-[#2a2a2a] rounded-sm">
+            <Card className="bg-white dark:bg-[#0f0f0f] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-white">Google OAuth</CardTitle>
-                    <CardDescription className="text-gray-400">Configure Google OAuth credentials for Gmail, Drive, and Calendar integration</CardDescription>
+                    <CardTitle className="text-gray-900 dark:text-white">Google OAuth</CardTitle>
+                    <CardDescription className="text-gray-500 dark:text-gray-400">Configure Google OAuth credentials for Gmail, Drive, and Calendar integration</CardDescription>
                   </div>
                   <div>{renderCredentialStatus("google")}</div>
                 </div>
               </CardHeader>
-              <CardContent className="text-white">
+              <CardContent>
                 <form onSubmit={handleSaveGoogleCredentials} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="google-client-id" className="text-white">Client ID</Label>
+                    <Label htmlFor="google-client-id">Client ID</Label>
                     <Input
                       id="google-client-id"
                       placeholder="Google Client ID"
                       value={googleClientId}
                       onChange={(e) => setGoogleClientId(e.target.value)}
-                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                      className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] rounded-sm"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="google-client-secret" className="text-white">Client Secret</Label>
+                    <Label htmlFor="google-client-secret">Client Secret</Label>
                     <Input
                       id="google-client-secret"
                       type="password"
                       placeholder="Google Client Secret"
                       value={googleClientSecret}
                       onChange={(e) => setGoogleClientSecret(e.target.value)}
-                      className="bg-[#181818] border-[#2a2a2a] text-white rounded-sm"
+                      className="bg-white dark:bg-[#181818] border-gray-200 dark:border-[#2a2a2a] rounded-sm"
                     />
                   </div>
-                  <p className="text-xs text-gray-400">
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
                     Get your credentials from{" "}
                     <a
                       href="https://console.cloud.google.com/apis/credentials"
                       target="_blank"
                       rel="noreferrer"
-                      className="text-blue-400 hover:underline"
+                      className="text-blue-500 dark:text-blue-400 hover:underline"
                     >
                       Google Cloud Console
                     </a>
