@@ -15,29 +15,31 @@ export default function Settings() {
       </header>
 
       <Tabs defaultValue="api-credentials" className="space-y-8">
-        <TabsList className="grid grid-cols-3 w-full p-1 bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
-          <TabsTrigger 
-            value="api-credentials" 
-            className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
-          >
-            <KeyIcon className="h-4 w-4" />
-            API Credentials
-          </TabsTrigger>
-          <TabsTrigger 
-            value="account" 
-            className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
-          >
-            <UserIcon className="h-4 w-4" />
-            Account
-          </TabsTrigger>
-          <TabsTrigger 
-            value="general" 
-            className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
-          >
-            <ServerIcon className="h-4 w-4" />
-            General
-          </TabsTrigger>
-        </TabsList>
+        <div className="w-full">
+          <TabsList className="grid grid-cols-3 w-full p-0 bg-gray-100 dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-sm">
+            <TabsTrigger 
+              value="api-credentials" 
+              className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
+            >
+              <KeyIcon className="h-4 w-4" />
+              API Credentials
+            </TabsTrigger>
+            <TabsTrigger 
+              value="account" 
+              className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
+            >
+              <UserIcon className="h-4 w-4" />
+              Account
+            </TabsTrigger>
+            <TabsTrigger 
+              value="general" 
+              className="flex items-center justify-center gap-2 px-4 py-2 h-10 data-[state=active]:bg-white dark:data-[state=active]:bg-[#0f0f0f] data-[state=active]:text-blue-500 data-[state=active]:border-b-2 data-[state=active]:border-blue-500 data-[state=active]:rounded-none text-gray-800 dark:text-white transition-all"
+            >
+              <ServerIcon className="h-4 w-4" />
+              General
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="api-credentials">
           <SettingsForm />
