@@ -95,15 +95,19 @@ export default function AuthPage() {
     <div className="h-screen w-full bg-gradient-to-b from-background to-background/80 flex items-center justify-center p-4">
       <div className="max-w-7xl w-full grid md:grid-cols-2 gap-6 items-center">
         {/* Hero section */}
-        <div className="flex flex-col space-y-4 order-2 md:order-1">
-          <Logo size="lg" />
-          <p className="text-2xl md:text-3xl font-semibold text-foreground/90">
-            Automation without the complexity
-          </p>
-          <p className="text-muted-foreground text-lg max-w-md">
-            Build powerful automations between your favorite apps and services with an intuitive, 
-            drag-and-drop interface powered by AI.
-          </p>
+        <div className="flex flex-col space-y-6 order-2 md:order-1">
+          <div className="flex justify-center md:justify-start mb-2">
+            <Logo size="lg" />
+          </div>
+          <div className="space-y-4">
+            <p className="text-2xl md:text-3xl font-semibold text-foreground/90">
+              Automation without the complexity
+            </p>
+            <p className="text-muted-foreground text-lg max-w-md">
+              Build powerful automations between your favorite apps and services with an intuitive, 
+              drag-and-drop interface powered by AI.
+            </p>
+          </div>
           <div className="flex flex-wrap gap-2 pt-4">
             <div className="flex items-center space-x-2 bg-primary/10 rounded-full px-4 py-2">
               <div className="w-2 h-2 rounded-full bg-primary"></div>

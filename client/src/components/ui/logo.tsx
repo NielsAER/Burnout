@@ -20,7 +20,7 @@ export const Logo = ({
   const sizeClasses = {
     sm: "h-10",
     md: "h-14",
-    lg: "h-20"
+    lg: "h-28 md:h-32" // Made the logo larger, especially on medium and large screens
   };
 
   return (
