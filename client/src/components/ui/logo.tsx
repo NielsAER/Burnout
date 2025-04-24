@@ -20,7 +20,7 @@ export const Logo = ({
   const sizeClasses = {
     sm: "h-10",
     md: "h-14",
-    lg: "h-28 md:h-32" // Made the logo larger, especially on medium and large screens
+    lg: "w-full max-w-md" // Made the logo width match the text width
   };
 
   return (
@@ -28,7 +28,7 @@ export const Logo = ({
       <img 
         src={isDarkMode ? lightLogo : darkLogo}
         alt="BRNOUT Logo" 
-        className={cn("object-contain", sizeClasses[size])} 
+        className={cn("object-contain object-center", sizeClasses[size])} 
       />
     </div>
   );
