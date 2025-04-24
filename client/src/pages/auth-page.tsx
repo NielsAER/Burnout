@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
-import { Redirect } from "wouter";
+import { Redirect, useLocation } from "wouter";
 import { insertUserSchema } from "@shared/schema";
 import { Logo } from "@/components/ui/logo";
 
@@ -46,6 +46,7 @@ export default function AuthPage() {
   const [activeTab, setActiveTab] = useState<string>("login");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [, navigate] = useLocation();
 
   // Login form
   const loginForm = useForm<LoginFormValues>({
