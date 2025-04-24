@@ -95,11 +95,11 @@ export default function AuthPage() {
     <div className="h-screen w-full bg-gradient-to-b from-background to-background/80 flex items-center justify-center p-4">
       <div className="max-w-7xl w-full grid md:grid-cols-2 gap-6 items-center">
         {/* Hero section */}
-        <div className="flex flex-col space-y-6 order-2 md:order-1">
-          <div className="w-full flex justify-center mb-6">
+        <div className="flex flex-col space-y-3 order-2 md:order-1">
+          <div className="w-full flex justify-center mb-1">
             <Logo size="lg" />
           </div>
-          <div className="space-y-4">
+          <div className="space-y-2">
             <p className="text-2xl md:text-3xl font-semibold text-foreground/90 max-w-md">
               Automation without the complexity
             </p>
