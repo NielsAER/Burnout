@@ -38,8 +38,13 @@ export interface IStorage {
   // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: number, data: Partial<Omit<User, 'id' | 'password'>>): Promise<User | undefined>;
+  updateUserPassword(id: number, newPassword: string): Promise<User | undefined>;
+  createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<boolean>;
+  getPasswordResetToken(token: string): Promise<{ userId: number, expiresAt: Date } | undefined>;
+  deletePasswordResetToken(token: string): Promise<boolean>;
   
   // Session store for authentication
   sessionStore: session.Store;
@@ -101,6 +106,7 @@ export class MemStorage implements IStorage {
   private achievements: Map<number, Achievement>;
   private userAchievements: Map<number, UserAchievement>;
   private workflowSuggestions: Map<number, WorkflowSuggestion>;
+  private passwordResetTokens: Map<string, { userId: number, expiresAt: Date }>;
   private currentUserId: number;
   private currentAutomationId: number;
   private currentExecutionHistoryId: number;
@@ -121,6 +127,7 @@ export class MemStorage implements IStorage {
     this.achievements = new Map();
     this.userAchievements = new Map();
     this.workflowSuggestions = new Map();
+    this.passwordResetTokens = new Map();
     this.currentUserId = 1;
     this.currentAutomationId = 1;
     this.currentExecutionHistoryId = 1;
@@ -333,6 +340,51 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(
       (user) => user.username === username,
     );
+  }
+  
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(
+      (user) => user.email === email,
+    );
+  }
+
+  async updateUserPassword(id: number, newPassword: string): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    
+    const updatedUser = { ...user, password: newPassword };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+  
+  async createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<boolean> {
+    try {
+      this.passwordResetTokens.set(token, { userId, expiresAt });
+      return true;
+    } catch (error) {
+      console.error("Failed to create password reset token:", error);
+      return false;
+    }
+  }
+  
+  async getPasswordResetToken(token: string): Promise<{ userId: number, expiresAt: Date } | undefined> {
+    const result = this.passwordResetTokens.get(token);
+    
+    // Check if token exists and hasn't expired
+    if (result && result.expiresAt > new Date()) {
+      return result;
+    }
+    
+    // Delete expired token if found
+    if (result) {
+      this.passwordResetTokens.delete(token);
+    }
+    
+    return undefined;
+  }
+  
+  async deletePasswordResetToken(token: string): Promise<boolean> {
+    return this.passwordResetTokens.delete(token);
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
