@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
+import brnoutLogo from "@assets/brnout.png";
 
 interface LogoProps {
   className?: string;
@@ -22,7 +23,7 @@ export const Logo = ({
   return (
     <div className={cn("inline-flex items-center", className)}>
       <img 
-        src="/images/brnout.png"
+        src={brnoutLogo}
         alt="BRNOUT Logo" 
         className={cn("object-contain object-center", sizeClasses[size])} 
       />
