@@ -973,6 +973,82 @@ export class DatabaseStorage implements IStorage {
       createTableIfMissing: true
     });
   }
+  
+  // Password reset methods
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    if (!email) return undefined;
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+  
+  async updateUserPassword(id: number, newPassword: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ password: newPassword })
+      .where(eq(users.id, id))
+      .returning();
+    return user;
+  }
+  
+  async createPasswordResetToken(userId: number, token: string, expiresAt: Date): Promise<boolean> {
+    try {
+      // Create the password_reset_tokens table if it doesn't exist
+      await db.execute(sql`
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+          token TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          expires_at TIMESTAMP NOT NULL
+        )
+      `);
+      
+      // Insert the new token
+      await db.execute(sql`
+        INSERT INTO password_reset_tokens (token, user_id, expires_at)
+        VALUES (${token}, ${userId}, ${expiresAt})
+      `);
+      
+      return true;
+    } catch (error) {
+      console.error('Failed to create password reset token:', error);
+      return false;
+    }
+  }
+  
+  async getPasswordResetToken(token: string): Promise<{ userId: number, expiresAt: Date } | undefined> {
+    try {
+      // Get token if it exists and hasn't expired
+      const result = await db.execute<{ user_id: number, expires_at: Date }>(sql`
+        SELECT user_id, expires_at 
+        FROM password_reset_tokens 
+        WHERE token = ${token} AND expires_at > NOW()
+      `);
+      
+      if (!result.rows || result.rows.length === 0) {
+        return undefined;
+      }
+      
+      return {
+        userId: result.rows[0].user_id,
+        expiresAt: result.rows[0].expires_at
+      };
+    } catch (error) {
+      console.error('Failed to get password reset token:', error);
+      return undefined;
+    }
+  }
+  
+  async deletePasswordResetToken(token: string): Promise<boolean> {
+    try {
+      await db.execute(sql`
+        DELETE FROM password_reset_tokens 
+        WHERE token = ${token}
+      `);
+      return true;
+    } catch (error) {
+      console.error('Failed to delete password reset token:', error);
+      return false;
+    }
+  }
 
   // User methods
   async getUser(id: number): Promise<User | undefined> {
