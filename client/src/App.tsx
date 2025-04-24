@@ -15,6 +15,8 @@ import AppConnections from "@/pages/AppConnections";
 import Settings from "@/pages/Settings";
 import UserProfile from "@/pages/UserProfile";
 import AuthPage from "@/pages/auth-page";
+import ForgotPasswordPage from "@/pages/forgot-password";
+import ResetPasswordPage from "@/pages/reset-password";
 
 // Customer Portal Pages
 import CustomerDashboard from "@/pages/customer/CustomerDashboard";
@@ -82,12 +84,20 @@ function Router() {
   const [location] = useLocation();
   const { user, userRole } = useAuth();
   
-  // Auth page should be accessible regardless of router
+  // Auth, forgot password, and reset password pages should be accessible without authentication
   if (location === "/auth") {
     return <AuthPage />;
   }
   
-  // If not on auth page, check if user exists and redirect accordingly
+  if (location === "/forgot-password") {
+    return <ForgotPasswordPage />;
+  }
+  
+  if (location.startsWith("/reset-password")) {
+    return <ResetPasswordPage />;
+  }
+  
+  // If not on auth-related pages, check if user exists and redirect accordingly
   if (!user) {
     return <Redirect to="/auth" />;
   }
