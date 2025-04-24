@@ -96,19 +96,19 @@ export default function AuthPage() {
       <div className="max-w-7xl w-full grid md:grid-cols-2 gap-6 items-center">
         {/* Hero section */}
         <div className="flex flex-col order-2 md:order-1">
-          <div className="w-full flex justify-center mb-0">
+          <div className="w-full mx-auto" style={{ maxWidth: "450px" }}>
             <Logo size="lg" />
           </div>
-          <div className="pt-2 space-y-4">
-            <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90 whitespace-nowrap">
+          <div className="mx-auto space-y-5 text-center" style={{ maxWidth: "450px" }}>
+            <h2 className="text-2xl md:text-3xl font-semibold text-foreground/90 whitespace-nowrap mt-3">
               Automation without the complexity
             </h2>
-            <p className="text-muted-foreground text-lg max-w-md">
+            <p className="text-muted-foreground text-lg">
               Build powerful automations between your favorite apps and services with an intuitive, 
               drag-and-drop interface powered by AI.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2 pt-4">
+          <div className="flex flex-wrap gap-2 pt-4 justify-center" style={{ maxWidth: "450px", margin: "0 auto" }}>
             <div className="flex items-center space-x-2 bg-primary/10 rounded-full px-4 py-2">
               <div className="w-2 h-2 rounded-full bg-primary"></div>
               <span className="text-sm font-medium">AI-powered workflows</span>

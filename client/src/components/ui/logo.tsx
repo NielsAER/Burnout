@@ -1,7 +1,5 @@
 import { cn } from "@/lib/utils";
 import { useTheme } from "@/contexts/ThemeContext";
-import lightLogo from "@assets/brnout-logo-light.png";
-import darkLogo from "@assets/brnout-logo-dark.png";
 
 interface LogoProps {
   className?: string;
@@ -14,19 +12,17 @@ export const Logo = ({
   size = "md",
   showTagline = false 
 }: LogoProps) => {
-  const { resolvedTheme } = useTheme();
-  const isDarkMode = resolvedTheme === "dark";
   
   const sizeClasses = {
     sm: "h-10",
     md: "h-14",
-    lg: "w-full max-w-md" // Made the logo width match the text width
+    lg: "w-full h-auto" // Made the logo width match the text width
   };
 
   return (
-    <div className={cn("inline-flex items-center py-2", className)}>
+    <div className={cn("inline-flex items-center", className)}>
       <img 
-        src={isDarkMode ? lightLogo : darkLogo}
+        src="/images/brnout.png"
         alt="BRNOUT Logo" 
         className={cn("object-contain object-center", sizeClasses[size])} 
       />
