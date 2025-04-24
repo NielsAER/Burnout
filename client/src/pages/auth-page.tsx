@@ -211,20 +211,32 @@ export default function AuthPage() {
                         )}
                       />
 
-                      <Button 
-                        type="submit" 
-                        className="w-full" 
-                        disabled={loginMutation.isPending}
-                      >
-                        {loginMutation.isPending ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Logging in...
-                          </>
-                        ) : (
-                          "Login"
-                        )}
-                      </Button>
+                      <div className="flex flex-col gap-4">
+                        <Button 
+                          type="submit" 
+                          className="w-full" 
+                          disabled={loginMutation.isPending}
+                        >
+                          {loginMutation.isPending ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                              Logging in...
+                            </>
+                          ) : (
+                            "Login"
+                          )}
+                        </Button>
+                        
+                        <div className="text-center">
+                          <Button 
+                            variant="link" 
+                            className="text-sm text-muted-foreground" 
+                            onClick={() => navigate("/forgot-password")}
+                          >
+                            Forgot your password?
+                          </Button>
+                        </div>
+                      </div>
                     </form>
                   </Form>
                 </CardContent>
