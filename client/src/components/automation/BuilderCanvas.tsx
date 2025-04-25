@@ -886,13 +886,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         {/* Simplified connector with Then Do label */}
         {trigger && (
           <div className="mb-6 flex items-center justify-center relative">
-            {/* Simple vertical line connector with "Then Do" text */}
+            {/* Simple vertical line connector */}
             <div className="h-12 w-0.5 bg-primary/30 dark:bg-primary/40"></div>
-            <div className="absolute bottom-0 flex items-center space-x-2">
-              <span className="bg-white dark:bg-[#181818] px-3 py-1 rounded-full text-xs font-medium text-gray-500 dark:text-gray-400 shadow-sm">
-                Then Do
-              </span>
-              <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
+            {/* Arrow and Then Do text side by side */}
+            <div className="absolute bottom-1 flex items-center">
+              <div className="bg-white dark:bg-[#181818] px-3 py-1 rounded-full text-xs font-medium text-gray-500 dark:text-gray-400 shadow-sm mr-1">Then Do</div>
+              <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80"></div>
             </div>
           </div>
         )}
