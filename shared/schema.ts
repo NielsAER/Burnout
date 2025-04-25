@@ -66,10 +66,16 @@ export const insertAutomationSchema = createInsertSchema(automations).omit({
 export const executionHistories = pgTable("execution_histories", {
   id: serial("id").primaryKey(),
   automationId: integer("automation_id").notNull(),
-  status: text("status").notNull(), // 'success', 'error'
+  status: text("status").notNull(), // 'success', 'failed'
   message: text("message"),
   executedAt: timestamp("executed_at").notNull().defaultNow(),
-  data: json("data"),
+  duration: integer("duration"), // in milliseconds
+  level: text("level").default("info"), // 'info', 'warning', 'error'
+  data: json("data"), // Contains detailed execution data including:
+                      // - steps: Array of execution steps with status
+                      // - error: Error details if status is 'failed'
+                      // - request: Request data if available
+                      // - response: Response data if available
 });
 
 export const insertExecutionHistorySchema = createInsertSchema(executionHistories).omit({
