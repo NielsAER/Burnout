@@ -341,10 +341,10 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
           className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger 
             ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' 
             : 'border-gray-300 dark:border-[#2a2a2a]'} 
-            rounded-xl flex flex-col items-center justify-center h-48 transition-all duration-300
+            rounded-xl flex flex-col items-center justify-center h-56 transition-all duration-300
             ${isOverTrigger && canDropTrigger ? 'shadow-lg shadow-primary/10' : 'hover:border-primary/50 hover:shadow-sm'}`}
         >
-          <div className="p-6 text-center">
+          <div className="p-8 text-center">
             <div className={`w-20 h-20 mx-auto rounded-full 
               ${isOverTrigger && canDropTrigger 
                 ? 'bg-primary/10 dark:bg-blue-900/20 scale-110' 
