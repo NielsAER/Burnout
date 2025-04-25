@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { formatDistanceToNow } from "date-fns";
 import {
@@ -67,13 +67,16 @@ export default function ExecutionHistory() {
     queryKey: ["/api/execution-history"],
   });
 
-  if (error) {
-    toast({
-      title: "Error",
-      description: "Failed to load execution history",
-      variant: "destructive",
-    });
-  }
+  // Using useEffect to avoid the React setState in render issue
+  useEffect(() => {
+    if (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load execution history",
+        variant: "destructive",
+      });
+    }
+  }, [error, toast]);
 
   const filteredHistory = executionHistory && Array.isArray(executionHistory)
     ? executionHistory.filter((item: any) =>

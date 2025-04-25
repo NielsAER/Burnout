@@ -272,8 +272,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/execution-history - Get all execution histories
   app.get("/api/execution-history", async (req, res) => {
     try {
+      // Log more information for debugging
+      console.log("Fetching execution histories...");
+      
       const histories = await storage.getAllExecutionHistories();
+      console.log(`Found ${histories.length} execution history records`);
+      
       const automations = await storage.getAllAutomations();
+      console.log(`Found ${automations.length} automations for enrichment`);
       
       // Enrich history data with automation names for display
       const enrichedHistories = histories.map(history => {
@@ -282,13 +288,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ...history,
           automationName: automation?.name || `Automation ${history.automationId}`,
           // Map executedAt to timestamp for compatibility with existing frontend
-          timestamp: history.executedAt
+          timestamp: history.executedAt,
+          // Ensure data and other fields are always provided
+          data: history.data || {},
+          duration: history.duration || 0,
+          level: history.level || "info",
+          message: history.message || ""
         };
       });
       
       res.json(enrichedHistories);
     } catch (error) {
       console.error("Error fetching execution history:", error);
+      console.error(error.stack || "No stack trace available");
       res.status(500).json({ message: "Failed to fetch execution histories" });
     }
   });
