@@ -885,12 +885,13 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         
         {/* Simplified connector with Then Do label */}
         {trigger && (
-          <div className="mb-6 flex items-center justify-center relative">
-            {/* Simple vertical line connector with arrow */}
-            <div className="h-12 w-0.5 bg-primary/30 dark:bg-primary/40"></div>
-            {/* Complete arrow at bottom */}
-            <div className="absolute bottom-0 w-6 h-6 flex items-center justify-center">
-              <div className="w-3 h-3 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80"></div>
+          <div className="mb-6 flex items-center justify-center">
+            {/* Vertical connector with arrow */}
+            <div className="relative h-12 w-0.5 bg-primary/30 dark:bg-primary/40">
+              {/* Arrow at the bottom */}
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center">
+                <div className="w-3.5 h-3.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80"></div>
+              </div>
             </div>
           </div>
         )}
@@ -983,13 +984,13 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   
                   {/* If there's a next action, render simple connector between them */}
                   {index < actions.length - 1 && (
-                    <div className="relative h-10 my-3 flex items-center justify-center">
-                      {/* Simple vertical connector line */}
-                      <div className="h-full w-0.5 bg-primary/30 dark:bg-primary/40"></div>
-                      
-                      {/* Simple arrow indicator */}
-                      <div className="absolute bottom-0 w-4 h-4 flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 transform translate-y-[-2px]"></div>
+                    <div className="h-10 my-3 flex items-center justify-center">
+                      {/* Vertical connector with arrow */}
+                      <div className="relative h-full w-0.5 bg-primary/30 dark:bg-primary/40">
+                        {/* Arrow at the bottom */}
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center">
+                          <div className="w-3.5 h-3.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80"></div>
+                        </div>
                       </div>
                     </div>
                   )}
