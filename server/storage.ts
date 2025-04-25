@@ -888,39 +888,317 @@ export class MemStorage implements IStorage {
   private seedExecutionHistories() {
     const now = new Date();
     
-    // Create some execution histories for automation 1 (Gmail to Slack)
+    // Create detailed success histories for automation 1 (Gmail to Slack)
     const automation1Histories: InsertExecutionHistory[] = [
       {
         automationId: 1,
         status: "success",
         message: "Processed 3 new emails matching filter criteria",
-        data: { emailCount: 3, matchedEmails: ["urgent meeting", "priority task", "asap review"] }
+        duration: 2135, // milliseconds
+        level: "info",
+        data: { 
+          emailCount: 3, 
+          matchedEmails: ["urgent meeting", "priority task", "asap review"],
+          steps: [
+            {
+              name: "Fetch Emails",
+              status: "success",
+              description: "Retrieved emails from Gmail API",
+              duration: 430,
+              input: { query: "is:unread label:important" },
+              output: { totalEmails: 15, matchedEmails: 3 }
+            },
+            {
+              name: "Filter Content",
+              status: "success",
+              description: "Applied keyword filters to emails",
+              duration: 125,
+              input: { emails: ["Email 1", "Email 2", "Email 3"] },
+              output: { filteredEmails: ["Email 1", "Email 2", "Email 3"] }
+            },
+            {
+              name: "Format Content",
+              status: "success",
+              description: "Formatted email content for Slack",
+              duration: 180,
+              input: { emails: ["Email 1", "Email 2", "Email 3"] },
+              output: { formattedMessages: ["Message 1", "Message 2", "Message 3"] }
+            },
+            {
+              name: "Send to Slack",
+              status: "success",
+              description: "Posted messages to Slack channel",
+              duration: 1400,
+              input: { channel: "#notifications", messages: ["Message 1", "Message 2", "Message 3"] },
+              output: { messageIds: ["m1", "m2", "m3"] }
+            }
+          ],
+          request: {
+            method: "POST",
+            url: "https://slack.com/api/chat.postMessage",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer [REDACTED]" },
+            body: { channel: "#notifications", text: "3 new urgent emails" }
+          },
+          response: {
+            status: 200,
+            body: { ok: true, channel: "C123456", ts: "1627084800.000001" }
+          }
+        }
       },
       {
         automationId: 1,
         status: "success",
         message: "Processed 1 new email matching filter criteria",
-        data: { emailCount: 1, matchedEmails: ["urgent invoice"] }
+        duration: 1845,
+        level: "info",
+        data: { 
+          emailCount: 1, 
+          matchedEmails: ["urgent invoice"],
+          steps: [
+            {
+              name: "Fetch Emails",
+              status: "success",
+              description: "Retrieved emails from Gmail API",
+              duration: 412,
+              input: { query: "is:unread label:important" },
+              output: { totalEmails: 7, matchedEmails: 1 }
+            },
+            {
+              name: "Filter Content",
+              status: "success",
+              description: "Applied keyword filters to emails",
+              duration: 98,
+              input: { emails: ["Email 1"] },
+              output: { filteredEmails: ["Email 1"] }
+            },
+            {
+              name: "Format Content",
+              status: "success",
+              description: "Formatted email content for Slack",
+              duration: 135,
+              input: { emails: ["Email 1"] },
+              output: { formattedMessages: ["Message 1"] }
+            },
+            {
+              name: "Send to Slack",
+              status: "success",
+              description: "Posted message to Slack channel",
+              duration: 1200,
+              input: { channel: "#notifications", messages: ["Message 1"] },
+              output: { messageIds: ["m1"] }
+            }
+          ]
+        }
       }
     ];
     
-    // Create some execution histories for automation 2 (Twitter to CRM)
+    // Create detailed success history for automation 2 (Twitter to CRM)
     const automation2Histories: InsertExecutionHistory[] = [
       {
         automationId: 2,
         status: "success",
         message: "Created 2 new contacts from Twitter mentions",
-        data: { mentionCount: 2 }
+        duration: 3150,
+        level: "info",
+        data: { 
+          mentionCount: 2,
+          steps: [
+            {
+              name: "Search Twitter",
+              status: "success",
+              description: "Retrieved recent mentions from Twitter API",
+              duration: 1250,
+              input: { query: "@companyname", count: 100 },
+              output: { totalMentions: 12, relevantMentions: 2 }
+            },
+            {
+              name: "Extract Contact Data",
+              status: "success",
+              description: "Extracted user profiles from mentions",
+              duration: 350,
+              input: { mentions: ["Mention 1", "Mention 2"] },
+              output: { userProfiles: ["User 1", "User 2"] }
+            },
+            {
+              name: "Create CRM Records",
+              status: "success",
+              description: "Created new contact records in CRM",
+              duration: 1550,
+              input: { profiles: ["User 1", "User 2"] },
+              output: { contactIds: ["c1", "c2"] }
+            }
+          ],
+          request: {
+            method: "POST",
+            url: "https://api.crm.com/contacts/batch",
+            headers: { "Content-Type": "application/json", "Authorization": "ApiKey [REDACTED]" },
+            body: { contacts: [{ name: "John Doe" }, { name: "Jane Smith" }] }
+          },
+          response: {
+            status: 201,
+            body: { success: true, created: 2, ids: ["c1", "c2"] }
+          }
+        }
       }
     ];
     
-    // Create error history for automation 3 (Form to Sheets)
+    // Create detailed error history for automation 3 (Form to Sheets)
     const automation3Histories: InsertExecutionHistory[] = [
       {
         automationId: 3,
-        status: "error",
+        status: "failed",
         message: "Authentication error: Google Sheets API access token expired",
-        data: { errorCode: "auth_expired" }
+        duration: 1520,
+        level: "error",
+        data: { 
+          errorCode: "auth_expired",
+          error: {
+            message: "Authentication error: Google Sheets API access token expired",
+            code: "401",
+            location: "GoogleSheetsAction.appendRow",
+            timestamp: new Date(now.getTime() - (2 * 60 * 60 * 1000)).toISOString()
+          },
+          steps: [
+            {
+              name: "Fetch Form Submissions",
+              status: "success",
+              description: "Retrieved form submissions from database",
+              duration: 320,
+              input: { formId: "contact-form", limit: 10 },
+              output: { submissions: ["Submission 1", "Submission 2"] }
+            },
+            {
+              name: "Format Data",
+              status: "success",
+              description: "Formatted form data for Google Sheets",
+              duration: 180,
+              input: { submissions: ["Submission 1", "Submission 2"] },
+              output: { rows: ["Row 1", "Row 2"] }
+            },
+            {
+              name: "Append to Sheet",
+              status: "failed",
+              description: "Appended rows to Google Sheet",
+              duration: 1020,
+              input: { sheetId: "1AbCdEfGhIjKlMnOpQrStUvWxYz", rows: ["Row 1", "Row 2"] },
+              error: {
+                message: "Request had invalid authentication credentials. Expected OAuth 2 access token.",
+                code: 401,
+                stack: "Error: Request had invalid authentication credentials\n    at GoogleSheetsAction.appendRow (googleSheets.ts:124)\n    at processFormSubmission (formProcessing.ts:85)\n    at runAutomation (automation.ts:47)"
+              }
+            }
+          ],
+          request: {
+            method: "POST",
+            url: "https://sheets.googleapis.com/v4/spreadsheets/1AbCdEfGhIjKlMnOpQrStUvWxYz/values/Sheet1!A1:append",
+            headers: { "Content-Type": "application/json", "Authorization": "Bearer [EXPIRED_TOKEN]" },
+            body: { values: [["John Doe", "john@example.com", "Product inquiry"]] }
+          },
+          response: {
+            status: 401,
+            body: { 
+              error: {
+                code: 401,
+                message: "Request had invalid authentication credentials. Expected OAuth 2 access token.",
+                status: "UNAUTHENTICATED"
+              }
+            }
+          }
+        }
+      }
+    ];
+    
+    // Create a few more sample execution histories with varying statuses
+    const additionalHistories: InsertExecutionHistory[] = [
+      {
+        automationId: 4,
+        status: "success",
+        message: "Generated daily sales report",
+        duration: 2845,
+        level: "info",
+        data: {
+          steps: [
+            {
+              name: "Fetch Sales Data",
+              status: "success",
+              description: "Retrieved daily sales data from database",
+              duration: 845,
+              input: { date: new Date(now.getTime() - (24 * 60 * 60 * 1000)).toISOString().split('T')[0] },
+              output: { totalSales: 42, revenue: "$3,240.50" }
+            },
+            {
+              name: "Generate Report",
+              status: "success",
+              description: "Created PDF report",
+              duration: 1200,
+              input: { data: { totalSales: 42, revenue: "$3,240.50" } },
+              output: { reportUrl: "https://storage.cloud.example.com/reports/daily-sales-20230615.pdf" }
+            },
+            {
+              name: "Email Report",
+              status: "success",
+              description: "Sent report to subscribers",
+              duration: 800,
+              input: { recipients: ["team@example.com"], reportUrl: "https://storage.cloud.example.com/reports/daily-sales-20230615.pdf" },
+              output: { messageId: "msg123456", status: "sent" }
+            }
+          ]
+        }
+      },
+      {
+        automationId: 5,
+        status: "failed",
+        message: "Failed to process payment",
+        duration: 1650,
+        level: "error",
+        data: {
+          error: {
+            message: "Payment processing failed: Card declined",
+            code: "card_declined",
+            location: "StripeAction.processPayment",
+            timestamp: new Date(now.getTime() - (4 * 60 * 60 * 1000)).toISOString()
+          },
+          steps: [
+            {
+              name: "Fetch Order",
+              status: "success",
+              description: "Retrieved order details from database",
+              duration: 215,
+              input: { orderId: "ORD-12345" },
+              output: { order: { id: "ORD-12345", amount: 99.95, customer: "cust_123" } }
+            },
+            {
+              name: "Process Payment",
+              status: "failed",
+              description: "Process payment via Stripe",
+              duration: 1435,
+              input: { amount: 99.95, currency: "usd", customerId: "cust_123" },
+              error: {
+                message: "Your card was declined. Your request was in test mode, but used a non test card.",
+                code: "card_declined",
+                decline_code: "generic_decline",
+                stack: "Error: Your card was declined\n    at StripeAction.processPayment (stripe.ts:87)\n    at processOrder (orderProcessing.ts:124)\n    at runAutomation (automation.ts:47)"
+              }
+            }
+          ],
+          request: {
+            method: "POST",
+            url: "https://api.stripe.com/v1/payment_intents",
+            headers: { "Content-Type": "application/x-www-form-urlencoded", "Authorization": "Bearer [REDACTED]" },
+            body: { amount: 9995, currency: "usd", customer: "cust_123", payment_method_types: ["card"] }
+          },
+          response: {
+            status: 402,
+            body: { 
+              error: {
+                type: "card_error",
+                code: "card_declined",
+                decline_code: "generic_decline",
+                message: "Your card was declined."
+              }
+            }
+          }
+        }
       }
     ];
     
@@ -958,6 +1236,18 @@ export class MemStorage implements IStorage {
         id,
         executedAt: new Date(now.getTime() - timeOffset)
       });
+    });
+    
+    timeOffset = 3 * 60 * 60 * 1000; // 3 hours for additional histories
+    
+    additionalHistories.forEach(history => {
+      const id = this.currentExecutionHistoryId++;
+      this.executionHistories.set(id, {
+        ...history,
+        id,
+        executedAt: new Date(now.getTime() - timeOffset)
+      });
+      timeOffset += 60 * 60 * 1000; // add 1 hour
     });
   }
 }

@@ -9,6 +9,7 @@ import Dashboard from "@/pages/Dashboard";
 import MyAutomations from "@/pages/MyAutomations";
 import AutomationBuilder from "@/pages/AutomationBuilder";
 import AutomationDetails from "@/pages/AutomationDetails";
+import ExecutionHistory from "@/pages/ExecutionHistory";
 import Templates from "@/pages/Templates";
 import AIServices from "@/pages/AIServices";
 import AppConnections from "@/pages/AppConnections";
@@ -55,6 +56,7 @@ function DeveloperRouter() {
       <ResearcherRoute path="/" component={Dashboard} />
       <ResearcherRoute path="/automations" component={MyAutomations} />
       <ResearcherRoute path="/automations/:id" component={AutomationDetails} />
+      <ResearcherRoute path="/history" component={ExecutionHistory} />
       <ResearcherRoute path="/templates" component={Templates} />
       <ResearcherRoute path="/builder" component={AutomationBuilder} />
       <ResearcherRoute path="/builder/:id" component={AutomationBuilder} />

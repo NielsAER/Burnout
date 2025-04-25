@@ -269,6 +269,50 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // GET /api/execution-history - Get all execution histories
+  app.get("/api/execution-history", async (req, res) => {
+    try {
+      const histories = await storage.getAllExecutionHistories();
+      const automations = await storage.getAllAutomations();
+      
+      // Enrich history data with automation names for display
+      const enrichedHistories = histories.map(history => {
+        const automation = automations.find(a => a.id === history.automationId);
+        return {
+          ...history,
+          automationName: automation?.name || `Automation ${history.automationId}`,
+          // Map executedAt to timestamp for compatibility with existing frontend
+          timestamp: history.executedAt
+        };
+      });
+      
+      res.json(enrichedHistories);
+    } catch (error) {
+      console.error("Error fetching execution history:", error);
+      res.status(500).json({ message: "Failed to fetch execution histories" });
+    }
+  });
+
+  // GET /api/execution-history/:automationId - Get execution histories for a specific automation
+  app.get("/api/execution-history/:automationId", async (req, res) => {
+    try {
+      const automationId = parseInt(req.params.automationId);
+      const histories = await storage.getExecutionHistoriesByAutomationId(automationId);
+      const automation = await storage.getAutomation(automationId);
+      
+      // Enrich history data with automation names
+      const enrichedHistories = histories.map(history => ({
+        ...history,
+        automationName: automation?.name || `Automation ${automationId}`,
+        timestamp: history.executedAt
+      }));
+      
+      res.json(enrichedHistories);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch execution histories for automation" });
+    }
+  });
+
   // POST /api/execution-history - Create a new execution history
   app.post("/api/execution-history", async (req, res) => {
     try {
