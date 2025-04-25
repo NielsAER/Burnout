@@ -35,11 +35,11 @@ export default function AIServices() {
   }, []);
 
   return (
-    <div className="container py-6 max-w-7xl">
+    <div className="container py-6 pl-6 md:pl-8 max-w-7xl">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2">AI Services</h1>
         <p className="text-muted-foreground text-lg">
-          Integrate powerful AI capabilities into your automations
+          Integrate powerful AI capabilities into your automations.
         </p>
       </header>
 
@@ -56,21 +56,21 @@ export default function AIServices() {
         </Alert>
       ) : null}
 
-      <Tabs defaultValue="text-analysis" className="space-y-4">
-        <TabsList className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <TabsTrigger value="text-analysis" className="flex gap-2 data-[state=active]:bg-primary/10">
+      <Tabs defaultValue="text-analysis" className="space-y-6">
+        <TabsList className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6 mt-2">
+          <TabsTrigger value="text-analysis" className="flex gap-2 px-4 py-2 data-[state=active]:bg-primary/10">
             <TextIcon className="h-4 w-4" />
             Text Analysis
           </TabsTrigger>
-          <TabsTrigger value="image-generation" className="flex gap-2" disabled={!hasOpenAI}>
+          <TabsTrigger value="image-generation" className="flex gap-2 px-4 py-2" disabled={!hasOpenAI}>
             <ImageIcon className="h-4 w-4" />
             Image Generation
           </TabsTrigger>
-          <TabsTrigger value="search" className="flex gap-2" disabled={!hasOpenAI}>
+          <TabsTrigger value="search" className="flex gap-2 px-4 py-2" disabled={!hasOpenAI}>
             <SearchIcon className="h-4 w-4" />
             Web Search
           </TabsTrigger>
-          <TabsTrigger value="tools" className="flex gap-2">
+          <TabsTrigger value="tools" className="flex gap-2 px-4 py-2">
             <SparklesIcon className="h-4 w-4" />
             LLM Tools
           </TabsTrigger>
@@ -90,7 +90,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="py-4 text-center">
                 <p className="text-muted-foreground">
-                  Coming soon! Generate images with DALL-E from OpenAI
+                  Coming soon! Generate images with DALL-E from OpenAI.
                 </p>
               </CardContent>
             </Card>
@@ -116,7 +116,7 @@ export default function AIServices() {
                     </AlertDescription>
                   </Alert>
                   <p className="text-muted-foreground">
-                    Research and retrieve information from the web with OpenAI
+                    Research and retrieve information from the web with OpenAI.
                   </p>
                 </CardContent>
               </Card>
@@ -134,7 +134,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-muted-foreground">
-                  Create concise summaries of long-form content for easy consumption
+                  Create concise summaries of long-form content for easy consumption.
                 </p>
               </CardContent>
               <div className="p-4 pt-0 mt-auto">
@@ -150,7 +150,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-muted-foreground">
-                  Rewrite content to match a specific tone, style, or format
+                  Rewrite content to match a specific tone, style, or format.
                 </p>
               </CardContent>
               <div className="p-4 pt-0 mt-auto">
@@ -166,7 +166,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-muted-foreground">
-                  Generate new content based on your specifications and requirements
+                  Generate new content based on your specifications and requirements.
                 </p>
               </CardContent>
               <div className="p-4 pt-0 mt-auto">
@@ -182,7 +182,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-muted-foreground">
-                  Translate content between multiple languages while preserving context
+                  Translate content between multiple languages while preserving context.
                 </p>
               </CardContent>
               <div className="p-4 pt-0 mt-auto">
@@ -198,7 +198,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-muted-foreground">
-                  Determine the sentiment and emotional tone of text content
+                  Determine the sentiment and emotional tone of text content.
                 </p>
               </CardContent>
               <div className="p-4 pt-0 mt-auto">
@@ -214,7 +214,7 @@ export default function AIServices() {
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-muted-foreground">
-                  Extract people, organizations, locations, and other entities from text
+                  Extract people, organizations, locations, and other entities from text.
                 </p>
               </CardContent>
               <div className="p-4 pt-0 mt-auto">

@@ -6,11 +6,11 @@ import { AccountSettings } from "@/components/settings/AccountSettings";
 
 export default function Settings() {
   return (
-    <div className="container py-6 max-w-5xl">
+    <div className="container py-6 pl-6 md:pl-8 max-w-5xl">
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">Settings</h1>
         <p className="text-gray-500 dark:text-gray-400 text-lg">
-          Configure your BRNOUT settings and account preferences
+          Configure your BRNOUT settings and account preferences.
         </p>
       </header>
 
