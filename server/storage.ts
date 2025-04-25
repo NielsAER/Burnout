@@ -1473,7 +1473,17 @@ export class DatabaseStorage implements IStorage {
 
   // Execution history methods
   async getAllExecutionHistories(): Promise<ExecutionHistory[]> {
-    return await db.select().from(executionHistories).orderBy(desc(executionHistories.executedAt));
+    // Query only specific columns that we know exist
+    return await db.select({
+      id: executionHistories.id,
+      automationId: executionHistories.automationId,
+      status: executionHistories.status,
+      message: executionHistories.message,
+      executedAt: executionHistories.executedAt,
+      data: executionHistories.data
+    })
+    .from(executionHistories)
+    .orderBy(desc(executionHistories.executedAt));
   }
 
   async getExecutionHistoriesByAutomationId(automationId: number): Promise<ExecutionHistory[]> {
