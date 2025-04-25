@@ -914,12 +914,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       Add Action
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl max-h-[90vh] overflow-hidden flex flex-col">
+                  <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl">
                     <div className="py-3 border-b-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-gray-900/30 rounded-t-lg">
                       <h4 className="px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Select an Action</h4>
                       <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Choose what happens when your trigger activates.</p>
                     </div>
-                    <ScrollArea className="flex-grow">
+                    <ScrollArea className="h-[400px]">
                       <div className="py-2">
                         {Object.keys(APPS)
                           .filter(appId => {
@@ -1003,12 +1003,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       Add Another Action
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl max-h-[90vh] overflow-hidden flex flex-col">
+                  <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl">
                     <div className="py-3 border-b-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-gray-900/30 rounded-t-lg">
                       <h4 className="px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Add Next Action</h4>
                       <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Chain multiple actions to create complex workflows.</p>
                     </div>
-                    <ScrollArea className="flex-grow">
+                    <ScrollArea className="h-[400px]">
                       <div className="py-2">
                         {Object.keys(APPS)
                           .filter(appId => {
