@@ -885,15 +885,15 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         
         {/* Simplified connector with Then Do label */}
         {trigger && (
-          <div className="mb-6 flex items-center justify-center group">
+          <div className="mb-6 flex items-center justify-center group connector-group">
             {/* Animated vertical connector with arrow */}
-            <div className="relative h-12 w-0.5 bg-gradient-to-b from-primary/20 to-primary/60 dark:from-primary/30 dark:to-primary/70 group-hover:from-primary/30 group-hover:to-primary/80 transition-colors duration-300">
+            <div className="relative h-12 w-0.5 connector-line bg-gradient-to-b from-primary/20 to-primary/60 dark:from-primary/30 dark:to-primary/70 transition-colors duration-300">
               {/* Animated pulse element */}
-              <div className="absolute inset-0 bg-primary/10 dark:bg-primary/20 opacity-0 group-hover:opacity-100 group-hover:animate-pulse duration-500"></div>
+              <div className="absolute inset-0 pulse-animation bg-primary/10 dark:bg-primary/20 opacity-0 transition-opacity duration-300"></div>
               
               {/* Arrow at the bottom with animation */}
-              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center transition-transform duration-300 group-hover:translate-y-0.5 group-hover:scale-110">
-                <div className="w-3.5 h-3.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 group-hover:border-primary/100 transition-all duration-300"></div>
+              <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center transition-transform duration-300 arrow-container">
+                <div className="w-3.5 h-3.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 arrow-head transition-all duration-300"></div>
               </div>
             </div>
           </div>
@@ -987,15 +987,15 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   
                   {/* If there's a next action, render animated connector between them */}
                   {index < actions.length - 1 && (
-                    <div className="h-10 my-3 flex items-center justify-center group">
+                    <div className="h-10 my-3 flex items-center justify-center group connector-group">
                       {/* Animated vertical connector with arrow */}
-                      <div className="relative h-full w-0.5 bg-gradient-to-b from-primary/20 to-primary/60 dark:from-primary/30 dark:to-primary/70 group-hover:from-primary/30 group-hover:to-primary/80 transition-colors duration-300">
+                      <div className="relative h-full w-0.5 connector-line bg-gradient-to-b from-primary/20 to-primary/60 dark:from-primary/30 dark:to-primary/70 transition-colors duration-300">
                         {/* Animated pulse element */}
-                        <div className="absolute inset-0 bg-primary/10 dark:bg-primary/20 opacity-0 group-hover:opacity-100 group-hover:animate-pulse duration-500"></div>
+                        <div className="absolute inset-0 pulse-animation bg-primary/10 dark:bg-primary/20 opacity-0 transition-opacity duration-300"></div>
                         
                         {/* Arrow at the bottom with animation */}
-                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center transition-transform duration-300 group-hover:translate-y-0.5 group-hover:scale-110">
-                          <div className="w-3.5 h-3.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 group-hover:border-primary/100 transition-all duration-300"></div>
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-5 h-5 flex items-center justify-center transition-transform duration-300 arrow-container">
+                          <div className="w-3.5 h-3.5 rotate-45 border-r-2 border-b-2 border-primary dark:border-primary/80 arrow-head transition-all duration-300"></div>
                         </div>
                       </div>
                     </div>
