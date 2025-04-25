@@ -497,7 +497,12 @@ export class MemStorage implements IStorage {
     const history: ExecutionHistory = {
       ...insertHistory,
       id,
-      executedAt: now
+      executedAt: now,
+      // Ensure required fields have default values
+      data: insertHistory.data || {},
+      message: insertHistory.message || null,
+      duration: insertHistory.duration || null,
+      level: insertHistory.level || "info"
     };
     this.executionHistories.set(id, history);
     return history;
