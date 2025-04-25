@@ -27,10 +27,18 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
         return "Dashboard";
       case "/automations":
         return "My Automations";
+      case "/app-connections":
+        return "App Connections";
       case "/builder":
         return "Create Automation";
       case "/ai-services":
         return "AI Services";
+      case "/history":
+        return "Execution History";
+      case "/settings":
+        return "Settings";
+      case "/profile":
+        return "Profile";
       default:
         if (location.startsWith("/builder/")) {
           return "Edit Automation";
@@ -73,7 +81,16 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
             <div className="flex items-center">
               <div>
                 <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{getPageTitle()}</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">Manage your automation workflows</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {location === "/" && "Overview of your automation metrics and activities"}
+                  {location === "/automations" && "Manage your automation workflows"}
+                  {location === "/app-connections" && "Connect to your external services and applications"}
+                  {location.includes("/builder") && "Build and configure your automations"}
+                  {location === "/ai-services" && "Access AI-powered tools for your workflows"}
+                  {location === "/history" && "View your automation execution history"}
+                  {location === "/settings" && "Configure your account and workflow settings"}
+                  {location === "/profile" && "Manage your personal profile and preferences"}
+                </p>
               </div>
             </div>
             <div className="flex items-center space-x-4">
