@@ -348,32 +348,20 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             <div className={`w-20 h-20 mx-auto rounded-full 
               ${isOverTrigger && canDropTrigger 
                 ? 'bg-primary/10 dark:bg-blue-900/20 scale-110' 
-                : 'bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-900/10 dark:to-blue-900/20'} 
-              flex items-center justify-center transition-all duration-300 relative group`}>
+                : 'bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20'} 
+              flex items-center justify-center transition-all duration-300 relative group icon-container`}>
               
-              <div className={`absolute inset-0 rounded-full ${isOverTrigger && canDropTrigger ? 'animate-ping bg-primary/10 opacity-70' : ''}`} 
+              <div className="absolute inset-0 rounded-full pulse-animation bg-primary/10 opacity-0 transition-opacity duration-300" 
                 style={{animationDuration: '3s'}} />
               
-              <PlusIcon className={`h-8 w-8 
-                ${isOverTrigger && canDropTrigger 
-                  ? 'text-primary dark:text-blue-400 animate-pulse' 
-                  : 'text-blue-500/70 dark:text-blue-400/70 group-hover:text-primary/80'} 
-                transition-colors duration-300`} />
+              <PlusIcon className="h-8 w-8 text-primary/60 dark:text-primary/80 transition-all duration-300 plus-icon" />
             </div>
             
-            <h4 className={`mt-4 text-base font-medium 
-              ${isOverTrigger && canDropTrigger 
-                ? 'text-primary dark:text-blue-400' 
-                : 'text-gray-700 dark:text-gray-300'} 
-              transition-colors`}>
+            <h4 className="mt-4 text-base font-medium text-gray-700 dark:text-gray-300 transition-colors duration-300 heading-text">
               {isOverTrigger && canDropTrigger ? 'Drop here to add trigger' : 'Start with a trigger'}
             </h4>
             
-            <p className={`mt-2 text-sm
-              ${isOverTrigger && canDropTrigger 
-                ? 'text-primary/70 dark:text-blue-400/70' 
-                : 'text-gray-500 dark:text-gray-400'} 
-              transition-colors max-w-xs mx-auto`}>
+            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 transition-colors duration-300 max-w-xs mx-auto description-text">
               {isOverTrigger && canDropTrigger 
                 ? 'Release to set up this trigger' 
                 : 'Drag a trigger from the apps panel or select one below'}
@@ -907,14 +895,14 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         >
           {actions.length === 0 ? (
             <div className="text-center p-8 border-2 border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-xl w-full transform transition-all duration-300 group hover:border-primary/50 hover:shadow-sm">
-              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-gray-50 to-blue-50/50 dark:from-gray-800 dark:to-blue-900/10 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300 relative">
-                <div className="absolute inset-0 rounded-full bg-primary/5 dark:bg-blue-900/20 opacity-0 group-hover:opacity-100 group-hover:animate-pulse transition-opacity" style={{animationDuration: '3s'}} />
-                <Plus className="h-8 w-8 text-blue-500/70 dark:text-blue-400/70 group-hover:text-primary transition-colors duration-300" />
+              <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 flex items-center justify-center mb-4 transition-all duration-300 relative group icon-container">
+                <div className="absolute inset-0 rounded-full pulse-animation bg-primary/10 opacity-0 transition-opacity duration-300" style={{animationDuration: '3s'}} />
+                <Plus className="h-8 w-8 text-primary/60 dark:text-primary/80 transition-all duration-300 plus-icon" />
               </div>
               
-              <h3 className="text-gray-700 dark:text-gray-200 font-medium mb-2 text-lg group-hover:text-primary transition-colors duration-300">Add an action</h3>
+              <h3 className="text-gray-700 dark:text-gray-200 font-medium mb-2 text-lg transition-colors duration-300 heading-text">Add an action</h3>
               
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs mx-auto leading-relaxed">
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs mx-auto leading-relaxed description-text">
                 Now that you have a trigger set up, add one or more actions that will run when the trigger is activated
               </p>
               

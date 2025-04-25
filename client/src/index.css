@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Custom animation for workflow connectors */
+/* Custom animation for workflow connectors and drop zones */
 
 /* Base connector styling */
 .connector-line {
@@ -19,12 +19,18 @@
   transition: all 0.3s ease;
 }
 
+/* Animation for plus icons */
+.plus-icon {
+  transition: all 0.3s ease;
+}
+
 /* Animation when hovering the whole canvas */
 .workflow-canvas:hover .connector-group .connector-line {
   @apply from-primary/30 to-primary/80 dark:from-primary/40 dark:to-primary/90;
 }
 
-.workflow-canvas:hover .connector-group .pulse-animation {
+.workflow-canvas:hover .connector-group .pulse-animation,
+.workflow-canvas:hover .icon-container .pulse-animation {
   @apply opacity-100 animate-pulse;
 }
 
@@ -32,7 +38,19 @@
   @apply border-primary dark:border-primary;
 }
 
-/* Enhanced animation when hovering directly over connector */
+.workflow-canvas:hover .icon-container {
+  @apply bg-gradient-to-br from-primary/10 to-primary/20 dark:from-primary/20 dark:to-primary/30;
+}
+
+.workflow-canvas:hover .plus-icon {
+  @apply text-primary/90 dark:text-primary/90;
+}
+
+.workflow-canvas:hover .heading-text {
+  @apply text-primary/90 dark:text-primary/90;
+}
+
+/* Enhanced animation when hovering directly over connector or drop zone */
 .connector-group:hover .connector-line {
   @apply from-primary/40 to-primary/90 dark:from-primary/50 dark:to-primary/100;
 }
@@ -41,8 +59,17 @@
   @apply translate-y-0.5 scale-110;
 }
 
-.connector-group:hover .pulse-animation {
+.connector-group:hover .pulse-animation,
+.icon-container:hover .pulse-animation {
   animation-duration: 1.5s;
+}
+
+.icon-container:hover {
+  @apply scale-110 from-primary/20 to-primary/30 dark:from-primary/30 dark:to-primary/40;
+}
+
+.icon-container:hover .plus-icon {
+  @apply text-primary dark:text-primary rotate-90;
 }
 
 @layer base {
