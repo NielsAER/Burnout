@@ -939,7 +939,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                                 </div>
                                 <div className="ml-3">
                                   <span className="text-sm font-medium dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{app.name}</span>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">Perform actions in {app.name}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">Perform actions in {app.name}.</p>
                                 </div>
                               </div>
                             );
@@ -1028,7 +1028,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                                 </div>
                                 <div className="ml-3">
                                   <span className="text-sm font-medium dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{app.name}</span>
-                                  <p className="text-xs text-gray-500 dark:text-gray-400">Perform actions in {app.name}</p>
+                                  <p className="text-xs text-gray-500 dark:text-gray-400">Perform actions in {app.name}.</p>
                                 </div>
                               </div>
                             );
