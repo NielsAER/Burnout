@@ -380,11 +380,11 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </p>
             
             {!isOverTrigger && (
-              <div className="mt-8">
+              <div className="mt-5">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button size="sm" className="text-sm font-semibold border-2 border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 dark:text-blue-300 rounded-lg px-6 py-2 h-12 shadow-sm transform transition-transform hover:scale-105">
-                      <Plus className="h-5 w-5 mr-2.5" /> 
+                    <Button size="sm" className="text-sm font-medium border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 dark:text-blue-300 rounded-md px-4 py-1 h-9 shadow-sm">
+                      <Plus className="h-4 w-4 mr-2" /> 
                       Select Trigger
                     </Button>
                   </PopoverTrigger>
