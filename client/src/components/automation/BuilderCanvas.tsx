@@ -131,22 +131,22 @@ const DraggableAction: FC<DraggableActionProps> = ({
   return (
     <div 
       ref={ref} 
-      className={`workflow-step w-full p-4 mb-4 bg-white dark:bg-[#181818] border
+      className={`workflow-step w-full p-5 mb-5 bg-white dark:bg-[#181818] border-2
           ${isDragging ? 'border-dashed border-primary/80 dark:border-blue-600' : 'border-gray-200 dark:border-[#2a2a2a]'} 
-          rounded-xl shadow-sm transition-all duration-300 
+          rounded-xl shadow-md transition-all duration-300 
           ${isOver ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' : ''} 
           ${isDragging 
             ? 'shadow-lg ring-2 ring-primary/20 dark:ring-blue-600/30 scale-[1.02] -rotate-1' 
-            : 'hover:border-primary/30 hover:shadow hover:scale-[1.01]'}`}
+            : 'hover:border-primary/30 hover:shadow-md hover:scale-[1.01]'}`}
       style={{ opacity }}
     >
-      <div className="flex items-center mb-3">
-        <div className="cursor-move p-1 mr-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 group">
+      <div className="flex items-center mb-4">
+        <div className="cursor-move p-1.5 mr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 group">
           <MoreHorizontal className="h-4 w-4 group-hover:animate-pulse" />
         </div>
         
         <div className="flex items-center">
-          <div className={`${isDragging ? 'animate-pulse' : ''}`}>
+          <div className={`p-2 rounded-lg bg-gray-50 dark:bg-gray-800 ${isDragging ? 'animate-pulse' : ''}`}>
             <AppIconMap appId={action.appId} />
           </div>
           <div className="ml-3">
@@ -159,14 +159,14 @@ const DraggableAction: FC<DraggableActionProps> = ({
         
         <div className="ml-auto flex space-x-2">
           <button 
-            className="text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 p-1 rounded-full transition-colors" 
+            className="text-gray-400 hover:text-primary dark:hover:text-blue-400 hover:bg-gray-100 dark:hover:bg-gray-800 p-1.5 rounded-full transition-colors" 
             onClick={() => onConfigure(action.id)}
             aria-label="Configure"
           >
             <Settings className="h-4 w-4" />
           </button>
           <button 
-            className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 p-1 rounded-full transition-colors" 
+            className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 p-1.5 rounded-full transition-colors" 
             onClick={() => onRemove(action.id)}
             aria-label="Remove"
           >
@@ -176,22 +176,22 @@ const DraggableAction: FC<DraggableActionProps> = ({
       </div>
       
       {action.config && Object.keys(action.config).length > 0 ? (
-        <div className="mt-2 text-xs px-2.5 py-1.5 bg-gray-50 dark:bg-gray-900 rounded-md border border-gray-200 dark:border-gray-800">
+        <div className="mt-3 text-xs px-3 py-2.5 bg-gray-50 dark:bg-gray-900 rounded-lg border-2 border-gray-200 dark:border-gray-800">
           <div className="flex items-center text-gray-600 dark:text-gray-300">
-            <div className="flex-1">
+            <div className="flex-1 font-medium">
               {action.config.optionName 
                 ? action.config.optionName
                 : action.name || 'Configured action'}
             </div>
-            <div className="ml-2 px-1.5 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded text-[10px] border border-green-100 dark:border-green-800">
+            <div className="ml-2 px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded text-[10px] border border-green-100 dark:border-green-800 font-medium">
               Configured
             </div>
           </div>
         </div>
       ) : (
-        <div className="mt-2 text-xs px-2.5 py-1.5 bg-orange-50 dark:bg-orange-950/30 rounded-md border border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center">
-          <span className="flex-1">Click to configure this action...</span>
-          <span className="px-1.5 py-0.5 bg-orange-100 dark:bg-orange-900/50 rounded text-[10px] border border-orange-200 dark:border-orange-800">
+        <div className="mt-3 text-xs px-3 py-2.5 bg-orange-50 dark:bg-orange-950/30 rounded-lg border-2 border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center">
+          <span className="flex-1 font-medium">Click to configure this action...</span>
+          <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/50 rounded text-[10px] border border-orange-200 dark:border-orange-800 font-medium">
             Required
           </span>
         </div>
@@ -425,10 +425,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
     if (trigger.appId === 'scheduler' || 
         (trigger.config && (trigger.config.scheduleType || trigger.config.time || trigger.config.frequency))) {
       return (
-        <div className="workflow-step w-full p-4 mb-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-lg shadow-sm transition-all hover:shadow">
-          <div className="flex items-center mb-3">
-            <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
-            <div className="ml-3">
+        <div className="workflow-step w-full p-5 mb-6 bg-white dark:bg-[#181818] border-2 border-blue-200 dark:border-blue-800/50 rounded-xl shadow-md transition-all hover:shadow-lg">
+          <div className="flex items-center mb-4">
+            <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 mr-3">
+              <Clock className="h-5 w-5 text-blue-500 dark:text-blue-400" />
+            </div>
+            <div className="ml-1">
               <h4 className="text-sm font-medium dark:text-gray-300">Time Trigger</h4>
               <p className="text-xs text-gray-500 dark:text-gray-400">
                 {trigger.config?.scheduleType === 'recurring' ? 'Recurring schedule' : 
@@ -437,14 +439,14 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </div>
             <div className="ml-auto flex space-x-2">
               <button 
-                className="text-gray-400 hover:text-gray-600" 
+                className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1.5 rounded-full transition-colors" 
                 onClick={() => handleConfigureStep(trigger.id)}
                 aria-label="Configure"
               >
                 <Settings className="h-4 w-4" />
               </button>
               <button 
-                className="text-gray-400 hover:text-red-500" 
+                className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 p-1.5 rounded-full transition-colors" 
                 onClick={onRemoveTrigger}
                 aria-label="Remove"
               >
@@ -452,10 +454,10 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               </button>
             </div>
           </div>
-          <div className="text-xs bg-blue-50 dark:bg-blue-950/30 p-2 rounded border border-blue-100 dark:border-blue-800 flex items-center dark:text-gray-300">
+          <div className="text-xs bg-blue-50 dark:bg-blue-950/30 p-3 rounded-lg border-2 border-blue-100 dark:border-blue-800/50 flex items-center dark:text-gray-300 font-medium">
             {trigger.config?.scheduleType === 'timer' ? (
               <>
-                <TimerIcon className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 mr-1.5" />
+                <TimerIcon className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 mr-2" />
                 {trigger.config.timerConfig ? (
                   <span>
                     Every {trigger.config.timerConfig.interval} {trigger.config.timerConfig.unit}
@@ -466,7 +468,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               </>
             ) : (
               <>
-                <Calendar className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 mr-1.5" />
+                <Calendar className="h-3.5 w-3.5 text-blue-500 dark:text-blue-400 mr-2" />
                 {trigger.config && trigger.config.time ? (
                   <span>
                     {trigger.config.frequency === 'daily' && `Every day at ${trigger.config.time}`}
@@ -492,10 +494,12 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
         };
 
     return (
-      <div className="workflow-step w-full p-4 mb-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#2a2a2a] rounded-lg shadow-sm transition-all hover:shadow">
-        <div className="flex items-center mb-3">
-          <AppIconMap appId={trigger.appId} />
-          <div className="ml-3">
+      <div className="workflow-step w-full p-5 mb-6 bg-white dark:bg-[#181818] border-2 border-blue-200 dark:border-blue-800/30 rounded-xl shadow-md transition-all hover:shadow-lg">
+        <div className="flex items-center mb-4">
+          <div className="p-2.5 rounded-lg bg-blue-50 dark:bg-blue-900/20 mr-3">
+            <AppIconMap appId={trigger.appId} />
+          </div>
+          <div className="ml-1">
             <h4 className="text-sm font-medium dark:text-gray-300">{appDetails.name}</h4>
             <p className="text-xs text-gray-500 dark:text-gray-400">
               {trigger.description || "When this happens..."}
@@ -503,14 +507,14 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
           </div>
           <div className="ml-auto flex space-x-2">
             <button 
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" 
+              className="text-gray-400 hover:text-blue-500 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 p-1.5 rounded-full transition-colors" 
               onClick={() => handleConfigureStep(trigger.id)}
               aria-label="Configure"
             >
               <Settings className="h-4 w-4" />
             </button>
             <button 
-              className="text-gray-400 hover:text-red-500" 
+              className="text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950 p-1.5 rounded-full transition-colors" 
               onClick={onRemoveTrigger}
               aria-label="Remove"
             >
@@ -518,15 +522,26 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </button>
           </div>
         </div>
-        <div className="text-xs text-gray-500 dark:text-gray-400 italic">
-          {trigger.config && Object.keys(trigger.config).length > 0 
-            ? `${
-                trigger.config.optionName 
+        
+        {trigger.config && Object.keys(trigger.config).length > 0 ? (
+          <div className="mt-3 text-xs px-3 py-2.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg border-2 border-blue-100 dark:border-blue-800/50 flex items-center dark:text-gray-300 font-medium">
+            <div className="flex-1">
+              {trigger.config.optionName 
                 ? trigger.config.optionName 
-                : trigger.name || 'Configured trigger'
-              }`
-            : "Click to configure..."}
-        </div>
+                : trigger.name || 'Configured trigger'}
+            </div>
+            <div className="ml-2 px-2 py-0.5 bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded text-[10px] border border-green-100 dark:border-green-800 font-medium">
+              Configured
+            </div>
+          </div>
+        ) : (
+          <div className="mt-3 text-xs px-3 py-2.5 bg-orange-50 dark:bg-orange-950/30 rounded-lg border-2 border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center">
+            <span className="flex-1 font-medium">Click to configure this trigger...</span>
+            <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/50 rounded text-[10px] border border-orange-200 dark:border-orange-800 font-medium">
+              Required
+            </span>
+          </div>
+        )}
       </div>
     );
   };
