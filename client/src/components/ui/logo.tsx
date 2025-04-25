@@ -22,8 +22,11 @@ export const Logo = ({
 
   return (
     <div className={cn("inline-flex items-center", className)}>
-      {/* Logo image removed as requested */}
-      <span className="text-2xl font-bold text-primary">BRNOUT</span>
+      <img 
+        src={brnoutLogo}
+        alt="BRNOUT Logo" 
+        className={cn("object-contain object-center", sizeClasses[size])} 
+      />
     </div>
   );
 };
