@@ -15,7 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
 
 // Categorize apps by type
-type AppCategory = "social" | "productivity" | "communication" | "marketing" | "analytics" | "payments" | "ai";
+type AppCategory = "social" | "productivity" | "communication" | "marketing" | "analytics" | "payments";
 
 const APP_CATEGORIES: Record<AppCategory, { title: string; description: string; apps: AppId[] }> = {
   social: {
@@ -47,11 +47,6 @@ const APP_CATEGORIES: Record<AppCategory, { title: string; description: string; 
     title: "Payments",
     description: "Connect your payment platforms",
     apps: ["stripe"]
-  },
-  ai: {
-    title: "AI Services",
-    description: "Connect your AI service accounts",
-    apps: ["openai", "anthropic", "ollama", "perplexity", "text-processor"]
   }
 };
 
@@ -233,22 +228,17 @@ export default function AppConnections() {
       const isApiService = ['openai', 'anthropic', 'perplexity', 'ollama', 'text-processor'].includes(appId);
       
       if (isApiService) {
-        // For API services, connect directly without OAuth
-        await apiRequest({
-          method: "POST",
-          url: `/api/app-connections/${appId}/connect`,
-          data: { apiIntegration: true },
-        });
-        
-        // Show success message
-        toast({
-          title: "API Service Connected",
-          description: `${appId.charAt(0).toUpperCase() + appId.slice(1)} API service has been connected successfully.`,
-        });
-        
-        // Refresh the connections data
-        queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+        // Redirect users to settings page for AI services
         setConnectingApp(null);
+        toast({
+          title: "Configure API Key",
+          description: `To use ${appId.charAt(0).toUpperCase() + appId.slice(1)}, please configure your API key in the Settings page.`,
+          action: (
+            <ToastAction altText="Go to Settings" onClick={() => navigate('/settings')}>
+              Go to Settings
+            </ToastAction>
+          ),
+        });
         return;
       }
       
