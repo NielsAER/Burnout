@@ -190,7 +190,7 @@ const DraggableAction: FC<DraggableActionProps> = ({
         </div>
       ) : (
         <div className="mt-3 text-xs px-3 py-2.5 bg-orange-50 dark:bg-orange-950/30 rounded-lg border-2 border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center">
-          <span className="flex-1 font-medium">Click to configure this action...</span>
+          <span className="flex-1 font-medium">Click to configure this action.</span>
           <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/50 rounded text-[10px] border border-orange-200 dark:border-orange-800 font-medium">
             Required
           </span>
@@ -457,7 +457,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                     Every {trigger.config.timerConfig.interval} {trigger.config.timerConfig.unit}
                   </span>
                 ) : (
-                  <span>Click to configure timer...</span>
+                  <span>Click to configure timer.</span>
                 )}
               </>
             ) : (
@@ -471,7 +471,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                     {!trigger.config.frequency && trigger.config.scheduleType !== 'timer' && `One time at ${trigger.config.time} on ${trigger.config.date || 'today'}`}
                   </span>
                 ) : (
-                  <span>Click to configure timer...</span>
+                  <span>Click to configure timer.</span>
                 )}
               </>
             )}
@@ -530,7 +530,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
           </div>
         ) : (
           <div className="mt-3 text-xs px-3 py-2.5 bg-orange-50 dark:bg-orange-950/30 rounded-lg border-2 border-orange-100 dark:border-orange-900/30 text-orange-600 dark:text-orange-400 flex items-center">
-            <span className="flex-1 font-medium">Click to configure this trigger...</span>
+            <span className="flex-1 font-medium">Click to configure this trigger.</span>
             <span className="px-2 py-0.5 bg-orange-100 dark:bg-orange-900/50 rounded text-[10px] border border-orange-200 dark:border-orange-800 font-medium">
               Required
             </span>
@@ -613,7 +613,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'once'})}
                     >
                       <div className="font-medium">One-time</div>
-                      <div className="text-sm text-gray-500">Run once at a specific date and time</div>
+                      <div className="text-sm text-gray-500">Run once at a specific date and time.</div>
                     </div>
                     <div 
                       className={`p-3 border rounded-md cursor-pointer transition-colors ${
@@ -622,7 +622,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'recurring'})}
                     >
                       <div className="font-medium">Recurring</div>
-                      <div className="text-sm text-gray-500">Run on a regular calendar schedule</div>
+                      <div className="text-sm text-gray-500">Run on a regular calendar schedule.</div>
                     </div>
                     <div 
                       className={`p-3 border rounded-md cursor-pointer transition-colors ${
@@ -631,7 +631,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       onClick={() => setCurrentConfig({...currentConfig, scheduleType: 'timer'})}
                     >
                       <div className="font-medium">Timer</div>
-                      <div className="text-sm text-gray-500">Run at regular intervals (e.g., every 15 minutes)</div>
+                      <div className="text-sm text-gray-500">Run at regular intervals (e.g., every 15 minutes).</div>
                     </div>
                   </div>
                 </div>
