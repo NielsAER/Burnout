@@ -379,7 +379,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl">
                     <div className="py-3 border-b-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-gray-900/30 rounded-t-lg">
                       <h4 className="px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Select a Trigger</h4>
-                      <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Choose what starts your automation</p>
+                      <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Choose what starts your automation.</p>
                     </div>
                     <div className="py-2 max-h-[300px] overflow-y-auto">
                       {Object.keys(APPS)
@@ -400,7 +400,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                               </div>
                               <div className="ml-3">
                                 <span className="text-sm font-medium dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400">{app.name}</span>
-                                <p className="text-xs text-gray-500 dark:text-gray-400">When something happens in {app.name}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400">When something happens in {app.name}.</p>
                               </div>
                             </div>
                           );
@@ -592,8 +592,8 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </DialogTitle>
             <DialogDescription>
               {isTimeBasedTrigger ? 
-                "Set when your automation should run" : 
-                `Customize how this ${stepType.toLowerCase()} will work`}
+                "Set when your automation should run." : 
+                `Customize how this ${stepType.toLowerCase()} will work.`}
             </DialogDescription>
           </DialogHeader>
           
@@ -903,7 +903,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               <h3 className="text-gray-700 dark:text-gray-200 font-medium mb-2 text-lg transition-colors duration-300 heading-text">Add an action</h3>
               
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 max-w-xs mx-auto leading-relaxed description-text">
-                Now that you have a trigger set up, add one or more actions that will run when the trigger is activated
+                Now that you have a trigger set up, add one or more actions that will run when the trigger is activated.
               </p>
               
               <div className="flex flex-col items-center space-y-3">
@@ -917,7 +917,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl">
                     <div className="py-3 border-b-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-gray-900/30 rounded-t-lg">
                       <h4 className="px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Select an Action</h4>
-                      <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Choose what happens when your trigger activates</p>
+                      <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Choose what happens when your trigger activates.</p>
                     </div>
                     <ScrollArea className="max-h-[400px]">
                       <div className="py-2">
@@ -947,7 +947,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       </div>
                     </ScrollArea>
                     <div className="p-3 border-t-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#151515] text-xs text-gray-500 dark:text-gray-400 rounded-b-xl">
-                      You can also drag apps from the left panel directly into this area
+                      You can also drag apps from the left panel directly into this area.
                     </div>
                   </PopoverContent>
                 </Popover>
@@ -1006,7 +1006,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <PopoverContent align="center" className="w-80 p-0 dark:bg-[#181818] dark:border-[#2a2a2a] rounded-xl border-2 border-gray-200 dark:border-gray-800 shadow-xl">
                     <div className="py-3 border-b-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-gray-900/30 rounded-t-lg">
                       <h4 className="px-4 text-sm font-medium text-gray-700 dark:text-gray-300">Add Next Action</h4>
-                      <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Chain multiple actions to create complex workflows</p>
+                      <p className="px-4 text-xs text-gray-500 dark:text-gray-400 mt-1">Chain multiple actions to create complex workflows.</p>
                     </div>
                     <ScrollArea className="max-h-[400px]">
                       <div className="py-2">
@@ -1036,7 +1036,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                       </div>
                     </ScrollArea>
                     <div className="p-3 border-t-2 border-gray-100 dark:border-[#2a2a2a] bg-gray-50 dark:bg-[#151515] text-xs text-gray-500 dark:text-gray-400 rounded-b-xl">
-                      Create powerful workflows by chaining multiple actions together
+                      Create powerful workflows by chaining multiple actions together.
                     </div>
                   </PopoverContent>
                 </Popover>
