@@ -371,8 +371,8 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               <div className="mt-7">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button size="sm" className="text-sm font-medium border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 dark:text-blue-300 rounded-md px-5 py-2 h-10 shadow-sm">
-                      <Plus className="h-4 w-4 mr-2" /> 
+                    <Button size="sm" className="text-sm font-medium border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 dark:text-blue-300 rounded-md px-5 py-2 h-10 shadow-sm group">
+                      <Plus className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" /> 
                       Select Trigger
                     </Button>
                   </PopoverTrigger>
@@ -909,8 +909,8 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
               <div className="flex flex-col items-center space-y-3">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button size="sm" className="text-sm font-medium border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 rounded-lg px-4 py-2 h-10 shadow-sm">
-                      <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                    <Button size="sm" className="text-sm font-medium border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 rounded-lg px-4 py-2 h-10 shadow-sm action-button group">
+                      <Plus className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
                       Add Action
                     </Button>
                   </PopoverTrigger>
@@ -954,8 +954,8 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                 
                 <p className="text-xs text-gray-400 dark:text-gray-500">or</p>
                 
-                <Button variant="outline" size="sm" onClick={() => window.open('https://docs.brnout.app/actions', '_blank')} className="text-xs border-2 border-gray-200 dark:border-[#2a2a2a] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] rounded-lg">
-                  Browse Action Documentation
+                <Button variant="outline" size="sm" onClick={() => window.open('https://docs.brnout.app/actions', '_blank')} className="text-xs border-2 border-gray-200 dark:border-[#2a2a2a] text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] rounded-lg group">
+                  <span className="inline-block transition-transform duration-300 group-hover:scale-105">Browse Action Documentation</span>
                 </Button>
               </div>
             </div>
@@ -997,9 +997,9 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
                   <PopoverTrigger asChild>
                     <Button 
                       size="sm" 
-                      className="text-sm font-medium border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 rounded-lg px-4 py-2 h-10 shadow-sm"
+                      className="text-sm font-medium border-2 border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-800 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 dark:text-blue-400 rounded-lg px-4 py-2 h-10 shadow-sm group"
                     >
-                      <Plus className="h-4 w-4 mr-2 group-hover:rotate-90 transition-transform duration-300" />
+                      <Plus className="h-4 w-4 mr-2 transition-transform duration-300 group-hover:rotate-90" />
                       Add Another Action
                     </Button>
                   </PopoverTrigger>
