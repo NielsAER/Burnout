@@ -244,16 +244,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // GET /api/execution-history - Get all execution histories
-  app.get("/api/execution-history", async (req, res) => {
-    try {
-      const histories = await storage.getAllExecutionHistories();
-      res.json(histories);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to fetch execution histories" });
-    }
-  });
-
   // GET /api/execution-history/automation/:automationId - Get execution histories for an automation
   app.get("/api/execution-history/automation/:automationId", async (req, res) => {
     try {
