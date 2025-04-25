@@ -341,7 +341,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
           className={`drop-zone w-full mb-6 border-2 border-dashed ${isOverTrigger && canDropTrigger 
             ? 'border-primary dark:border-blue-600 bg-primary/5 dark:bg-blue-900/20' 
             : 'border-gray-300 dark:border-[#2a2a2a]'} 
-            rounded-xl flex flex-col items-center justify-center h-56 transition-all duration-300
+            rounded-xl flex flex-col items-center justify-center h-64 transition-all duration-300
             ${isOverTrigger && canDropTrigger ? 'shadow-lg shadow-primary/10' : 'hover:border-primary/50 hover:shadow-sm'}`}
         >
           <div className="p-8 text-center">
@@ -380,10 +380,10 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
             </p>
             
             {!isOverTrigger && (
-              <div className="mt-5">
+              <div className="mt-7">
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button size="sm" className="text-sm font-medium border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 dark:text-blue-300 rounded-md px-4 py-1 h-9 shadow-sm">
+                    <Button size="sm" className="text-sm font-medium border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-600 dark:border-blue-700 dark:bg-blue-900/30 dark:hover:bg-blue-900/40 dark:text-blue-300 rounded-md px-5 py-2 h-10 shadow-sm">
                       <Plus className="h-4 w-4 mr-2" /> 
                       Select Trigger
                     </Button>
