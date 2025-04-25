@@ -14,7 +14,7 @@ import {
   ExternalLink,
   User
 } from "lucide-react";
-import { Logo } from "./logo";
+
 
 interface SidebarProps {
   onClose?: () => void;
@@ -41,7 +41,7 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
       {/* Logo */}
       <div className="p-4 border-b border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
         <div className="flex items-center">
-          <Logo size="sm" />
+          <span className="text-lg font-semibold">Researcher Portal</span>
         </div>
       </div>
       

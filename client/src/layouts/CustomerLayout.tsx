@@ -20,9 +20,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
-// Import customer portal logo
-import customerLogoLight from "@assets/brnout-logo-light.png";
-import customerLogoDark from "@assets/brnout-logo-dark.png";
+// Customer layout for simplified interface
 
 export default function CustomerLayout({ children }: { children: React.ReactNode }) {
   const { user, logoutMutation } = useAuth();
@@ -72,16 +70,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
     <div className="hidden md:flex flex-col h-screen w-64 bg-background border-r border-border">
       <div className="p-4 flex justify-center">
         <Link to="/customer/dashboard">
-          <img
-            src={customerLogoLight}
-            alt="BRNOUT Logo"
-            className="h-12 dark:hidden"
-          />
-          <img
-            src={customerLogoDark}
-            alt="BRNOUT Logo"
-            className="h-12 hidden dark:block"
-          />
+          <span className="text-lg font-semibold">Customer Portal</span>
         </Link>
       </div>
       
@@ -143,16 +132,7 @@ export default function CustomerLayout({ children }: { children: React.ReactNode
   const renderMobileHeader = () => (
     <div className="md:hidden border-b border-border p-4 flex items-center justify-between">
       <Link to="/customer/dashboard">
-        <img
-          src={customerLogoLight}
-          alt="BRNOUT Logo"
-          className="h-8 dark:hidden"
-        />
-        <img
-          src={customerLogoDark}
-          alt="BRNOUT Logo"
-          className="h-8 hidden dark:block"
-        />
+        <span className="text-lg font-semibold">Customer Portal</span>
       </Link>
       
       <div className="flex items-center space-x-2">
