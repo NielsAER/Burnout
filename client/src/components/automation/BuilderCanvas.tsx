@@ -846,7 +846,7 @@ const BuilderCanvas: FC<BuilderCanvasProps> = ({
 
   return (
     <div className="flex-1">
-      <div className="bg-white dark:bg-[#111111] border border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-xl p-6 min-h-[500px] relative flex flex-col shadow-sm">
+      <div className="bg-white dark:bg-[#111111] border border-dashed border-gray-300 dark:border-[#2a2a2a] rounded-xl p-6 min-h-[500px] relative flex flex-col shadow-sm workflow-canvas">
         {/* Top toolbar */}
         <div className="flex justify-between items-center mb-6">
           <div className="flex items-center">

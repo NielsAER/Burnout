@@ -2,6 +2,26 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom animation for workflow connectors */
+.workflow-canvas:hover .group .bg-gradient-to-b {
+  @apply from-primary/30 to-primary/80;
+  transition: all 0.5s ease;
+}
+
+.workflow-canvas:hover .group .absolute.inset-0 {
+  @apply opacity-100 animate-pulse;
+  animation-duration: 2s;
+}
+
+.workflow-canvas:hover .group .w-3\.5.h-3\.5 {
+  @apply border-primary/100;
+}
+
+/* Only scale and move when directly hovering */
+.group:hover .absolute.-bottom-1 {
+  @apply translate-y-0.5 scale-110;
+}
+
 @layer base {
   * {
     @apply border-border;
