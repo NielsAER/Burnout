@@ -380,18 +380,18 @@ export default function AppConnections() {
   };
 
   return (
-    <div className="container mx-auto py-6">
+    <div className="container mx-auto py-6 pl-6 md:pl-8">
       <div className="mb-6">
         <h1 className="text-3xl font-bold tracking-tight">App Connections</h1>
         <p className="text-muted-foreground mt-2">
-          Connect your accounts to various services to enable automations and workflows
+          Connect your accounts to various services to enable automations and workflows.
         </p>
       </div>
 
       <Tabs defaultValue="social" value={activeCategory} onValueChange={(value) => setActiveCategory(value as AppCategory)}>
-        <TabsList className="mb-4">
+        <TabsList className="mb-6 mt-2">
           {Object.entries(APP_CATEGORIES).map(([key, category]) => (
-            <TabsTrigger key={key} value={key}>
+            <TabsTrigger key={key} value={key} className="px-4 py-2">
               {category.title}
             </TabsTrigger>
           ))}
@@ -406,16 +406,18 @@ export default function AppConnections() {
                 if (!app) return null;
                 
                 return (
-                  <Card key={appId} className="overflow-hidden">
-                    <CardHeader className="flex flex-row items-center gap-4 pb-2">
-                      <AppIconMap appId={appId} />
+                  <Card key={appId} className="overflow-hidden border-2 hover:shadow-md transition-all">
+                    <CardHeader className="flex flex-row items-center gap-4 pb-3">
+                      <div className="p-1 bg-primary/5 rounded-full">
+                        <AppIconMap appId={appId} />
+                      </div>
                       <div>
-                        <CardTitle>{app.name}</CardTitle>
+                        <CardTitle className="text-lg">{app.name}</CardTitle>
                         <CardDescription>{app.description}</CardDescription>
                       </div>
                     </CardHeader>
                     <CardContent>
-                      <div className="flex justify-between items-center py-2">
+                      <div className="flex justify-between items-center py-2 border-t pt-3">
                         <div>
                           <div className="text-sm font-medium mb-1">Connection Status</div>
                           {renderConnectionStatus(appId)}
@@ -429,7 +431,7 @@ export default function AppConnections() {
                         </div>
                       </div>
                     </CardContent>
-                    <CardFooter className="pt-0">
+                    <CardFooter className="pt-2">
                       {isConnected(appId) ? (
                         <Button
                           variant="outline"
