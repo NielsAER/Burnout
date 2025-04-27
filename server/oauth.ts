@@ -96,8 +96,27 @@ export function getOAuthCredentials(req: Request, service: string): any {
 // Helper functions to get user profiles from different services
 async function getInstagramProfile(accessToken: string) {
   try {
-    const response = await axios.get(`https://graph.instagram.com/me?fields=id,username&access_token=${accessToken}`);
-    return response.data;
+    // First, get the basic profile info from the Instagram Graph API
+    const response = await axios.get(`https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=${accessToken}`);
+    
+    // Then get the user's media (if available)
+    try {
+      const mediaResponse = await axios.get(`https://graph.instagram.com/me/media?fields=id,caption,media_type,media_url,permalink,thumbnail_url,timestamp,username&access_token=${accessToken}&limit=5`);
+      
+      // Combine the user profile with media data
+      return {
+        ...response.data,
+        media: mediaResponse.data.data || [],
+        accessToken: accessToken // Store the token for future use
+      };
+    } catch (mediaError) {
+      console.warn("Could not fetch Instagram media:", mediaError);
+      // Return just the profile if media fetch fails
+      return {
+        ...response.data,
+        accessToken: accessToken // Store the token for future use
+      };
+    }
   } catch (error) {
     console.error("Failed to get Instagram profile:", error);
     throw error;
