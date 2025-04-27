@@ -1902,6 +1902,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Store the token
               accessToken = tokenData.access_token;
               
+              // Special handling for Instagram token response format
+              if (service === 'instagram' && tokenData && 'user_id' in tokenData) {
+                // Instagram's initial token response includes user_id and username directly
+                // Store additional user data
+                username = tokenData.username || 'instagram_user';
+                
+                // Convert short-lived token to long-lived token
+                try {
+                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${clientSecret}&access_token=${accessToken}`;
+                  const longLivedTokenResponse = await fetch(longLivedTokenUrl);
+                  
+                  if (longLivedTokenResponse.ok) {
+                    const longLivedTokenData = await longLivedTokenResponse.json();
+                    console.log('Exchanged for long-lived Instagram token');
+                    // Use long-lived token for better user experience
+                    accessToken = longLivedTokenData.access_token;
+                  }
+                } catch (tokenExchangeError) {
+                  console.error('Failed to exchange for long-lived Instagram token:', tokenExchangeError);
+                  // Continue with short-lived token if exchange fails
+                }
+              }
+              
               // If we have a user info endpoint, fetch the user profile
               if (accessToken) {
                 let userEndpoint;
@@ -1909,7 +1932,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 switch(service) {
                   case 'instagram':
-                    userEndpoint = 'https://graph.instagram.com/me?fields=id,username';
+                    userEndpoint = 'https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=' + accessToken;
+                    userHeaders = {}; // No need for auth header when token is in URL
                     break;
                   case 'linkedin':
                     userEndpoint = 'https://api.linkedin.com/v2/me';
