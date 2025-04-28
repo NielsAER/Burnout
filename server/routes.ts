@@ -1285,8 +1285,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // For Instagram OAuth, we need to use the exact redirect URI registered in Meta Developer portal
             // This must exactly match what's configured in the Instagram App settings
             
-            // Set redirect URI to youapp.com - the domain registered in Meta Developer Portal
-            const redirectUri = `https://youapp.com/auth/callback`;
+            // Set the exact redirect URI that matches what's registered in Meta Developer Portal
+            const redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/auth/callback`;
             
             // Instagram OAuth URL with proper CSRF protection
             // Instagram Basic Display API requires user_profile and user_media scopes
@@ -1694,7 +1694,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
-              redirectUri = `https://youapp.com/auth/callback`;
+              redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/auth/callback`;
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
