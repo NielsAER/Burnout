@@ -1288,8 +1288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Instagram OAuth URL with proper CSRF protection
             // Instagram Basic Display API requires user_profile and user_media scopes
-            // Use the direct client ID (706181635281684) provided by the user
-            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=706181635281684&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
+            // Use the direct client ID (697674269427861) provided by the user
+            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=697674269427861&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           }
           break;
           
@@ -1687,8 +1687,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           switch(service) {
             case 'instagram':
               // Use the direct Instagram credentials provided by the user
-              clientId = '706181635281684';
-              clientSecret = '4d7cbbd1ac127e8d73612447ed456dec';
+              clientId = '697674269427861';
+              clientSecret = '350ec33e4a298b4ee7154d84be7d2423';
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
@@ -1913,7 +1913,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // Convert short-lived token to long-lived token
                 try {
                   // Use the same hardcoded client secret for consistency
-                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=4d7cbbd1ac127e8d73612447ed456dec&access_token=${accessToken}`;
+                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=350ec33e4a298b4ee7154d84be7d2423&access_token=${accessToken}`;
                   const longLivedTokenResponse = await fetch(longLivedTokenUrl);
                   
                   if (longLivedTokenResponse.ok) {
