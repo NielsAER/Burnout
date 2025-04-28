@@ -1288,7 +1288,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             
             // Instagram OAuth URL with proper CSRF protection
             // Instagram Basic Display API requires user_profile and user_media scopes
-            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${process.env.INSTAGRAM_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
+            // Use the direct client ID (706181635281684) provided by the user
+            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=706181635281684&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           }
           break;
           
