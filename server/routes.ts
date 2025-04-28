@@ -1283,16 +1283,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
             storeOAuthState(req, 'instagram', state);
             
             // For Instagram OAuth, we need to use the exact redirect URI registered in Meta Developer portal
-            // Use https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram
-            // This should match exactly what's configured in Meta Developer Portal
+            // This must exactly match what's configured in the Instagram App settings
             
-            // Hard-code the exact redirect URI that's registered in Instagram app settings
-            const redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram`;
+            // Set redirect URI to youapp.com - the domain registered in Meta Developer Portal
+            const redirectUri = `https://youapp.com/auth/callback`;
             
             // Instagram OAuth URL with proper CSRF protection
             // Instagram Basic Display API requires user_profile and user_media scopes
-            // Use the direct client ID (697674269427861) provided by the user
-            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=697674269427861&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
+            // This uses the application ID from your Instagram app
+            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=you-app-id&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           }
           break;
           
@@ -1689,13 +1688,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           switch(service) {
             case 'instagram':
-              // Use the direct Instagram credentials provided by the user
-              clientId = '697674269427861';
-              clientSecret = '350ec33e4a298b4ee7154d84be7d2423';
+              // Use the application ID from the Instagram app
+              clientId = 'you-app-id';
+              clientSecret = 'you-app-secret';
               
-              // Hard-code the exact redirect URI that's registered in Instagram app settings
-              // This must match EXACTLY what's in the Meta Developer Portal
-              redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram`;
+              // Set redirect URI to match exactly what's configured in Meta Developer Portal
+              // Must match the redirect URL in authorization request
+              redirectUri = `https://youapp.com/auth/callback`;
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
@@ -1919,8 +1918,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 // Convert short-lived token to long-lived token
                 try {
-                  // Use the same hardcoded client secret for consistency
-                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=350ec33e4a298b4ee7154d84be7d2423&access_token=${accessToken}`;
+                  // Use the client secret from the app settings
+                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=you-app-secret&access_token=${accessToken}`;
                   const longLivedTokenResponse = await fetch(longLivedTokenUrl);
                   
                   if (longLivedTokenResponse.ok) {
