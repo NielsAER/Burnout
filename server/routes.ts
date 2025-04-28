@@ -1283,8 +1283,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             storeOAuthState(req, 'instagram', state);
             
             // For Instagram OAuth, we need to use the exact redirect URI registered in Meta Developer portal
-            // Use a generic path that's likely registered in the Instagram app settings
-            const redirectUri = `${baseUrl}/api/callback/instagram`;
+            // Use https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram
+            // This should match exactly what's configured in Meta Developer Portal
+            
+            // Hard-code the exact redirect URI that's registered in Instagram app settings
+            const redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram`;
             
             // Instagram OAuth URL with proper CSRF protection
             // Instagram Basic Display API requires user_profile and user_media scopes
@@ -1682,13 +1685,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         try {
           // Determine which client secret and token endpoint to use
           let clientId, clientSecret, tokenUrl, requestBody, requestHeaders;
-          const redirectUri = `${baseUrl}/api/callback/${service}`;
+          let redirectUri;
           
           switch(service) {
             case 'instagram':
               // Use the direct Instagram credentials provided by the user
               clientId = '697674269427861';
               clientSecret = '350ec33e4a298b4ee7154d84be7d2423';
+              
+              // Hard-code the exact redirect URI that's registered in Instagram app settings
+              // This must match EXACTLY what's in the Meta Developer Portal
+              redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram`;
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
