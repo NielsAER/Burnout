@@ -1686,8 +1686,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           switch(service) {
             case 'instagram':
-              clientId = process.env.INSTAGRAM_CLIENT_ID || 'YOUR_APP_ID';
-              clientSecret = process.env.INSTAGRAM_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              // Use the direct Instagram credentials provided by the user
+              clientId = '706181635281684';
+              clientSecret = '4d7cbbd1ac127e8d73612447ed456dec';
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
@@ -1911,7 +1912,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 // Convert short-lived token to long-lived token
                 try {
-                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=${clientSecret}&access_token=${accessToken}`;
+                  // Use the same hardcoded client secret for consistency
+                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=4d7cbbd1ac127e8d73612447ed456dec&access_token=${accessToken}`;
                   const longLivedTokenResponse = await fetch(longLivedTokenUrl);
                   
                   if (longLivedTokenResponse.ok) {
