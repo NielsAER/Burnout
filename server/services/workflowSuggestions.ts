@@ -112,7 +112,7 @@ async function generateSuggestionsWithAI(
   userContext: UserContext,
   count: number,
   category?: string
-): Promise<WorkflowSuggestion[]> {
+): Promise<WorkflowSuggestionResponse[]> {
   try {
     // Create the prompt for OpenAI
     const systemMessage = `You are an expert workflow automation assistant that provides highly personalized automation suggestions. 
@@ -179,7 +179,7 @@ Only include suggestions that involve apps the user has connected.`;
 async function generateDetailedSuggestionWithAI(
   userContext: UserContext,
   suggestionId: string
-): Promise<WorkflowSuggestion> {
+): Promise<WorkflowSuggestionResponse> {
   try {
     // For now, we'll generate a generic detailed suggestion
     // In a production system, this would fetch from a database

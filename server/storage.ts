@@ -1653,11 +1653,56 @@ export class DatabaseStorage implements IStorage {
       .insert(userAchievements)
       .values({
         automationId,
-        achievementId
+        achievementId,
+        unlockedAt: new Date()
       })
       .returning();
     
     return userAchievement;
+  }
+  
+  // Workflow Suggestion methods for database
+  async getAllWorkflowSuggestions(): Promise<WorkflowSuggestion[]> {
+    return await db.select().from(workflowSuggestions);
+  }
+  
+  async getPersonalizedWorkflowSuggestions(limit: number = 10): Promise<WorkflowSuggestion[]> {
+    return await db
+      .select()
+      .from(workflowSuggestions)
+      .where(eq(workflowSuggestions.personalized, true))
+      .orderBy(desc(workflowSuggestions.relevanceScore))
+      .limit(limit);
+  }
+  
+  async getWorkflowSuggestionsByCategory(category: string, limit: number = 10): Promise<WorkflowSuggestion[]> {
+    return await db
+      .select()
+      .from(workflowSuggestions)
+      .where(eq(workflowSuggestions.category, category))
+      .orderBy(desc(workflowSuggestions.relevanceScore))
+      .limit(limit);
+  }
+  
+  async createWorkflowSuggestion(suggestion: InsertWorkflowSuggestion): Promise<WorkflowSuggestion> {
+    const [newSuggestion] = await db.insert(workflowSuggestions).values(suggestion).returning();
+    return newSuggestion;
+  }
+  
+  async updateWorkflowSuggestion(id: number, data: Partial<InsertWorkflowSuggestion>): Promise<WorkflowSuggestion | undefined> {
+    const [updatedSuggestion] = await db
+      .update(workflowSuggestions)
+      .set(data)
+      .where(eq(workflowSuggestions.id, id))
+      .returning();
+    return updatedSuggestion;
+  }
+  
+  async deleteWorkflowSuggestion(id: number): Promise<boolean> {
+    const result = await db
+      .delete(workflowSuggestions)
+      .where(eq(workflowSuggestions.id, id));
+    return !!result;
   }
 }
 
