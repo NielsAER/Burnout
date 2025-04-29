@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import { storage } from "../storage";
-import { Automation, AppConnection } from "@shared/schema";
+import { Automation, AppConnection, WorkflowSuggestion as DbWorkflowSuggestion, InsertWorkflowSuggestion, User } from "@shared/schema";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
 const openai = new OpenAI({
@@ -10,7 +10,7 @@ const openai = new OpenAI({
 /**
  * Types for suggestion system
  */
-export interface WorkflowSuggestion {
+export interface WorkflowSuggestionResponse {
   name: string;
   description: string;
   triggerAppId: string;
@@ -40,7 +40,7 @@ export async function generateWorkflowSuggestions(
   userId: number,
   count: number = 3,
   category?: string
-): Promise<WorkflowSuggestion[]> {
+): Promise<WorkflowSuggestionResponse[]> {
   try {
     // Get user's context
     const userContext = await getUserContext(userId);
@@ -61,7 +61,7 @@ export async function generateWorkflowSuggestions(
 export async function getDetailedSuggestion(
   userId: number,
   suggestionId: string
-): Promise<WorkflowSuggestion> {
+): Promise<WorkflowSuggestionResponse> {
   try {
     // This would typically fetch from a database, but for now we'll regenerate
     // In a production system, suggestions would be stored with IDs
@@ -414,4 +414,54 @@ function getCategoryFromAutomation(automation: Automation): string {
   }
   
   return triggerCategory;
+}
+
+/**
+ * Generate and store personalized workflow suggestions for a user
+ */
+export async function generateAndStoreSuggestions(
+  userId: number, 
+  count: number = 5
+): Promise<DbWorkflowSuggestion[]> {
+  try {
+    // Get user information
+    const user = await storage.getUser(userId);
+    if (!user) {
+      throw new Error("User not found");
+    }
+    
+    // Generate personalized suggestions
+    const aiSuggestions = await generateWorkflowSuggestions(userId, count);
+    
+    // Store the suggestions in the database
+    const storedSuggestions: DbWorkflowSuggestion[] = [];
+    
+    for (const suggestion of aiSuggestions) {
+      // Prepare suggestion for database
+      const insertSuggestion: InsertWorkflowSuggestion = {
+        name: suggestion.name,
+        description: suggestion.description,
+        triggerAppId: suggestion.triggerAppId,
+        actionAppId: suggestion.actionAppId,
+        config: {
+          trigger: suggestion.triggerConfigTemplate,
+          action: suggestion.actionConfigTemplate,
+          complexity: suggestion.complexity,
+          benefits: suggestion.benefits
+        },
+        category: suggestion.category,
+        personalized: true,
+        relevanceScore: suggestion.matchScore
+      };
+      
+      // Store in database
+      const storedSuggestion = await storage.createWorkflowSuggestion(insertSuggestion);
+      storedSuggestions.push(storedSuggestion);
+    }
+    
+    return storedSuggestions;
+  } catch (error: any) {
+    console.error("Error generating and storing suggestions:", error);
+    throw new Error(`Failed to generate and store suggestions: ${error.message}`);
+  }
 }
