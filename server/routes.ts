@@ -24,6 +24,7 @@ import * as ollamaService from "./services/ollama";
 import * as perplexityService from "./services/perplexity";
 import * as textProcessorService from "./services/text-processor";
 import * as googleDocsService from "./services/google-docs";
+import * as workflowSuggestionService from "./services/workflowSuggestions";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -2931,6 +2932,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Workflow suggestions error:", error);
       res.status(500).json({ 
         message: "Failed to get workflow suggestions", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // GET /api/assistant/personalized-suggestions - Get personalized workflow suggestions
+  app.get("/api/assistant/personalized-suggestions", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const count = req.query.count ? parseInt(req.query.count as string) : 5;
+      
+      // Get personalized suggestions from the database first
+      const dbSuggestions = await storage.getPersonalizedWorkflowSuggestions(count);
+      
+      // If we have enough suggestions, return them
+      if (dbSuggestions.length >= count) {
+        return res.json({
+          suggestions: dbSuggestions,
+          source: "database"
+        });
+      }
+      
+      // Otherwise, generate new personalized suggestions
+      const suggestions = await workflowSuggestionService.generateWorkflowSuggestions(
+        req.user.id,
+        count
+      );
+      
+      res.json({
+        suggestions,
+        source: "generated"
+      });
+    } catch (error: any) {
+      console.error("Personalized workflow suggestions error:", error);
+      res.status(500).json({ 
+        message: "Failed to get personalized workflow suggestions", 
+        error: error.message 
+      });
+    }
+  });
+  
+  // POST /api/assistant/generate-store-suggestions - Generate and store personalized workflow suggestions
+  app.post("/api/assistant/generate-store-suggestions", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const count = req.body.count || 5;
+      
+      // Generate and store new personalized suggestions
+      const suggestions = await workflowSuggestionService.generateAndStoreSuggestions(
+        req.user.id,
+        count
+      );
+      
+      res.json({
+        suggestions,
+        count: suggestions.length
+      });
+    } catch (error: any) {
+      console.error("Generate and store workflow suggestions error:", error);
+      res.status(500).json({ 
+        message: "Failed to generate and store workflow suggestions", 
         error: error.message 
       });
     }

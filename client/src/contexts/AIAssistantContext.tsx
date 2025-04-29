@@ -3,10 +3,17 @@ import { useLocation } from 'wouter';
 import { apiRequest } from '@/lib/queryClient';
 
 interface WorkflowSuggestion {
+  id?: number;
   name: string;
   description: string;
-  difficulty: 'beginner' | 'intermediate' | 'advanced';
-  tags: string[];
+  difficulty?: 'beginner' | 'intermediate' | 'advanced';
+  tags?: string[];
+  triggerAppId: string;
+  actionAppId: string;
+  category?: string;
+  relevanceScore?: number;
+  personalized?: boolean;
+  createdAt?: string;
 }
 
 interface AIAssistantContextType {
@@ -17,6 +24,8 @@ interface AIAssistantContextType {
   toggleAssistant: () => void;
   askQuestion: (question: string) => Promise<string>;
   getWorkflowSuggestions: (category?: string) => Promise<WorkflowSuggestion[]>;
+  getPersonalizedSuggestions: (count?: number) => Promise<WorkflowSuggestion[]>;
+  generatePersonalizedSuggestions: (count?: number) => Promise<WorkflowSuggestion[]>;
   showAssistant: () => void;
 }
 
@@ -121,6 +130,40 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
   
+  // Get personalized workflow suggestions based on user activity and preferences
+  const getPersonalizedSuggestions = async (count: number = 5): Promise<WorkflowSuggestion[]> => {
+    try {
+      const response = await fetch(`/api/assistant/personalized-suggestions?count=${count}`);
+      
+      if (!response.ok) {
+        if (response.status === 401) {
+          console.log('User not authenticated, returning default suggestions');
+          // If not authenticated, return regular suggestions as fallback
+          return getWorkflowSuggestions();
+        }
+        throw new Error(`API returned ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      return data.suggestions || [];
+    } catch (error) {
+      console.error('Error getting personalized suggestions:', error);
+      return [];
+    }
+  };
+  
+  // Generate new personalized workflow suggestions and store them
+  const generatePersonalizedSuggestions = async (count: number = 5): Promise<WorkflowSuggestion[]> => {
+    try {
+      const response = await apiRequest('POST', '/api/assistant/generate-store-suggestions', { count });
+      const data = await response.json();
+      return data.suggestions || [];
+    } catch (error) {
+      console.error('Error generating personalized suggestions:', error);
+      return [];
+    }
+  };
+  
   // Show the AI assistant and optionally set a specific context
   const showAssistant = () => {
     setIsVisible(true);
@@ -146,6 +189,8 @@ export const AIAssistantProvider: React.FC<{ children: React.ReactNode }> = ({ c
         toggleAssistant,
         askQuestion,
         getWorkflowSuggestions,
+        getPersonalizedSuggestions,
+        generatePersonalizedSuggestions,
         showAssistant
       }}
     >

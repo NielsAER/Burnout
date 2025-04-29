@@ -107,7 +107,12 @@ export function AIAssistantTooltip({
   const inputRef = useRef<HTMLInputElement>(null);
   
   const { generateTextOpenAI, loading } = useLLMServices();
-  const { askQuestion, getWorkflowSuggestions } = useAIAssistant();
+  const { 
+    askQuestion, 
+    getWorkflowSuggestions, 
+    getPersonalizedSuggestions,
+    generatePersonalizedSuggestions 
+  } = useAIAssistant();
   const { toast } = useToast();
 
   const positionClasses = {
