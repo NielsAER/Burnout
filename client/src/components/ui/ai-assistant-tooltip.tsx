@@ -217,12 +217,65 @@ export function AIAssistantTooltip({
     setCharacterState("thinking");
     
     try {
-      const suggestions = await getWorkflowSuggestions(category);
-      setWorkflowSuggestions(suggestions);
+      // First try to get personalized suggestions
+      const personalizedSuggestions = await getPersonalizedSuggestions(5);
+      
+      if (personalizedSuggestions.length > 0) {
+        // If we have personalized suggestions, use those
+        setWorkflowSuggestions(personalizedSuggestions.map(suggestion => ({
+          ...suggestion,
+          personalized: true // Mark these as personalized for UI display
+        })));
+      } else if (category) {
+        // If no personalized suggestions but category provided, get category-specific suggestions
+        const suggestions = await getWorkflowSuggestions(category);
+        setWorkflowSuggestions(suggestions);
+      } else {
+        // Fallback to general suggestions
+        const suggestions = await getWorkflowSuggestions();
+        setWorkflowSuggestions(suggestions);
+      }
+      
       setCharacterState("excited");
     } catch (error) {
       console.error("Error fetching workflow suggestions:", error);
       setWorkflowSuggestions([]);
+      setCharacterState("confused");
+    }
+  };
+  
+  // Generate new personalized suggestions
+  const generateNewSuggestions = async () => {
+    setCharacterState("thinking");
+    
+    try {
+      const newSuggestions = await generatePersonalizedSuggestions(5);
+      
+      if (newSuggestions.length > 0) {
+        setWorkflowSuggestions(newSuggestions.map(suggestion => ({
+          ...suggestion,
+          personalized: true,
+          isNew: true // Mark these as newly generated
+        })));
+        
+        toast({
+          title: "New Suggestions Generated",
+          description: "Fresh workflow suggestions based on your activity",
+          variant: "default",
+        });
+      } else {
+        // If we couldn't generate new ones, fetch existing ones
+        fetchWorkflowSuggestions();
+      }
+      
+      setCharacterState("excited");
+    } catch (error) {
+      console.error("Error generating new suggestions:", error);
+      toast({
+        title: "Couldn't Generate Suggestions",
+        description: "Please try again later",
+        variant: "destructive",
+      });
       setCharacterState("confused");
     }
   };
@@ -358,15 +411,34 @@ export function AIAssistantTooltip({
               ) : showingWorkflowSuggestions ? (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <h5 className="text-sm font-medium">Workflow Suggestions</h5>
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      className="h-6 w-6 p-0" 
-                      onClick={resetAssistant}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>
+                    <h5 className="text-sm font-medium">
+                      Workflow Suggestions
+                      {workflowSuggestions.some(s => s.personalized) && (
+                        <span className="ml-2 inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
+                          Personalized
+                        </span>
+                      )}
+                    </h5>
+                    <div className="flex items-center space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 w-6 p-0"
+                        title="Get New Suggestions"
+                        onClick={generateNewSuggestions}
+                      >
+                        <Sparkles className="h-3 w-3" />
+                        <span className="sr-only">Get New Suggestions</span>
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="h-6 w-6 p-0" 
+                        onClick={resetAssistant}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
                   </div>
                   
                   {workflowSuggestions.length > 0 ? (
@@ -374,11 +446,22 @@ export function AIAssistantTooltip({
                       {workflowSuggestions.map((suggestion, index) => (
                         <div 
                           key={index} 
-                          className="rounded-md border p-3 text-xs relative hover:border-primary transition-colors group cursor-pointer"
+                          className={cn(
+                            "rounded-md border p-3 text-xs relative hover:border-primary transition-colors group cursor-pointer",
+                            suggestion.personalized && "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10",
+                            suggestion.isNew && "animate-pulse"
+                          )}
                           onClick={() => handleCreateWorkflow(suggestion)}
                         >
                           <div className="flex justify-between items-start mb-1">
-                            <div className="font-medium pr-6">{suggestion.name}</div>
+                            <div className="font-medium pr-6">
+                              {suggestion.name}
+                              {suggestion.personalized && (
+                                <span className="ml-1 inline-flex items-center px-1 py-0.5 rounded-sm text-[8px] bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 align-top">
+                                  For You
+                                </span>
+                              )}
+                            </div>
                             <span className={cn(
                               "text-[10px] px-1.5 py-0.5 rounded-full",
                               suggestion.difficulty === "beginner" ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" :
