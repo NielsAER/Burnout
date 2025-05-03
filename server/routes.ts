@@ -1129,6 +1129,193 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Handle Facebook auth (for Instagram integration)
+  app.post("/api/facebook-auth", async (req, res) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: "You must be logged in to connect apps" });
+      }
+      
+      const { accessToken, userID, serviceType } = req.body;
+      
+      if (!accessToken || !userID) {
+        return res.status(400).json({ error: "Missing required Facebook auth parameters" });
+      }
+      
+      console.log(`Processing Facebook auth for ${serviceType || 'instagram'}`);
+      
+      let apiEndpoint, profileData;
+      
+      if (serviceType === 'instagram') {
+        // For Instagram integration, we need to:
+        // 1. Get the Facebook user's Instagram Business accounts
+        // 2. Get the Instagram user profile using the Instagram Graph API
+        
+        try {
+          // Get user's Instagram accounts
+          const fbResponse = await fetch(
+            `https://graph.facebook.com/v17.0/${userID}/accounts?access_token=${accessToken}`
+          );
+          
+          if (!fbResponse.ok) {
+            throw new Error(`Failed to fetch Instagram accounts: ${fbResponse.statusText}`);
+          }
+          
+          const accountsData = await fbResponse.json();
+          
+          // No pages found, Instagram business account might not be connected
+          if (!accountsData.data || accountsData.data.length === 0) {
+            return res.status(400).json({ 
+              error: "No Instagram business account found. Make sure your Instagram account is connected to a Facebook page."
+            });
+          }
+          
+          // Get the first page's Instagram business account
+          const page = accountsData.data[0];
+          
+          // Get Instagram Business Account ID for the page
+          const igAccountResponse = await fetch(
+            `https://graph.facebook.com/v17.0/${page.id}?fields=instagram_business_account&access_token=${accessToken}`
+          );
+          
+          if (!igAccountResponse.ok) {
+            throw new Error(`Failed to fetch Instagram business account: ${igAccountResponse.statusText}`);
+          }
+          
+          const igAccountData = await igAccountResponse.json();
+          
+          if (!igAccountData.instagram_business_account) {
+            return res.status(400).json({ 
+              error: "No Instagram business account found. Please connect your Instagram account to your Facebook page."
+            });
+          }
+          
+          const igAccountId = igAccountData.instagram_business_account.id;
+          
+          // Get Instagram user profile
+          const igProfileResponse = await fetch(
+            `https://graph.facebook.com/v17.0/${igAccountId}?fields=username,profile_picture_url,name&access_token=${accessToken}`
+          );
+          
+          if (!igProfileResponse.ok) {
+            throw new Error(`Failed to fetch Instagram profile: ${igProfileResponse.statusText}`);
+          }
+          
+          profileData = await igProfileResponse.json();
+          
+          // Create the credentials object to store
+          const credentials = {
+            access_token: accessToken,
+            user_id: igAccountId,
+            username: profileData.username,
+            name: profileData.name,
+            profile_picture: profileData.profile_picture_url,
+            created_at: new Date()
+          };
+          
+          // Store Instagram credentials and create connection
+          if (req.isAuthenticated()) {
+            // Store credentials in session
+            if (!req.session.oauthCredentials) {
+              req.session.oauthCredentials = {};
+            }
+            
+            req.session.oauthCredentials['instagram'] = credentials;
+            
+            // Create connection in database
+            await storage.createAppConnection({
+              userId: req.user.id,
+              appId: 'instagram',
+              username: profileData.username, 
+              token: JSON.stringify(credentials),
+              profile: JSON.stringify(profileData)
+            });
+            
+            res.status(200).json({ 
+              success: true, 
+              message: "Successfully connected to Instagram",
+              profile: {
+                username: profileData.username,
+                name: profileData.name
+              }
+            });
+          } else {
+            res.status(401).json({ error: "You must be logged in to connect apps" });
+          }
+        } catch (error: any) {
+          console.error('Instagram Graph API Error:', error);
+          res.status(500).json({ 
+            error: `Failed to connect to Instagram: ${error.message}` 
+          });
+        }
+      } else if (serviceType === 'facebook-ads') {
+        // For Facebook Ads integration
+        try {
+          // Get Facebook user profile
+          const fbProfileResponse = await fetch(
+            `https://graph.facebook.com/v17.0/me?fields=id,name,email&access_token=${accessToken}`
+          );
+          
+          if (!fbProfileResponse.ok) {
+            throw new Error(`Failed to fetch Facebook profile: ${fbProfileResponse.statusText}`);
+          }
+          
+          profileData = await fbProfileResponse.json();
+          
+          // Create the credentials object to store
+          const credentials = {
+            access_token: accessToken,
+            user_id: profileData.id,
+            name: profileData.name,
+            email: profileData.email,
+            created_at: new Date()
+          };
+          
+          // Store Facebook Ads credentials and create connection
+          if (req.isAuthenticated()) {
+            // Store credentials in session
+            if (!req.session.oauthCredentials) {
+              req.session.oauthCredentials = {};
+            }
+            
+            req.session.oauthCredentials['facebook-ads'] = credentials;
+            
+            // Create connection in database
+            await storage.createAppConnection({
+              userId: req.user.id,
+              appId: 'facebook-ads',
+              username: profileData.name, 
+              token: JSON.stringify(credentials),
+              profile: JSON.stringify(profileData)
+            });
+            
+            res.status(200).json({ 
+              success: true, 
+              message: "Successfully connected to Facebook Ads",
+              profile: {
+                name: profileData.name,
+                email: profileData.email
+              }
+            });
+          } else {
+            res.status(401).json({ error: "You must be logged in to connect apps" });
+          }
+        } catch (error: any) {
+          console.error('Facebook Graph API Error:', error);
+          res.status(500).json({ 
+            error: `Failed to connect to Facebook Ads: ${error.message}` 
+          });
+        }
+      } else {
+        res.status(400).json({ error: "Unsupported service type" });
+      }
+    } catch (error) {
+      console.error("Error in Facebook auth:", error);
+      res.status(500).json({ message: "Failed to process Facebook authentication" });
+    }
+  });
+
   // POST /api/settings/api-keys - Save API keys
   app.post("/api/settings/api-keys", async (req, res) => {
     try {

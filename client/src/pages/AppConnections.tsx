@@ -13,6 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { FacebookAuth } from "@/components/integration/FacebookAuth";
 
 // Categorize apps by type
 type AppCategory = "social" | "productivity" | "communication" | "marketing" | "analytics" | "payments";
@@ -430,6 +431,24 @@ export default function AppConnections() {
                         >
                           Disconnect
                         </Button>
+                      ) : appId === 'instagram' ? (
+                        // For Instagram, use Facebook Auth through SDK
+                        <FacebookAuth 
+                          buttonText="Connect with Facebook"
+                          serviceType="instagram"
+                          onLoginSuccess={(response) => {
+                            console.log("Facebook login successful:", response);
+                            // Success is handled in the component
+                          }}
+                          onLoginFailure={(error) => {
+                            console.error("Facebook login failed:", error);
+                            toast({
+                              title: "Connection Failed",
+                              description: error.message || "Failed to connect to Instagram via Facebook",
+                              variant: "destructive"
+                            });
+                          }}
+                        />
                       ) : (
                         <Button
                           variant="default"
