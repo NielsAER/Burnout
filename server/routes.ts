@@ -2050,6 +2050,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // LinkedIn token exchange
               tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
               
+              // Must use the EXACT same redirect URI that was used in the authorization request
+              // This must match what was registered in LinkedIn's developer portal
+              redirectUri = 'https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/linkedin';
+              console.log("Using LinkedIn callback redirect URI:", redirectUri);
+              
               // LinkedIn also requires form-urlencoded
               requestBody = new URLSearchParams({
                 grant_type: 'authorization_code',
