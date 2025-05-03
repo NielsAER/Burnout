@@ -444,86 +444,23 @@ export default function AppConnections() {
                           Disconnect
                         </Button>
                       ) : (
-                        // For LinkedIn, offer direct token connection option
+                        // For LinkedIn, just use standard OAuth connection
                         appId === 'linkedin' ? (
-                          <div className="space-y-2">
-                            <Button
-                              variant="default"
-                              onClick={() => handleConnect(appId)}
-                              className="w-full"
-                              disabled={connectingApp === appId || isConnectingLinkedIn}
-                            >
-                              {connectingApp === appId ? (
-                                <>
-                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                  Connecting...
-                                </>
-                              ) : (
-                                <>Connect with OAuth <ChevronRight className="ml-2 h-4 w-4" /></>
-                              )}
-                            </Button>
-                            
-                            <Dialog>
-                              <DialogTrigger asChild>
-                                <Button
-                                  variant="outline"
-                                  className="w-full"
-                                  disabled={isConnectingLinkedIn || connectingApp === appId}
-                                >
-                                  {isConnectingLinkedIn ? (
-                                    <>
-                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                      Connecting...
-                                    </>
-                                  ) : (
-                                    <>Connect with Token</>
-                                  )}
-                                </Button>
-                              </DialogTrigger>
-                              <DialogContent className="sm:max-w-md">
-                                <DialogHeader>
-                                  <DialogTitle>Connect LinkedIn with Token</DialogTitle>
-                                  <DialogDescription>
-                                    Use a direct token to connect to your LinkedIn account without going through the OAuth flow.
-                                  </DialogDescription>
-                                </DialogHeader>
-                                <div className="space-y-4 py-4">
-                                  <div className="space-y-2">
-                                    <Label htmlFor="linkedin-token">LinkedIn Access Token</Label>
-                                    <Input
-                                      id="linkedin-token"
-                                      value={linkedInToken}
-                                      onChange={(e) => setLinkedInToken(e.target.value)}
-                                      className="w-full"
-                                    />
-                                  </div>
-                                </div>
-                                <DialogFooter className="sm:justify-between">
-                                  <DialogClose asChild>
-                                    <Button type="button" variant="secondary">
-                                      Cancel
-                                    </Button>
-                                  </DialogClose>
-                                  <Button 
-                                    type="button" 
-                                    onClick={() => {
-                                      connectWithToken(linkedInToken);
-                                    }}
-                                    disabled={isConnectingLinkedIn || !linkedInToken}
-                                  >
-                                    {isConnectingLinkedIn ? (
-                                      <>
-                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                        Connecting...
-                                      </>
-                                    ) : (
-                                      <>Connect</>
-                                    )}
-                                  </Button>
-                                </DialogFooter>
-                              </DialogContent>
-                            </Dialog>
-                          </div>
+                          <Button
+                            variant="default"
+                            onClick={() => handleConnect(appId)}
+                            className="w-full"
+                            disabled={connectingApp === appId}
+                          >
+                            {connectingApp === appId ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Connecting...
+                              </>
+                            ) : (
+                              <>Connect <ChevronRight className="ml-2 h-4 w-4" /></>
+                            )}
+                          </Button>
                         ) : (
                           // For other services, use standard OAuth approach
                           <Button
