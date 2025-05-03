@@ -1271,30 +1271,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Handle different OAuth providers
       switch (appId) {
         case 'instagram':
-          if (!process.env.INSTAGRAM_CLIENT_ID || !process.env.INSTAGRAM_CLIENT_SECRET) {
-            // Missing credentials - ask user to provide them
-            requiredSecrets = ['INSTAGRAM_CLIENT_ID', 'INSTAGRAM_CLIENT_SECRET'];
-            return res.status(400).json({ 
-              error: "Missing Instagram OAuth credentials", 
-              requiredSecrets
-            });
-          } else {
-            // Generate state for CSRF protection
-            const state = generateState();
-            storeOAuthState(req, 'instagram', state);
-            
-            // For Instagram OAuth, we need to use the exact redirect URI registered in Meta Developer portal
-            // This must exactly match what's configured in the Instagram App settings
-            
-            // Set the exact redirect URI that matches what's registered in Meta Developer Portal
-            // We need to use /api/callback/instagram instead of /auth/callback to match our implementation
-            const redirectUri = `${req.protocol}://${req.get('host')}/api/callback/instagram`;
-            
-            // Instagram OAuth URL with proper CSRF protection
-            // Instagram Basic Display API requires user_profile and user_media scopes
-            // This uses the application ID provided by the user
-            oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=573274152454213&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
-          }
+          // No need to check for credentials as we're using hardcoded ones provided by the user
+          // Generate state for CSRF protection
+          const state = generateState();
+          storeOAuthState(req, 'instagram', state);
+          
+          // IMPORTANT: For Instagram OAuth, we must use the exact redirect URI registered in Meta Developer portal
+          // This must match the Valid OAuth Redirect URIs in your Instagram Basic Display app settings
+          
+          // Use a hardcoded URL that exactly matches what's registered in the Meta Developer Portal
+          // NOTE: If this doesn't match exactly what's in the Meta Developer Portal, you'll get "Invalid platform app" error
+          const redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram`;
+          
+          console.log("Using Instagram redirect URI:", redirectUri);
+          
+          // Instagram OAuth URL with proper CSRF protection
+          // Instagram Basic Display API requires user_profile and user_media scopes
+          oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=573274152454213&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           break;
           
         case 'linkedin':
@@ -1696,7 +1689,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
-              redirectUri = `${req.protocol}://${req.get('host')}/api/callback/instagram`;
+              redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram`;
+              console.log("Using Instagram callback URI:", redirectUri);
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
