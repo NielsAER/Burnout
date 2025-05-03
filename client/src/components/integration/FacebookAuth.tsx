@@ -8,7 +8,7 @@ declare global {
   interface Window {
     FB: any;
     fbAsyncInit: () => void;
-    statusChangeCallback: (response: any) => void;
+    statusChangeCallback: ((response: any) => void) | (() => void);
   }
 }
 
@@ -66,11 +66,13 @@ export function FacebookAuth({
 
   // Save the callback to window for FB SDK to access
   useEffect(() => {
+    // Set the global callback function
     window.statusChangeCallback = statusChangeCallback;
     
     // Clean up
     return () => {
-      delete window.statusChangeCallback;
+      // Create an empty function to avoid type errors
+      window.statusChangeCallback = () => {};
     };
   }, [statusChangeCallback]);
 
@@ -99,7 +101,7 @@ export function FacebookAuth({
         });
         
         // Invalidate connections cache to refresh the UI
-        queryClient.invalidateQueries({ queryKey: ['/api/connections'] });
+        queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
       } else {
         toast({
           title: 'Connection Failed',
