@@ -1632,9 +1632,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'linkedin', state);
             
-            // For LinkedIn OAuth, use the exact registered redirect URI from LinkedIn Developer portal
-            // Use a generic callback path that's likely registered in the LinkedIn app settings
-            const redirectUri = `${baseUrl}/api/callback/linkedin`;
+            // For LinkedIn OAuth, use the EXACT redirect URI that was registered in the LinkedIn developer portal
+            // Based on the error message, we need to use the hardcoded redirect URI that matches LinkedIn's registration
+            const redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/linkedin`;
+            
+            console.log("Using LinkedIn redirect URI:", redirectUri);
             
             // LinkedIn OAuth URL with proper CSRF protection
             // LinkedIn uses space-separated scopes but URL-encoded
