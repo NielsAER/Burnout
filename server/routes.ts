@@ -1027,6 +1027,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // Direct token integration for LinkedIn
+  app.post('/api/direct-token-connect/linkedin', async (req, res) => {
+    try {
+      // Check if user is authenticated
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ error: 'You must be logged in to connect LinkedIn' });
+      }
+      
+      const { token } = req.body;
+      
+      if (!token) {
+        return res.status(400).json({ error: 'Token is required' });
+      }
+      
+      // Fetch user profile using the provided token
+      try {
+        // LinkedIn user profile API
+        const userResponse = await fetch('https://api.linkedin.com/v2/me', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json',
+          }
+        });
+        
+        if (!userResponse.ok) {
+          throw new Error(`LinkedIn API error: ${userResponse.status} ${userResponse.statusText}`);
+        }
+        
+        const userData = await userResponse.json();
+        console.log('LinkedIn user data:', userData);
+        
+        // Extract username and save connection
+        const username = userData.localizedFirstName 
+          ? `${userData.localizedFirstName} ${userData.localizedLastName || ''}` 
+          : userData.id;
+        
+        // Save the LinkedIn connection
+        await storage.saveAppConnection({
+          appId: 'linkedin',
+          userId: req.user.id,
+          username: username.trim(),
+          credentials: { 
+            accessToken: token,
+            userId: userData.id
+          },
+          permissions: ['basic_profile']
+        });
+        
+        return res.json({ 
+          success: true,
+          userData,
+          message: 'LinkedIn account connected successfully' 
+        });
+      } catch (error) {
+        console.error('LinkedIn profile fetch error:', error);
+        return res.status(400).json({ 
+          error: 'Failed to fetch LinkedIn profile',
+          message: error.message 
+        });
+      }
+    } catch (error) {
+      console.error('LinkedIn direct token error:', error);
+      return res.status(500).json({ 
+        error: 'Failed to connect LinkedIn account',
+        message: error.message 
+      });
+    }
+  });
+
   // Simulated OAuth callback for development/testing
   app.get('/api/auth/:service/simulated-callback', (req, res) => {
     const { service } = req.params;

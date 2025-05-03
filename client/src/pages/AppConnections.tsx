@@ -13,6 +13,17 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
+import { useLinkedInDirectToken } from "@/lib/useLinkedInDirectToken";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
 
 // Categorize apps by type
 type AppCategory = "social" | "productivity" | "communication" | "marketing" | "analytics" | "payments";
@@ -63,6 +74,8 @@ export default function AppConnections() {
   const [, navigate] = useLocation();
   const [activeCategory, setActiveCategory] = useState<AppCategory>("social");
   const [connectingApp, setConnectingApp] = useState<string | null>(null);
+  const [linkedInToken, setLinkedInToken] = useState<string>("AQUHxDdRo_UARMzpDENsl8OeX_RZ1cSVvra-reQNrUX4pR3YNyMUtQAI8y-3EKm_2iiGvkoaC-k-jF3KtlXRJU0VGWsojM_trWLzzmaf6e31sV4CTSGxlhArPfsWrkkKlpRHn-GzryVWBtrfMWtSqta1XYtcETU2BQEvFU6c2c3bbmnZN1Yj0Vs08eXMJ5eHQfptTzJCkiwju7uwos4-rM7GL3d7WBYcR_f6UWiNtQN82-6YL_CJbX2k_xsPott1rHWyy13ubS1l1zzm5pkbsjcbWluoErONQOnGksTh7E-iid0nxH3_pJTTpT-mNZT-HZyBqAWmXuSMvwDUbd2oooXMUN5FKQ");
+  const { connectWithToken, isConnecting: isConnectingLinkedIn } = useLinkedInDirectToken();
 
   // Fetch connection statuses
   const { data: connections, isLoading } = useQuery<any[]>({
@@ -431,15 +444,104 @@ export default function AppConnections() {
                           Disconnect
                         </Button>
                       ) : (
-                        // Use standard OAuth approach for all services including Instagram
-                        <Button
-                          variant="default"
-                          onClick={() => handleConnect(appId)}
-                          className="w-full"
-                          disabled={connectingApp === appId}
-                        >
-                          Connect <ChevronRight className="ml-2 h-4 w-4" />
-                        </Button>
+                        // For LinkedIn, offer direct token connection option
+                        appId === 'linkedin' ? (
+                          <div className="space-y-2">
+                            <Button
+                              variant="default"
+                              onClick={() => handleConnect(appId)}
+                              className="w-full"
+                              disabled={connectingApp === appId || isConnectingLinkedIn}
+                            >
+                              {connectingApp === appId ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Connecting...
+                                </>
+                              ) : (
+                                <>Connect with OAuth <ChevronRight className="ml-2 h-4 w-4" /></>
+                              )}
+                            </Button>
+                            
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="w-full"
+                                  disabled={isConnectingLinkedIn || connectingApp === appId}
+                                >
+                                  {isConnectingLinkedIn ? (
+                                    <>
+                                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                      Connecting...
+                                    </>
+                                  ) : (
+                                    <>Connect with Token</>
+                                  )}
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent className="sm:max-w-md">
+                                <DialogHeader>
+                                  <DialogTitle>Connect LinkedIn with Token</DialogTitle>
+                                  <DialogDescription>
+                                    Use a direct token to connect to your LinkedIn account without going through the OAuth flow.
+                                  </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-4 py-4">
+                                  <div className="space-y-2">
+                                    <Label htmlFor="linkedin-token">LinkedIn Access Token</Label>
+                                    <Input
+                                      id="linkedin-token"
+                                      value={linkedInToken}
+                                      onChange={(e) => setLinkedInToken(e.target.value)}
+                                      className="w-full"
+                                    />
+                                  </div>
+                                </div>
+                                <DialogFooter className="sm:justify-between">
+                                  <DialogClose asChild>
+                                    <Button type="button" variant="secondary">
+                                      Cancel
+                                    </Button>
+                                  </DialogClose>
+                                  <Button 
+                                    type="button" 
+                                    onClick={() => {
+                                      connectWithToken(linkedInToken);
+                                    }}
+                                    disabled={isConnectingLinkedIn || !linkedInToken}
+                                  >
+                                    {isConnectingLinkedIn ? (
+                                      <>
+                                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                        Connecting...
+                                      </>
+                                    ) : (
+                                      <>Connect</>
+                                    )}
+                                  </Button>
+                                </DialogFooter>
+                              </DialogContent>
+                            </Dialog>
+                          </div>
+                        ) : (
+                          // For other services, use standard OAuth approach
+                          <Button
+                            variant="default"
+                            onClick={() => handleConnect(appId)}
+                            className="w-full"
+                            disabled={connectingApp === appId}
+                          >
+                            {connectingApp === appId ? (
+                              <>
+                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                Connecting...
+                              </>
+                            ) : (
+                              <>Connect <ChevronRight className="ml-2 h-4 w-4" /></>
+                            )}
+                          </Button>
+                        )
                       )}
                     </CardFooter>
                   </Card>
