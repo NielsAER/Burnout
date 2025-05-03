@@ -82,24 +82,24 @@ const StatsCard: FC<StatsCardProps> = ({
 
   return (
     <Card className="bg-white dark:bg-[#0f0f0f] overflow-hidden shadow border border-gray-200 dark:border-[#2a2a2a] rounded-lg dark:rounded-sm">
-      <div className="p-5">
-        <div className="flex items-center">
-          <div className={`flex-shrink-0 ${colorMap[color].bg} rounded-md dark:rounded-sm p-3`}>
+      <div className="p-3 md:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center">
+          <div className={`flex-shrink-0 ${colorMap[color].bg} rounded-md dark:rounded-sm p-2 md:p-3 mb-3 sm:mb-0`}>
             {renderIcon()}
           </div>
-          <div className="ml-5 w-0 flex-1">
+          <div className="sm:ml-5 w-full sm:w-0 sm:flex-1">
             <dl>
-              <dt className="text-sm font-medium text-gray-600 dark:text-gray-400 truncate">{title}</dt>
-              <dd className="flex items-baseline">
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">{value}</div>
+              <dt className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400 truncate">{title}</dt>
+              <dd className="flex items-baseline mt-1">
+                <div className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white">{value}</div>
                 {change && (
-                  <div className={`ml-2 flex items-baseline text-sm font-semibold ${
+                  <div className={`ml-2 flex items-baseline text-xs sm:text-sm font-semibold ${
                     changeDirection === "up" ? "text-emerald-500 dark:text-emerald-400" : "text-red-500 dark:text-red-400"
                   }`}>
                     {changeDirection === "up" ? (
-                      <ArrowUp className="h-4 w-4" />
+                      <ArrowUp className="h-3 w-3 sm:h-4 sm:w-4" />
                     ) : (
-                      <ArrowDown className="h-4 w-4" />
+                      <ArrowDown className="h-3 w-3 sm:h-4 sm:w-4" />
                     )}
                     <span className="sr-only">{changeDirection === "up" ? "Increased" : "Decreased"} by</span>
                     {change}%

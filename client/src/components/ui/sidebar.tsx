@@ -37,16 +37,26 @@ export const Sidebar: FC<SidebarProps> = ({ onClose }) => {
   };
 
   return (
-    <aside className="w-64 flex flex-col z-20 h-full bg-white dark:bg-[#181818] border-r border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
-      {/* Logo */}
-      <div className="p-4 border-b border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
-        <div className="flex items-center">
-          <span className="text-lg font-semibold">Researcher Portal</span>
+    <aside className="w-full md:w-64 flex flex-col z-20 h-full bg-white dark:bg-[#181818] border-r border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
+      {/* Logo and Close Button */}
+      <div className="p-3 md:p-4 border-b border-gray-200 dark:border-[#2a2a2a] transition-colors duration-200">
+        <div className="flex items-center justify-between">
+          <span className="text-base md:text-lg font-semibold">Researcher Portal</span>
+          {onClose && (
+            <button 
+              onClick={onClose}
+              className="md:hidden rounded-full p-1 hover:bg-gray-100 dark:hover:bg-[#2a2a2a] text-gray-500 dark:text-gray-400"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
       
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto p-4">
+      <nav className="flex-1 overflow-y-auto p-3 md:p-4">
         <div className="space-y-1">
           <Link 
             href="/" 

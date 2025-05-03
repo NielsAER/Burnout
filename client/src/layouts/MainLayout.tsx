@@ -77,11 +77,11 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
       <main className="flex-1 overflow-y-auto bg-gray-50 dark:bg-[#0f0f0f]">
         {/* Header */}
         <header className="bg-white dark:bg-[#0f0f0f] border-b border-gray-200 dark:border-[#2a2a2a] shadow-sm">
-          <div className="py-4 px-6 flex items-center justify-between">
+          <div className="py-4 px-4 md:px-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center">
               <div>
-                <h1 className="text-2xl font-semibold text-gray-900 dark:text-white">{getPageTitle()}</h1>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <h1 className="text-xl md:text-2xl font-semibold text-gray-900 dark:text-white">{getPageTitle()}</h1>
+                <p className="text-xs md:text-sm text-gray-500 dark:text-gray-400">
                   {location === "/" && "Overview of your automation metrics and activities"}
                   {location === "/automations" && "Manage your automation workflows"}
                   {location === "/app-connections" && "Connect to your external services and applications"}
@@ -93,29 +93,30 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-4">
               {!location.includes("/builder") && (
                 <Button 
                   onClick={handleCreateAutomation}
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-none rounded-sm px-3 py-2 text-sm h-9"
+                  className="bg-blue-600 hover:bg-blue-700 text-white border-none rounded-sm px-2 md:px-3 py-2 text-xs md:text-sm h-8 md:h-9 flex-shrink-0"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Automation
+                  <Plus className="mr-1 md:mr-2 h-3 w-3 md:h-4 md:w-4" />
+                  <span className="hidden sm:inline">Create Automation</span>
+                  <span className="sm:hidden">New</span>
                 </Button>
               )}
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-sm"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-sm h-8 w-8 md:h-9 md:w-9"
               >
-                <Search className="h-5 w-5" />
+                <Search className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
               <Button 
                 variant="ghost" 
                 size="icon" 
-                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-sm"
+                className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-[#2a2a2a] rounded-sm h-8 w-8 md:h-9 md:w-9"
               >
-                <Bell className="h-5 w-5" />
+                <Bell className="h-4 w-4 md:h-5 md:w-5" />
               </Button>
             </div>
           </div>
