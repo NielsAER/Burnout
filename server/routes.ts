@@ -1632,16 +1632,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'linkedin', state);
             
-            // For LinkedIn OAuth, we need to use their EXACT format requirements
-            // Use a more explicit approach based on LinkedIn's error messages
-            // Convert host to the actual Replit URL
-            const host = req.headers.host || '';
-            const linkedInRedirectUri = `https://${host}/api/callback/linkedin`;
+            // For LinkedIn OAuth, we need to use a VERY simple redirect URI without any special characters
+            // LinkedIn can be extremely picky about redirect URIs
             
-            console.log("Using LinkedIn redirect URI:", linkedInRedirectUri);
+            // Try a VERY simple callback URL without complex subdomains
+            // Make sure this exact string is registered in your LinkedIn developer settings
+            const linkedInRedirectUri = "https://brnout.replit.app/api/callback/linkedin";
             
-            // Log the raw redirect URI (without encoding) to help with debugging
-            console.log("Raw LinkedIn redirect URI:", linkedInRedirectUri);
+            console.log("Using simplified LinkedIn redirect URI:", linkedInRedirectUri);
             
             // LinkedIn OAuth URL with proper CSRF protection
             // LinkedIn uses space-separated scopes but URL-encoded
@@ -2055,10 +2053,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // LinkedIn token exchange
               tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
               
-              // Must use the EXACT same redirect URI that was used in the authorization request
+              // Must use the EXACT same simplified redirect URI that was used in the authorization request
               // This must match what was registered in LinkedIn's developer portal
-              const host = req.headers.host || '';
-              redirectUri = `https://${host}/api/callback/linkedin`;
+              // Use a very simple URL structure that's easier to register and verify
+              redirectUri = "https://brnout.replit.app/api/callback/linkedin";
               console.log("Using LinkedIn callback redirect URI:", redirectUri);
               
               // LinkedIn also requires form-urlencoded
