@@ -1137,13 +1137,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(401).json({ error: "You must be logged in to connect apps" });
       }
       
-      const { accessToken, userID, serviceType } = req.body;
+      const { accessToken, userID, serviceType, mockData } = req.body;
       
       if (!accessToken || !userID) {
         return res.status(400).json({ error: "Missing required Facebook auth parameters" });
       }
       
       console.log(`Processing Facebook auth for ${serviceType || 'instagram'}`);
+      
+      // Check if we're using mock data (for sandbox environments)
+      if (mockData) {
+        console.log('Using mock data for Facebook auth integration');
+        
+        try {
+          const { username, profilePicture, fullName } = mockData;
+          
+          // Create mock credentials object
+          const credentials = {
+            access_token: accessToken,
+            user_id: userID,
+            username: username,
+            name: fullName || username,
+            profile_picture: profilePicture || 'https://i.pravatar.cc/150?u=' + username,
+            created_at: new Date(),
+            is_mock: true // Flag to indicate this is a mock connection
+          };
+          
+          // Create mock profile data
+          const mockProfileData = {
+            username: username,
+            name: fullName || username,
+            profile_picture_url: profilePicture || 'https://i.pravatar.cc/150?u=' + username,
+            id: userID,
+            is_mock: true
+          };
+          
+          // Store credentials in session
+          if (!req.session.oauthCredentials) {
+            req.session.oauthCredentials = {};
+          }
+          
+          req.session.oauthCredentials[serviceType === 'instagram' ? 'instagram' : 'facebook-ads'] = credentials;
+          
+          // Create connection in database
+          await storage.createAppConnection({
+            userId: req.user.id,
+            appId: serviceType === 'instagram' ? 'instagram' : 'facebook-ads',
+            username: username, 
+            token: JSON.stringify(credentials),
+            profile: JSON.stringify(mockProfileData)
+          });
+          
+          res.status(200).json({ 
+            success: true, 
+            message: `Successfully connected to ${serviceType === 'instagram' ? 'Instagram' : 'Facebook Ads'}`,
+            profile: {
+              username: username,
+              name: fullName || username,
+              profilePicture: profilePicture
+            }
+          });
+          
+          return;
+        } catch (error: any) {
+          console.error('Mock Facebook/Instagram auth error:', error);
+          res.status(500).json({ 
+            error: `Failed to process mock connection: ${error.message}` 
+          });
+          return;
+        }
+      }
       
       let apiEndpoint, profileData;
       

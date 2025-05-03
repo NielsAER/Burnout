@@ -1,16 +1,10 @@
-import { useEffect, useCallback } from 'react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
-
-// Define the window with FB global
-declare global {
-  interface Window {
-    FB: any;
-    fbAsyncInit: () => void;
-    statusChangeCallback: ((response: any) => void) | (() => void);
-  }
-}
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface FacebookAuthProps {
   onLoginSuccess?: (response: any) => void;
@@ -19,6 +13,7 @@ interface FacebookAuthProps {
   serviceType?: 'instagram' | 'facebook-ads';
 }
 
+// Mock Instagram Auth that doesn't rely on Facebook SDK
 export function FacebookAuth({
   onLoginSuccess,
   onLoginFailure,
@@ -26,69 +21,53 @@ export function FacebookAuth({
   serviceType = 'instagram'
 }: FacebookAuthProps) {
   const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [username, setUsername] = useState('');
+  const [connecting, setConnecting] = useState(false);
 
-  // Handle the status change callback from FB.getLoginStatus
-  const statusChangeCallback = useCallback((response: any) => {
-    console.log('Facebook status change:', response);
-    
-    if (response.status === 'connected') {
-      // Logged into Facebook and app
-      console.log('Facebook login successful');
-      console.log('Access token:', response.authResponse?.accessToken);
-      
-      // Call onLoginSuccess if provided
-      if (onLoginSuccess) {
-        onLoginSuccess(response);
-      }
-      
-      // Send the token to your backend to complete the Instagram authorization
-      handleFacebookToken(response.authResponse);
-    } else if (response.status === 'not_authorized') {
-      // Logged into Facebook but not your app
-      console.log('User is logged into Facebook but has not authorized your app');
+  // Handle the simulated login
+  const handleSimulatedLogin = async () => {
+    if (!username) {
       toast({
-        title: 'Authorization Required',
-        description: 'Please authorize our app to access your Instagram account',
-        variant: 'default'
+        title: 'Input Required',
+        description: 'Please enter your Instagram username',
+        variant: 'destructive'
       });
-      
-      if (onLoginFailure) {
-        onLoginFailure({ message: 'Not authorized for app' });
-      }
-    } else {
-      // Not logged into Facebook
-      console.log('User is not logged into Facebook');
-      if (onLoginFailure) {
-        onLoginFailure({ message: 'Not logged into Facebook' });
-      }
-    }
-  }, [onLoginSuccess, onLoginFailure, toast]);
-
-  // Save the callback to window for FB SDK to access
-  useEffect(() => {
-    // Set the global callback function
-    window.statusChangeCallback = statusChangeCallback;
-    
-    // Clean up
-    return () => {
-      // Create an empty function to avoid type errors
-      window.statusChangeCallback = () => {};
-    };
-  }, [statusChangeCallback]);
-
-  // Handle the Facebook token by sending it to your backend
-  const handleFacebookToken = async (authResponse: any) => {
-    if (!authResponse || !authResponse.accessToken) {
-      console.error('No access token available');
       return;
     }
-    
+
+    setConnecting(true);
+
     try {
+      // Create a simulated auth response
+      const mockAuthResponse = {
+        accessToken: 'mock-access-token-' + Math.random().toString(36).substring(2, 15),
+        userID: 'user-' + Math.random().toString(36).substring(2, 10),
+        expiresIn: 3600,
+        signedRequest: 'mock-signed-request',
+        graphDomain: 'instagram',
+        data_access_expiration_time: Date.now() + 60 * 60 * 24 * 60 * 1000, // 60 days
+      };
+
+      // Call onLoginSuccess if provided
+      if (onLoginSuccess) {
+        onLoginSuccess({ 
+          status: 'connected', 
+          authResponse: mockAuthResponse 
+        });
+      }
+      
       // Send the token to your backend
       const response = await apiRequest('POST', '/api/facebook-auth', {
-        accessToken: authResponse.accessToken,
-        userID: authResponse.userID,
-        serviceType: serviceType
+        accessToken: mockAuthResponse.accessToken,
+        userID: mockAuthResponse.userID,
+        serviceType: serviceType,
+        // Add mock data for demonstration
+        mockData: {
+          username: username,
+          profilePicture: 'https://i.pravatar.cc/150?u=' + username,
+          fullName: username.split('@')[0]
+        }
       });
       
       const data = await response.json();
@@ -96,12 +75,15 @@ export function FacebookAuth({
       if (response.ok) {
         toast({
           title: 'Connection Successful',
-          description: `Successfully connected to ${serviceType === 'instagram' ? 'Instagram' : 'Facebook Ads'}`,
+          description: `Successfully connected to ${serviceType === 'instagram' ? 'Instagram' : 'Facebook Ads'} as ${username}`,
           variant: 'default'
         });
         
         // Invalidate connections cache to refresh the UI
         queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+        
+        // Close the dialog
+        setDialogOpen(false);
       } else {
         toast({
           title: 'Connection Failed',
@@ -110,46 +92,72 @@ export function FacebookAuth({
         });
       }
     } catch (error) {
-      console.error('Error sending token to backend:', error);
+      console.error('Error in simulated login:', error);
+      
+      if (onLoginFailure) {
+        onLoginFailure({ message: 'Connection failed' });
+      }
+      
       toast({
         title: 'Connection Error',
         description: 'Failed to process authentication',
         variant: 'destructive'
       });
+    } finally {
+      setConnecting(false);
     }
   };
 
-  // Handle the login button click
-  const handleLoginClick = useCallback(() => {
-    if (window.FB) {
-      window.FB.login(function(response: any) {
-        if (response.authResponse) {
-          console.log('Facebook login successful via button click');
-          statusChangeCallback(response);
-        } else {
-          console.log('User cancelled login or did not fully authorize');
-          if (onLoginFailure) {
-            onLoginFailure({ message: 'Login cancelled' });
-          }
-        }
-      }, { scope: 'instagram_basic,instagram_content_publish,pages_show_list' });
-    } else {
-      console.error('Facebook SDK not loaded');
-      toast({
-        title: 'Facebook SDK Error',
-        description: 'Facebook authentication is not available right now',
-        variant: 'destructive'
-      });
-    }
-  }, [statusChangeCallback, onLoginFailure, toast]);
+  // Handle the button click - open dialog instead of using Facebook SDK
+  const handleOpenDialog = () => {
+    setDialogOpen(true);
+  };
 
   return (
-    <Button 
-      onClick={handleLoginClick}
-      className="w-full"
-      variant="default"
-    >
-      {buttonText}
-    </Button>
+    <>
+      <Button 
+        onClick={handleOpenDialog}
+        className="w-full"
+        variant="default"
+      >
+        {buttonText}
+      </Button>
+      
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Connect to {serviceType === 'instagram' ? 'Instagram' : 'Facebook Ads'}</DialogTitle>
+            <DialogDescription>
+              Enter your {serviceType === 'instagram' ? 'Instagram' : 'Facebook'} username to connect your account.
+              <br />
+              <em className="text-xs text-muted-foreground">(This is a simulated connection for demo purposes)</em>
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="username" className="text-right">
+                Username
+              </Label>
+              <Input
+                id="username"
+                placeholder={serviceType === 'instagram' ? '@yourusername' : 'your.name'}
+                className="col-span-3"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              type="submit" 
+              onClick={handleSimulatedLogin}
+              disabled={connecting}
+            >
+              {connecting ? 'Connecting...' : 'Connect Account'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
