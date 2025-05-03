@@ -95,10 +95,8 @@ const Dashboard = () => {
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-lg font-medium text-white">My Automations</h2>
           <div className="flex">
-            <Link href="/automations">
-              <a className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center">
+            <Link href="/automations" className="text-sm font-medium text-blue-400 hover:text-blue-300 flex items-center">
                 View all <ArrowRight className="ml-1 h-4 w-4" />
-              </a>
             </Link>
           </div>
         </div>
