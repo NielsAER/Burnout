@@ -1632,15 +1632,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'linkedin', state);
             
-            // For LinkedIn OAuth, use the EXACT redirect URI that was registered in the LinkedIn developer portal
-            // Based on the error message, we need to use the hardcoded redirect URI that matches LinkedIn's registration
-            const redirectUri = `https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/linkedin`;
+            // For LinkedIn OAuth, we need to use their EXACT format requirements
+            // Use a more explicit approach based on LinkedIn's error messages
+            // Convert host to the actual Replit URL
+            const host = req.headers.host || '';
+            const linkedInRedirectUri = `https://${host}/api/callback/linkedin`;
             
-            console.log("Using LinkedIn redirect URI:", redirectUri);
+            console.log("Using LinkedIn redirect URI:", linkedInRedirectUri);
+            
+            // Log the raw redirect URI (without encoding) to help with debugging
+            console.log("Raw LinkedIn redirect URI:", linkedInRedirectUri);
             
             // LinkedIn OAuth URL with proper CSRF protection
             // LinkedIn uses space-separated scopes but URL-encoded
-            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code&state=${state}`;
+            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(linkedInRedirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code&state=${state}`;
           }
           break;
           
@@ -2052,7 +2057,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Must use the EXACT same redirect URI that was used in the authorization request
               // This must match what was registered in LinkedIn's developer portal
-              redirectUri = 'https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/linkedin';
+              const host = req.headers.host || '';
+              redirectUri = `https://${host}/api/callback/linkedin`;
               console.log("Using LinkedIn callback redirect URI:", redirectUri);
               
               // LinkedIn also requires form-urlencoded
