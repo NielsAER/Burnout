@@ -74,6 +74,13 @@ export interface IStorage {
   createAppConnection(connection: InsertAppConnection): Promise<AppConnection>;
   updateAppConnection(id: number, data: Partial<InsertAppConnection>): Promise<AppConnection | undefined>;
   deleteAppConnection(id: number): Promise<boolean>;
+  saveAppConnection(connection: { 
+    appId: string;
+    userId: number;
+    username?: string | null;
+    permissions?: any;
+    credentials?: any; 
+  }): Promise<AppConnection>;
   
   // Template methods
   getAllTemplates(): Promise<Template[]>;
@@ -550,6 +557,44 @@ export class MemStorage implements IStorage {
   
   async deleteAppConnection(id: number): Promise<boolean> {
     return this.appConnections.delete(id);
+  }
+  
+  async saveAppConnection(connection: { 
+    appId: string;
+    userId: number;
+    username?: string | null;
+    permissions?: any;
+    credentials?: any; 
+  }): Promise<AppConnection> {
+    // First check if a connection already exists for this user and app
+    const existingConnection = await this.getAppConnectionByUserAndApp(
+      connection.userId,
+      connection.appId
+    );
+    
+    if (existingConnection) {
+      // Update the existing connection
+      const updatedConnection = await this.updateAppConnection(existingConnection.id, {
+        credentials: connection.credentials,
+        permissions: connection.permissions,
+        username: connection.username
+      });
+      
+      if (!updatedConnection) {
+        throw new Error(`Failed to update connection for ${connection.appId}`);
+      }
+      
+      return updatedConnection;
+    } else {
+      // Create a new connection
+      return await this.createAppConnection({
+        appId: connection.appId,
+        userId: connection.userId,
+        credentials: connection.credentials,
+        permissions: connection.permissions,
+        username: connection.username
+      });
+    }
   }
 
   // Template methods
@@ -1561,6 +1606,44 @@ export class DatabaseStorage implements IStorage {
       .where(eq(appConnections.id, id));
     
     return result.rowCount! > 0;
+  }
+  
+  async saveAppConnection(connection: { 
+    appId: string;
+    userId: number;
+    username?: string | null;
+    permissions?: any;
+    credentials?: any; 
+  }): Promise<AppConnection> {
+    // First check if a connection already exists for this user and app
+    const existingConnection = await this.getAppConnectionByUserAndApp(
+      connection.userId,
+      connection.appId
+    );
+    
+    if (existingConnection) {
+      // Update the existing connection
+      const updatedConnection = await this.updateAppConnection(existingConnection.id, {
+        credentials: connection.credentials,
+        permissions: connection.permissions,
+        username: connection.username
+      });
+      
+      if (!updatedConnection) {
+        throw new Error(`Failed to update connection for ${connection.appId}`);
+      }
+      
+      return updatedConnection;
+    } else {
+      // Create a new connection
+      return await this.createAppConnection({
+        appId: connection.appId,
+        userId: connection.userId,
+        credentials: connection.credentials,
+        permissions: connection.permissions,
+        username: connection.username
+      });
+    }
   }
 
   // Template methods
