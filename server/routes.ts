@@ -155,7 +155,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.updateAppConnection(existingConnection.id, {
             username,
             permissions,
-            credentials: { token: accessToken }
+            credentials: { 
+              token: accessToken, 
+              tokenType: 'bearer',
+              updatedAt: new Date().toISOString()
+            }
           });
         } else {
           // Create new connection with user ID from authenticated session
@@ -164,7 +168,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             userId: req.user.id,
             username,
             permissions,
-            credentials: { token: accessToken }
+            credentials: { 
+              token: accessToken,
+              tokenType: 'bearer',
+              createdAt: new Date().toISOString()
+            }
           });
         }
         
