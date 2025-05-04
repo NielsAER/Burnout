@@ -1613,9 +1613,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Instagram OAuth URL with proper CSRF protection
           // Instagram Basic Display API requires user_profile and user_media scopes
-          oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=573274152454213&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
+          const instagramClientId = '573274152454213'; // Verify this matches what's in Meta Developer Portal
+          
+          console.log("Using Instagram Client ID:", instagramClientId);
+          
+          oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           
           console.log("Generated Instagram OAuth URL:", oauthUrl);
+          
+          // Add detailed validation logging for diagnostic purposes
+          console.log("Instagram OAuth configuration:", {
+            clientId: instagramClientId,
+            redirectUri: redirectUri,
+            scopes: "user_profile,user_media",
+            state: state
+          });
           break;
           
         case 'linkedin':
@@ -2023,10 +2035,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
               clientId = '573274152454213';
               clientSecret = '4dc31eb48ebb2d3288410423b2c50682';
               
+              console.log("Using Instagram credentials - Client ID:", clientId);
+              
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
               redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram";
               console.log("Using Instagram callback URI:", redirectUri);
+              
+              // Log detailed Instagram OAuth callback info for debugging
+              console.log("Instagram OAuth callback data:", {
+                code: code,
+                clientId: clientId,
+                redirectUri: redirectUri
+              });
               
               // Instagram token exchange via POST to access_token endpoint
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
@@ -2239,10 +2260,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               if (!tokenResponse.ok) {
                 console.error(`Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
+                
+                // For better debugging, try to get the error response body
+                try {
+                  const errorBody = await tokenResponse.text();
+                  console.error(`Token exchange error details:`, errorBody);
+                  
+                  // Special handling for Instagram errors which often have more details
+                  if (service === 'instagram') {
+                    console.error(`Instagram token exchange error. Full response:`, {
+                      status: tokenResponse.status,
+                      statusText: tokenResponse.statusText,
+                      body: errorBody,
+                      requestDetails: {
+                        clientId,
+                        redirectUri,
+                        tokenUrl
+                      }
+                    });
+                  }
+                } catch (parseError) {
+                  console.error(`Couldn't parse error response:`, parseError);
+                }
+                
                 throw new Error(`Failed to exchange code for token: ${tokenResponse.statusText}`);
               }
               
-              const tokenData = await tokenResponse.json();
+              let tokenData;
+              try {
+                tokenData = await tokenResponse.json();
+                console.log(`Successfully parsed token data for ${service}`);
+              } catch (parseError) {
+                console.error(`Failed to parse token response as JSON:`, parseError);
+                // Try to read as text for debugging
+                const textBody = await tokenResponse.text();
+                console.error(`Raw token response:`, textBody);
+                throw new Error(`Invalid token response format: ${parseError.message}`);
+              }
               console.log(`Token received for ${service}:`, tokenData);
               
               // Store the token
