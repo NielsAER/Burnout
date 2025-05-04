@@ -1611,13 +1611,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           console.log("Using Instagram redirect URI:", redirectUri);
           
-          // Instagram OAuth URL with proper CSRF protection
-          // Instagram Basic Display API requires user_profile and user_media scopes
+          // Instagram OAuth URL using Facebook Login (solution from Stack Overflow)
+          // We need to use the Facebook OAuth flow with Instagram permissions
           const instagramClientId = '697674269427861'; // Using the specific Instagram Graph API app ID
           
-          console.log("Using Instagram Graph API Client ID:", instagramClientId);
+          console.log("Using Instagram Graph API Client ID via Facebook Login:", instagramClientId);
           
-          oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
+          // Important: For Instagram Graph API, use the Facebook OAuth endpoint with instagram_basic permissions
+          // This fixes the "Invalid Platform App" error as mentioned in Stack Overflow post
+          oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish&response_type=code&state=${state}`;
           
           console.log("Generated Instagram OAuth URL:", oauthUrl);
           
@@ -2037,8 +2039,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               console.log("Using Instagram Graph API credentials - Client ID:", clientId);
               
-              console.log("Using Instagram credentials - Client ID:", clientId);
-              
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
               redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram";
@@ -2051,8 +2051,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 redirectUri: redirectUri
               });
               
-              // Instagram token exchange via POST to access_token endpoint
-              tokenUrl = 'https://api.instagram.com/oauth/access_token';
+              // Using Facebook Graph API endpoint for token exchange (fixes "Invalid Platform App" error)
+              // Based on Stack Overflow solution: https://stackoverflow.com/questions/60258144/invalid-platform-app-error-using-instagram-basic-display-api
+              tokenUrl = 'https://graph.facebook.com/v16.0/oauth/access_token';
               
               // Instagram requires form-urlencoded body
               const postData = {
@@ -2355,7 +2356,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 switch(service) {
                   case 'instagram':
-                    userEndpoint = 'https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=' + accessToken;
+                    // Use Facebook Graph API endpoint instead of Instagram Basic Display API
+                    // This fixes the "Invalid Platform App" error as per Stack Overflow solution
+                    userEndpoint = 'https://graph.facebook.com/v16.0/me/accounts?fields=instagram_business_account{username,profile_picture_url,id,name}&access_token=' + accessToken;
+                    console.log("Using Facebook Graph API for Instagram user data:", userEndpoint);
                     userHeaders = {}; // No need for auth header when token is in URL
                     break;
                   case 'linkedin':
@@ -2400,8 +2404,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     
                     // Extract the username based on the service
                     if (userData) {
-                      if (service === 'instagram' && userData.username) {
-                        username = userData.username;
+                      if (service === 'instagram') {
+                        // Handle the nested structure from Facebook Graph API
+                        if (userData.data && userData.data.length > 0 && 
+                            userData.data[0].instagram_business_account && 
+                            userData.data[0].instagram_business_account.username) {
+                          username = userData.data[0].instagram_business_account.username;
+                          console.log("Found Instagram username:", username);
+                        } else {
+                          // Fallback if we can't find the username in the expected structure
+                          console.log("Instagram data structure unexpected:", userData);
+                          username = 'instagram_user';
+                        }
                       } else if (service === 'linkedin' && userData.localizedFirstName) {
                         username = `${userData.localizedFirstName} ${userData.localizedLastName || ''}`;
                       } else if ((service.startsWith('google') || service === 'gmail') && userData.email) {
