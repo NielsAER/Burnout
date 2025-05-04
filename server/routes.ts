@@ -1607,19 +1607,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // This must match the Valid OAuth Redirect URIs in your Instagram Basic Display app settings
           
           // Use the exact redirect URI registered in Meta Developer Portal
-          const redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram";
+          // Update the redirect URI to match exactly what's in the URL provided by the user
+          const redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
           
           console.log("Using Instagram redirect URI:", redirectUri);
           
-          // Instagram OAuth URL using Facebook Login (solution from Stack Overflow)
-          // We need to use the Facebook OAuth flow with Instagram permissions
+          // Using the direct Instagram OAuth URL provided by the user
           const instagramClientId = '697674269427861'; // Using the specific Instagram Graph API app ID
           
-          console.log("Using Instagram Graph API Client ID via Facebook Login:", instagramClientId);
+          console.log("Using Instagram Graph API Client ID with direct Instagram OAuth:", instagramClientId);
           
-          // Important: For Instagram Graph API, use the Facebook OAuth endpoint with instagram_basic permissions
-          // This fixes the "Invalid Platform App" error as mentioned in Stack Overflow post
-          oauthUrl = `https://www.facebook.com/v16.0/dialog/oauth?client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=instagram_basic,instagram_content_publish&response_type=code&state=${state}`;
+          // Using the exact URL format provided by the user
+          oauthUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=${state}`;
           
           console.log("Generated Instagram OAuth URL:", oauthUrl);
           
@@ -2041,7 +2040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
-              redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/instagram";
+              redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
               console.log("Using Instagram callback URI:", redirectUri);
               
               // Log detailed Instagram OAuth callback info for debugging
