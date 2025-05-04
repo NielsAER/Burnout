@@ -52,8 +52,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
         console.log("Using Instagram callback URI for direct redirect:", redirectUri);
         
-        // Using Facebook Graph API endpoint for token exchange
-        tokenUrl = 'https://graph.facebook.com/v16.0/oauth/access_token';
+        // Using Instagram Basic Display API endpoint for token exchange
+        tokenUrl = 'https://api.instagram.com/oauth/access_token';
         
         // Instagram requires form-urlencoded body
         const postData = {
@@ -106,9 +106,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (accessToken) {
             console.log("Successfully obtained Instagram access token!");
             
-            // Call Facebook Graph API to get Instagram account info
+            // Call Instagram Basic Display API to get account info
             try {
-              const userResponse = await fetch('https://graph.facebook.com/v16.0/me/accounts?fields=instagram_business_account{username,name,profile_picture_url}', {
+              const userResponse = await fetch('https://graph.instagram.com/me?fields=id,username,account_type', {
                 headers: {
                   'Authorization': `Bearer ${accessToken}`
                 }
@@ -118,11 +118,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 const userData = await userResponse.json();
                 console.log(`User data received from Instagram:`, userData);
                 
-                // Extract the username based on the structure
-                if (userData && userData.data && userData.data.length > 0 && 
-                    userData.data[0].instagram_business_account && 
-                    userData.data[0].instagram_business_account.username) {
-                  username = userData.data[0].instagram_business_account.username;
+                // Extract the username from the Basic Display API response
+                if (userData && userData.username) {
+                  username = userData.username;
                   console.log("Found Instagram username:", username);
                 } else {
                   console.log("Instagram data structure unexpected, using default username");
@@ -131,8 +129,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 console.error(`Failed to get Instagram profile: ${userResponse.status} ${userResponse.statusText}`);
               }
               
-              // Set permissions for Instagram
-              permissions = ['instagram_business_basic', 'instagram_business_content_publish'];
+              // Set permissions for Instagram Basic Display API
+              permissions = ['user_profile', 'user_media'];
             } catch (error) {
               console.error(`Error fetching Instagram profile:`, error);
             }
@@ -1789,8 +1787,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           console.log("Using Instagram Graph API Client ID with direct Instagram OAuth:", instagramClientId);
           
-          // Using the exact URL format provided by the user
-          oauthUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=instagram_business_basic%2Cinstagram_business_manage_messages%2Cinstagram_business_manage_comments%2Cinstagram_business_content_publish%2Cinstagram_business_manage_insights&state=${state}`;
+          // Using the exact URL format for Instagram Basic Display API
+          oauthUrl = `https://www.instagram.com/oauth/authorize?enable_fb_login=0&force_authentication=1&client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&response_type=code&scope=user_profile,user_media&state=${state}`;
           
           console.log("Generated Instagram OAuth URL:", oauthUrl);
           
