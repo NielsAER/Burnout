@@ -1299,12 +1299,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // App Connections Routes
   
-  // GET /api/app-connections - Get all app connections
+  // GET /api/app-connections - Get user's app connections
   app.get("/api/app-connections", async (req, res) => {
     try {
-      const connections = await storage.getAllAppConnections();
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+      
+      // Get only the connections for the current user
+      const connections = await storage.getAppConnectionsByUser(req.user.id);
+      
+      // Log connections for debugging
+      console.log(`Found ${connections.length} app connections for user ${req.user.id}`);
+      connections.forEach(conn => {
+        console.log(`- ${conn.appId}: ${conn.username || 'unknown username'}`);
+      });
+      
       res.json(connections);
     } catch (error) {
+      console.error("Error fetching app connections:", error);
       res.status(500).json({ message: "Failed to fetch app connections" });
     }
   });

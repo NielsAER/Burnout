@@ -122,41 +122,19 @@ export default function AppConnections() {
       window.history.replaceState({}, document.title, window.location.pathname);
       
       // Handle the Instagram direct OAuth callback
-      const handleInstagramRedirect = async () => {
-        try {
-          setConnectingApp('instagram');
-          
-          const response = await fetch(`/api/callback/instagram?code=${code}&state=${state}`);
-          
-          if (response.ok) {
-            toast({
-              title: "Connection Successful",
-              description: "Your Instagram account has been connected successfully!",
-            });
-            
-            // Refresh the connections data
-            queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
-          } else {
-            const errorData = await response.json();
-            toast({
-              title: "Connection Failed",
-              description: errorData.message || "There was an error connecting your Instagram account. Please try again.",
-              variant: "destructive",
-            });
-          }
-        } catch (error) {
-          console.error('Error handling Instagram redirect:', error);
-          toast({
-            title: "Connection Failed",
-            description: "There was an error processing your Instagram connection. Please try again.",
-            variant: "destructive",
-          });
-        } finally {
-          setConnectingApp(null);
-        }
-      };
+      // Note: We don't need this anymore as the server directly handles the callback
+      // and redirects with success/error flags which are handled above
+      // Just trigger a refresh of the connections to update the UI
+      console.log('Direct Instagram OAuth redirect received - refreshing connections');
       
-      handleInstagramRedirect();
+      // Refresh the connections data
+      queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+      
+      // Set timeout to refresh again after a moment to ensure updated server state is received
+      setTimeout(() => {
+        setConnectingApp(null);
+        queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+      }, 1000);
     }
   }, [queryClient, toast]);
   
