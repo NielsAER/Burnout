@@ -91,6 +91,8 @@ export default function AppConnections() {
     const searchParams = new URLSearchParams(window.location.search);
     const success = searchParams.get('success');
     const error = searchParams.get('error');
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
     
     if (success) {
       // Clean up the URL
@@ -112,8 +114,51 @@ export default function AppConnections() {
         description: "There was an error connecting your account. Please try again.",
         variant: "destructive",
       });
+    } else if (code && state) {
+      // This is a direct OAuth redirect from Instagram
+      console.log('Detected direct OAuth redirect with code:', code.substring(0, 10) + '...');
+      
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // Handle the Instagram direct OAuth callback
+      const handleInstagramRedirect = async () => {
+        try {
+          setConnectingApp('instagram');
+          
+          const response = await fetch(`/api/callback/instagram?code=${code}&state=${state}`);
+          
+          if (response.ok) {
+            toast({
+              title: "Connection Successful",
+              description: "Your Instagram account has been connected successfully!",
+            });
+            
+            // Refresh the connections data
+            queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+          } else {
+            const errorData = await response.json();
+            toast({
+              title: "Connection Failed",
+              description: errorData.message || "There was an error connecting your Instagram account. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error('Error handling Instagram redirect:', error);
+          toast({
+            title: "Connection Failed",
+            description: "There was an error processing your Instagram connection. Please try again.",
+            variant: "destructive",
+          });
+        } finally {
+          setConnectingApp(null);
+        }
+      };
+      
+      handleInstagramRedirect();
     }
-  }, []);
+  }, [queryClient, toast]);
   
   const connectionMap = useMemo(() => {
     const formatted: Record<string, ConnectionStatus> = {};
