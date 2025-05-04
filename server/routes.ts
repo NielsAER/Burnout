@@ -2055,13 +2055,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
               tokenUrl = 'https://api.instagram.com/oauth/access_token';
               
               // Instagram requires form-urlencoded body
-              requestBody = new URLSearchParams({
+              const postData = {
                 client_id: clientId,
                 client_secret: clientSecret,
                 grant_type: 'authorization_code',
                 redirect_uri: redirectUri,
                 code: code.toString()
+              };
+              
+              // Log the complete token exchange request for debugging
+              console.log("Instagram token exchange request:", {
+                url: tokenUrl,
+                method: 'POST',
+                body: postData
               });
+              
+              requestBody = new URLSearchParams(postData);
               
               requestHeaders = {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -2254,6 +2263,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Make the token request
               const method = requestBody ? 'POST' : 'GET';
+              
+              // Log the complete request details for debugging
+              console.log(`${service} token request:`, {
+                url: tokenUrl,
+                method,
+                headers: requestHeaders,
+                body: requestBody ? requestBody.toString() : null
+              });
+              
               const tokenResponse = await fetch(tokenUrl, {
                 method,
                 headers: requestHeaders,
