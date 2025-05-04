@@ -28,6 +28,157 @@ import * as workflowSuggestionService from "./services/workflowSuggestions";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add direct handler for Instagram redirects to /app-connections
+  app.get('/app-connections', async (req, res, next) => {
+    try {
+      const { code, state } = req.query;
+      
+      // Only process if this appears to be an OAuth callback with code and state
+      if (code && state && typeof code === 'string' && typeof state === 'string') {
+        console.log("Detected direct OAuth callback to /app-connections", { 
+          code: code.substring(0, 10) + '...',
+          state 
+        });
+        
+        // Process the token exchange for Instagram
+        let clientId, clientSecret, redirectUri, tokenUrl, accessToken, username = 'instagram_user';
+        let permissions: any = ['basic'];
+        
+        // Use Instagram Graph API credentials
+        clientId = '697674269427861';
+        clientSecret = '350ec33e4c298c4ee71';
+        
+        // Set redirect URI to match exactly what's in the authorization
+        redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
+        console.log("Using Instagram callback URI for direct redirect:", redirectUri);
+        
+        // Using Facebook Graph API endpoint for token exchange
+        tokenUrl = 'https://graph.facebook.com/v16.0/oauth/access_token';
+        
+        // Instagram requires form-urlencoded body
+        const postData = {
+          client_id: clientId,
+          client_secret: clientSecret,
+          grant_type: 'authorization_code',
+          redirect_uri: redirectUri,
+          code: code
+        };
+        
+        console.log("Instagram token exchange request:", {
+          url: tokenUrl,
+          method: 'POST',
+          body: JSON.stringify(postData)
+        });
+        
+        const requestBody = new URLSearchParams(postData);
+        const requestHeaders = {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        };
+        
+        // Make the token request
+        console.log(`Exchanging code for Instagram token...`);
+        const tokenResponse = await fetch(tokenUrl, {
+          method: 'POST',
+          headers: requestHeaders,
+          body: requestBody
+        });
+        
+        if (!tokenResponse.ok) {
+          console.error(`Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
+          
+          try {
+            const errorBody = await tokenResponse.text();
+            console.error(`Token exchange error details:`, errorBody);
+          } catch (parseError) {
+            console.error(`Couldn't parse error response`);
+          }
+          
+          // Redirect to app-connections with error flag
+          return res.redirect('/app-connections?error=instagram_token_exchange_failed');
+        }
+        
+        let tokenData;
+        try {
+          tokenData = await tokenResponse.json();
+          console.log(`Successfully parsed Instagram token data:`, tokenData);
+          accessToken = tokenData.access_token;
+          
+          if (accessToken) {
+            console.log("Successfully obtained Instagram access token!");
+            
+            // Call Facebook Graph API to get Instagram account info
+            try {
+              const userResponse = await fetch('https://graph.facebook.com/v16.0/me/accounts?fields=instagram_business_account{username,name,profile_picture_url}', {
+                headers: {
+                  'Authorization': `Bearer ${accessToken}`
+                }
+              });
+              
+              if (userResponse.ok) {
+                const userData = await userResponse.json();
+                console.log(`User data received from Instagram:`, userData);
+                
+                // Extract the username based on the structure
+                if (userData && userData.data && userData.data.length > 0 && 
+                    userData.data[0].instagram_business_account && 
+                    userData.data[0].instagram_business_account.username) {
+                  username = userData.data[0].instagram_business_account.username;
+                  console.log("Found Instagram username:", username);
+                } else {
+                  console.log("Instagram data structure unexpected, using default username");
+                }
+              } else {
+                console.error(`Failed to get Instagram profile: ${userResponse.status} ${userResponse.statusText}`);
+              }
+              
+              // Set permissions for Instagram
+              permissions = ['instagram_business_basic', 'instagram_business_content_publish'];
+            } catch (error) {
+              console.error(`Error fetching Instagram profile:`, error);
+            }
+          }
+        } catch (parseError) {
+          console.error(`Error parsing token response:`, parseError);
+          return res.redirect('/app-connections?error=instagram_token_parse_failed');
+        }
+        
+        // Check if user is authenticated
+        if (!req.isAuthenticated()) {
+          return res.redirect('/auth?redirect=' + encodeURIComponent('/app-connections'));
+        }
+        
+        // Check if connection already exists
+        const existingConnection = await storage.getAppConnectionByUserAndApp(req.user.id, 'instagram');
+        
+        if (existingConnection) {
+          // Update existing connection
+          await storage.updateAppConnection(existingConnection.id, {
+            username,
+            permissions,
+            credentials: { token: accessToken }
+          });
+        } else {
+          // Create new connection with user ID from authenticated session
+          await storage.createAppConnection({
+            appId: 'instagram',
+            userId: req.user.id,
+            username,
+            permissions,
+            credentials: { token: accessToken }
+          });
+        }
+        
+        // Redirect to app-connections with success flag
+        return res.redirect('/app-connections?success=instagram');
+      }
+      
+      // If it's not an OAuth callback, let it pass through to the normal frontend routing
+      next();
+    } catch (error) {
+      console.error("Error processing Instagram callback:", error);
+      res.redirect('/app-connections?error=instagram_processing_failed');
+    }
+  });
   // Set up authentication
   setupAuth(app);
   // GET /api/automations - Get all automations
