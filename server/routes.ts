@@ -1613,7 +1613,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Instagram OAuth URL with proper CSRF protection
           // Instagram Basic Display API requires user_profile and user_media scopes
-          const instagramClientId = '573274152454213'; // Verify this matches what's in Meta Developer Portal
+          const instagramClientId = '9479212108799533'; // Updated to match actual Meta Developer Portal app
           
           console.log("Using Instagram Client ID:", instagramClientId);
           
@@ -2032,8 +2032,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           switch(service) {
             case 'instagram':
               // Use the updated Instagram credentials provided by the user
-              clientId = '573274152454213';
-              clientSecret = '4dc31eb48ebb2d3288410423b2c50682';
+              clientId = '9479212108799533';
+              clientSecret = '5d8ea52ce86189dd7545568bad8dfe8b';
               
               console.log("Using Instagram credentials - Client ID:", clientId);
               
@@ -2311,7 +2311,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 // Convert short-lived token to long-lived token
                 try {
                   // Use the updated Instagram client secret provided by the user
-                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=4dc31eb48ebb2d3288410423b2c50682&access_token=${accessToken}`;
+                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=5d8ea52ce86189dd7545568bad8dfe8b&access_token=${accessToken}`;
+                  
+                  console.log("Instagram long-lived token exchange URL:", longLivedTokenUrl);
                   const longLivedTokenResponse = await fetch(longLivedTokenUrl);
                   
                   if (longLivedTokenResponse.ok) {
