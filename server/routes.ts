@@ -1613,9 +1613,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           // Instagram OAuth URL with proper CSRF protection
           // Instagram Basic Display API requires user_profile and user_media scopes
-          const instagramClientId = '9479212108799533'; // Updated to match actual Meta Developer Portal app
+          const instagramClientId = '697674269427861'; // Using the specific Instagram Graph API app ID
           
-          console.log("Using Instagram Client ID:", instagramClientId);
+          console.log("Using Instagram Graph API Client ID:", instagramClientId);
           
           oauthUrl = `https://api.instagram.com/oauth/authorize?client_id=${instagramClientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user_profile,user_media&response_type=code&state=${state}`;
           
@@ -2031,9 +2031,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           
           switch(service) {
             case 'instagram':
-              // Use the updated Instagram credentials provided by the user
-              clientId = '9479212108799533';
-              clientSecret = '5d8ea52ce86189dd7545568bad8dfe8b';
+              // Use the Instagram Graph API credentials from the user's account
+              clientId = '697674269427861';
+              clientSecret = '350ec33e4c298c4ee71'; // Only using part of the secret shown in the screenshot
+              
+              console.log("Using Instagram Graph API credentials - Client ID:", clientId);
               
               console.log("Using Instagram credentials - Client ID:", clientId);
               
@@ -2310,10 +2312,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 
                 // Convert short-lived token to long-lived token
                 try {
-                  // Use the updated Instagram client secret provided by the user
-                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=5d8ea52ce86189dd7545568bad8dfe8b&access_token=${accessToken}`;
+                  // Use the Instagram Graph API client secret for long-lived token exchange
+                  const longLivedTokenUrl = `https://graph.instagram.com/access_token?grant_type=ig_exchange_token&client_secret=350ec33e4c298c4ee71&access_token=${accessToken}`;
                   
-                  console.log("Instagram long-lived token exchange URL:", longLivedTokenUrl);
+                  console.log("Instagram Graph API long-lived token exchange URL:", longLivedTokenUrl);
                   const longLivedTokenResponse = await fetch(longLivedTokenUrl);
                   
                   if (longLivedTokenResponse.ok) {
