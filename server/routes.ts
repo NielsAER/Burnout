@@ -41,6 +41,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         // Process the token exchange for Instagram
+        const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+        const host = req.get('host') || 'localhost:5000';
+        const baseUrl = `${protocol}://${host}`;
+        
         let clientId, clientSecret, redirectUri, tokenUrl, accessToken, username = 'instagram_user';
         let permissions: any = ['basic'];
         
@@ -1778,6 +1782,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // IMPORTANT: For Instagram OAuth, we must use the exact redirect URI registered in Meta Developer portal
           // This must match the Valid OAuth Redirect URIs in your Instagram Basic Display app settings
           
+          // Define the base URL using the protocol and host
+          const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+          const host = req.get('host') || 'localhost:5000';
+          const baseUrl = `${protocol}://${host}`;
+          
           // Use a redirect URI that works with Meta Developer Portal
           // This must be a URI registered in your Meta Developer Console
           const redirectUri = `${baseUrl}/api/callback/instagram`;
@@ -2212,6 +2221,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
+              // Define the base URL using the protocol and host
+              const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+              const host = req.get('host') || 'localhost:5000';
+              const baseUrl = `${protocol}://${host}`;
+              
               redirectUri = `${baseUrl}/api/callback/instagram`;
               console.log("Using Instagram callback URI:", redirectUri);
               
