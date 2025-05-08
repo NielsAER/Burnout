@@ -91,8 +91,6 @@ export default function AppConnections() {
     const searchParams = new URLSearchParams(window.location.search);
     const success = searchParams.get('success');
     const error = searchParams.get('error');
-    const code = searchParams.get('code');
-    const state = searchParams.get('state');
     
     if (success) {
       // Clean up the URL
@@ -114,29 +112,8 @@ export default function AppConnections() {
         description: "There was an error connecting your account. Please try again.",
         variant: "destructive",
       });
-    } else if (code && state) {
-      // This is a direct OAuth redirect from Instagram
-      console.log('Detected direct OAuth redirect with code:', code.substring(0, 10) + '...');
-      
-      // Clean up the URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      
-      // Handle the Instagram direct OAuth callback
-      // Note: We don't need this anymore as the server directly handles the callback
-      // and redirects with success/error flags which are handled above
-      // Just trigger a refresh of the connections to update the UI
-      console.log('Direct Instagram OAuth redirect received - refreshing connections');
-      
-      // Refresh the connections data
-      queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
-      
-      // Set timeout to refresh again after a moment to ensure updated server state is received
-      setTimeout(() => {
-        setConnectingApp(null);
-        queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
-      }, 1000);
     }
-  }, [queryClient, toast]);
+  }, []);
   
   const connectionMap = useMemo(() => {
     const formatted: Record<string, ConnectionStatus> = {};

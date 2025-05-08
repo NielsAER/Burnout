@@ -28,169 +28,6 @@ import * as workflowSuggestionService from "./services/workflowSuggestions";
 import { setupAuth } from "./auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Add direct handler for Instagram redirects to /app-connections
-  app.get('/app-connections', async (req, res, next) => {
-    try {
-      const { code, state } = req.query;
-      
-      // Only process if this appears to be an OAuth callback with code and state
-      if (code && state && typeof code === 'string' && typeof state === 'string') {
-        console.log("Detected direct OAuth callback to /app-connections", { 
-          code: code.substring(0, 10) + '...',
-          state 
-        });
-        
-        // Process the token exchange for Instagram
-        const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-        const host = req.get('host') || 'localhost:5000';
-        const baseUrl = `${protocol}://${host}`;
-        
-        let clientId, clientSecret, redirectUri, tokenUrl, accessToken, username = 'instagram_user';
-        let permissions: any = ['basic'];
-        
-        // Use Instagram Graph API credentials
-        clientId = '697674269427861';
-        clientSecret = '350ec33e4c298c4ee71';
-        
-        // Set redirect URI to match exactly what's in the authorization
-        redirectUri = `${baseUrl}/api/callback/instagram`;
-        console.log("Using Instagram callback URI for direct redirect:", redirectUri);
-        
-        // Using Facebook Graph API endpoint for token exchange
-        tokenUrl = 'https://graph.facebook.com/v16.0/oauth/access_token';
-        
-        // Instagram requires form-urlencoded body
-        const postData = {
-          client_id: clientId,
-          client_secret: clientSecret,
-          grant_type: 'authorization_code',
-          redirect_uri: redirectUri,
-          code: code
-        };
-        
-        console.log("Instagram token exchange request:", {
-          url: tokenUrl,
-          method: 'POST',
-          body: JSON.stringify(postData)
-        });
-        
-        const requestBody = new URLSearchParams(postData);
-        const requestHeaders = {
-          'Content-Type': 'application/x-www-form-urlencoded'
-        };
-        
-        // Make the token request
-        console.log(`Exchanging code for Instagram token...`);
-        const tokenResponse = await fetch(tokenUrl, {
-          method: 'POST',
-          headers: requestHeaders,
-          body: requestBody
-        });
-        
-        if (!tokenResponse.ok) {
-          console.error(`Token exchange failed: ${tokenResponse.status} ${tokenResponse.statusText}`);
-          
-          try {
-            const errorBody = await tokenResponse.text();
-            console.error(`Token exchange error details:`, errorBody);
-          } catch (parseError) {
-            console.error(`Couldn't parse error response`);
-          }
-          
-          // Redirect to app-connections with error flag
-          return res.redirect('/app-connections?error=instagram_token_exchange_failed');
-        }
-        
-        let tokenData;
-        try {
-          tokenData = await tokenResponse.json();
-          console.log(`Successfully parsed Instagram token data:`, tokenData);
-          accessToken = tokenData.access_token;
-          
-          if (accessToken) {
-            console.log("Successfully obtained Instagram access token!");
-            
-            // Call Facebook Graph API to get Instagram account info
-            try {
-              const userResponse = await fetch('https://graph.facebook.com/v16.0/me/accounts?fields=instagram_business_account{username,name,profile_picture_url}', {
-                headers: {
-                  'Authorization': `Bearer ${accessToken}`
-                }
-              });
-              
-              if (userResponse.ok) {
-                const userData = await userResponse.json();
-                console.log(`User data received from Instagram:`, userData);
-                
-                // Extract the username based on the structure
-                if (userData && userData.data && userData.data.length > 0 && 
-                    userData.data[0].instagram_business_account && 
-                    userData.data[0].instagram_business_account.username) {
-                  username = userData.data[0].instagram_business_account.username;
-                  console.log("Found Instagram username:", username);
-                } else {
-                  console.log("Instagram data structure unexpected, using default username");
-                }
-              } else {
-                console.error(`Failed to get Instagram profile: ${userResponse.status} ${userResponse.statusText}`);
-              }
-              
-              // Set permissions for Instagram
-              permissions = ['instagram_business_basic', 'instagram_business_content_publish'];
-            } catch (error) {
-              console.error(`Error fetching Instagram profile:`, error);
-            }
-          }
-        } catch (parseError) {
-          console.error(`Error parsing token response:`, parseError);
-          return res.redirect('/app-connections?error=instagram_token_parse_failed');
-        }
-        
-        // Check if user is authenticated
-        if (!req.isAuthenticated()) {
-          return res.redirect('/auth?redirect=' + encodeURIComponent('/app-connections'));
-        }
-        
-        // Check if connection already exists
-        const existingConnection = await storage.getAppConnectionByUserAndApp(req.user.id, 'instagram');
-        
-        if (existingConnection) {
-          // Update existing connection
-          await storage.updateAppConnection(existingConnection.id, {
-            username,
-            permissions,
-            credentials: { 
-              token: accessToken, 
-              tokenType: 'bearer',
-              updatedAt: new Date().toISOString()
-            }
-          });
-        } else {
-          // Create new connection with user ID from authenticated session
-          await storage.createAppConnection({
-            appId: 'instagram',
-            userId: req.user.id,
-            username,
-            permissions,
-            credentials: { 
-              token: accessToken,
-              tokenType: 'bearer',
-              createdAt: new Date().toISOString()
-            }
-          });
-        }
-        
-        // Redirect to app-connections with success flag
-        return res.redirect('/app-connections?success=instagram');
-      }
-      
-      // If it's not an OAuth callback, let it pass through to the normal frontend routing
-      next();
-    } catch (error) {
-      console.error("Error processing Instagram callback:", error);
-      res.redirect('/app-connections?error=instagram_processing_failed');
-    }
-  });
   // Set up authentication
   setupAuth(app);
   // GET /api/automations - Get all automations
@@ -1311,25 +1148,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // App Connections Routes
   
-  // GET /api/app-connections - Get user's app connections
+  // GET /api/app-connections - Get all app connections
   app.get("/api/app-connections", async (req, res) => {
     try {
-      if (!req.isAuthenticated()) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      
-      // Get only the connections for the current user
-      const connections = await storage.getAppConnectionsByUser(req.user.id);
-      
-      // Log connections for debugging
-      console.log(`Found ${connections.length} app connections for user ${req.user.id}`);
-      connections.forEach(conn => {
-        console.log(`- ${conn.appId}: ${conn.username || 'unknown username'}`);
-      });
-      
+      const connections = await storage.getAllAppConnections();
       res.json(connections);
     } catch (error) {
-      console.error("Error fetching app connections:", error);
       res.status(500).json({ message: "Failed to fetch app connections" });
     }
   });
@@ -1782,14 +1606,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // IMPORTANT: For Instagram OAuth, we must use the exact redirect URI registered in Meta Developer portal
           // This must match the Valid OAuth Redirect URIs in your Instagram Basic Display app settings
           
-          // Define the base URL using the protocol and host
-          const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-          const host = req.get('host') || 'localhost:5000';
-          const baseUrl = `${protocol}://${host}`;
-          
-          // Use a redirect URI that works with Meta Developer Portal
-          // This must be a URI registered in your Meta Developer Console
-          const redirectUri = `${baseUrl}/api/callback/instagram`;
+          // Use the exact redirect URI registered in Meta Developer Portal
+          // Update the redirect URI to match exactly what's in the URL provided by the user
+          const redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
           
           console.log("Using Instagram redirect URI:", redirectUri);
           
@@ -1807,7 +1626,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Instagram OAuth configuration:", {
             clientId: instagramClientId,
             redirectUri: redirectUri,
-            scopes: "instagram_business_basic,instagram_business_manage_messages,instagram_business_manage_comments,instagram_business_content_publish,instagram_business_manage_insights",
+            scopes: "user_profile,user_media",
             state: state
           });
           break;
@@ -1853,11 +1672,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'twitter', state);
             
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
-            
             // For Twitter OAuth 2.0, use consistent pattern with other platforms
             const redirectUri = `${baseUrl}/api/callback/twitter`;
             
@@ -1882,11 +1696,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Generate state for CSRF protection
             const state = generateState();
             storeOAuthState(req, 'google', state);
-            
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
             
             // For Google OAuth, use the consistent pattern with other platforms
             const redirectUri = `${baseUrl}/api/callback/google`;
@@ -1925,11 +1734,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             req.session.oauthStates['slack'] = state;
             
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
-            
             const redirectUri = `${baseUrl}/api/callback/slack`;
             
             // Slack OAuth URL with proper CSRF protection
@@ -1953,11 +1757,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             req.session.oauthStates['facebook-ads'] = state;
             
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
-            
             const redirectUri = `${baseUrl}/api/callback/facebook-ads`;
             
             // Facebook OAuth URL with proper CSRF protection
@@ -1977,11 +1776,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Generate state for CSRF protection
             const state = generateState();
             storeOAuthState(req, 'trello', state);
-            
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
             
             const redirectUri = `${baseUrl}/api/callback/trello`;
             
@@ -2003,11 +1797,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'notion', state);
             
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
-            
             const redirectUri = `${baseUrl}/api/callback/notion`;
             
             // Notion OAuth URL with proper CSRF protection
@@ -2028,11 +1817,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'microsoft', state);
             
-            // Define the base URL using the protocol and host
-            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-            const host = req.get('host') || 'localhost:5000';
-            const baseUrl = `${protocol}://${host}`;
-            
             const redirectUri = `${baseUrl}/api/callback/microsoft`;
             
             // Microsoft OAuth URL (Microsoft Graph) with proper CSRF protection
@@ -2048,12 +1832,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'text-processor':
           // For API services, we'll use API keys directly, no need for OAuth
           // Call the callback endpoint directly with a special flag
-          
-          // Define the base URL using the protocol and host
-          const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-          const host = req.get('host') || 'localhost:5000';
-          const baseUrl = `${protocol}://${host}`;
-          
           return res.json({
             oauthUrl: `${baseUrl}/api/callback/${appId}?code=direct_api_integration&api_integration=true`
           });
@@ -2262,12 +2040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
-              // Define the base URL using the protocol and host
-              const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
-              const host = req.get('host') || 'localhost:5000';
-              const baseUrl = `${protocol}://${host}`;
-              
-              redirectUri = `${baseUrl}/api/callback/instagram`;
+              redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
               console.log("Using Instagram callback URI:", redirectUri);
               
               // Log detailed Instagram OAuth callback info for debugging
