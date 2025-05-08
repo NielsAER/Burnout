@@ -1642,7 +1642,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in Facebook auth:", error);
       // For general errors in the Facebook auth flow, also use the error page
-      renderErrorPage(res, serviceType === 'instagram' ? 'instagram' : 'facebook-ads', error);
+      // Since serviceType might be undefined here, defaulting to 'facebook-ads'
+      renderErrorPage(res, 'facebook-ads', error);
     }
   });
 
@@ -2201,12 +2202,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check for OAuth errors
       if (oauthError) {
         console.error(`OAuth error for ${service}:`, oauthError);
-        return res.redirect(`/app-connections?error=${oauthError}`);
+        // Use our consistent error page function for better UX
+        return renderErrorPage(res, service, new Error(`Authentication error: ${oauthError}`));
       }
       
       if (!code) {
         console.error(`No auth code received for ${service}`);
-        return res.redirect(`/app-connections?error=no_auth_code`);
+        // Use our consistent error page function for better UX
+        return renderErrorPage(res, service, new Error("No authentication code received"));
       }
       
       // Get host information for redirect URIs
@@ -2309,6 +2312,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               clientId = process.env.GOOGLE_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.GOOGLE_CLIENT_SECRET || 'YOUR_APP_SECRET';
               
+              // Set Google redirect URI to match the one used in authorization request
+              const host = req.headers.host || 'localhost:5000';
+              const protocol = req.secure ? 'https' : 'http';
+              const baseUrl = `${protocol}://${host}`;
+              redirectUri = `${baseUrl}/api/callback/google`;
+              
               // Google token exchange
               tokenUrl = 'https://oauth2.googleapis.com/token';
               
@@ -2330,6 +2339,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               clientId = process.env.SLACK_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.SLACK_CLIENT_SECRET || 'YOUR_APP_SECRET';
               
+              // Set Slack redirect URI to match the one used in authorization request
+              const slackHost = req.headers.host || 'localhost:5000';
+              const slackProtocol = req.secure ? 'https' : 'http';
+              const slackBaseUrl = `${slackProtocol}://${slackHost}`;
+              redirectUri = `${slackBaseUrl}/api/callback/slack`;
+              
               // Slack token exchange
               tokenUrl = 'https://slack.com/api/oauth.v2.access';
               
@@ -2349,6 +2364,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             case 'twitter':
               clientId = process.env.TWITTER_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.TWITTER_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Set Twitter redirect URI to match the one used in authorization request
+              const twitterHost = req.headers.host || 'localhost:5000';
+              const twitterProtocol = req.secure ? 'https' : 'http';
+              const twitterBaseUrl = `${twitterProtocol}://${twitterHost}`;
+              redirectUri = `${twitterBaseUrl}/api/callback/twitter`;
               
               // Twitter token exchange
               tokenUrl = 'https://api.twitter.com/2/oauth2/token';
@@ -2373,6 +2394,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               clientId = process.env.FACEBOOK_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.FACEBOOK_CLIENT_SECRET || 'YOUR_APP_SECRET';
               
+              // Set Facebook redirect URI to match the one used in authorization request
+              const fbHost = req.headers.host || 'localhost:5000';
+              const fbProtocol = req.secure ? 'https' : 'http';
+              const fbBaseUrl = `${fbProtocol}://${fbHost}`;
+              redirectUri = `${fbBaseUrl}/api/callback/facebook-ads`;
+              
               // Facebook token exchange
               tokenUrl = 'https://graph.facebook.com/v16.0/oauth/access_token';
               
@@ -2387,6 +2414,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             case 'notion':
               clientId = process.env.NOTION_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.NOTION_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Set Notion redirect URI to match the one used in authorization request
+              const notionHost = req.headers.host || 'localhost:5000';
+              const notionProtocol = req.secure ? 'https' : 'http';
+              const notionBaseUrl = `${notionProtocol}://${notionHost}`;
+              redirectUri = `${notionBaseUrl}/api/callback/notion`;
               
               // Notion token exchange
               tokenUrl = 'https://api.notion.com/v1/oauth/token';
