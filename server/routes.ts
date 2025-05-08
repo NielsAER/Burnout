@@ -1853,6 +1853,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'twitter', state);
             
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
+            
             // For Twitter OAuth 2.0, use consistent pattern with other platforms
             const redirectUri = `${baseUrl}/api/callback/twitter`;
             
@@ -1877,6 +1882,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Generate state for CSRF protection
             const state = generateState();
             storeOAuthState(req, 'google', state);
+            
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
             
             // For Google OAuth, use the consistent pattern with other platforms
             const redirectUri = `${baseUrl}/api/callback/google`;
@@ -1915,6 +1925,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             req.session.oauthStates['slack'] = state;
             
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
+            
             const redirectUri = `${baseUrl}/api/callback/slack`;
             
             // Slack OAuth URL with proper CSRF protection
@@ -1938,6 +1953,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
             req.session.oauthStates['facebook-ads'] = state;
             
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
+            
             const redirectUri = `${baseUrl}/api/callback/facebook-ads`;
             
             // Facebook OAuth URL with proper CSRF protection
@@ -1957,6 +1977,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Generate state for CSRF protection
             const state = generateState();
             storeOAuthState(req, 'trello', state);
+            
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
             
             const redirectUri = `${baseUrl}/api/callback/trello`;
             
@@ -1978,6 +2003,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'notion', state);
             
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
+            
             const redirectUri = `${baseUrl}/api/callback/notion`;
             
             // Notion OAuth URL with proper CSRF protection
@@ -1998,6 +2028,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'microsoft', state);
             
+            // Define the base URL using the protocol and host
+            const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+            const host = req.get('host') || 'localhost:5000';
+            const baseUrl = `${protocol}://${host}`;
+            
             const redirectUri = `${baseUrl}/api/callback/microsoft`;
             
             // Microsoft OAuth URL (Microsoft Graph) with proper CSRF protection
@@ -2013,6 +2048,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         case 'text-processor':
           // For API services, we'll use API keys directly, no need for OAuth
           // Call the callback endpoint directly with a special flag
+          
+          // Define the base URL using the protocol and host
+          const protocol = req.secure || req.headers['x-forwarded-proto'] === 'https' ? 'https' : 'http';
+          const host = req.get('host') || 'localhost:5000';
+          const baseUrl = `${protocol}://${host}`;
+          
           return res.json({
             oauthUrl: `${baseUrl}/api/callback/${appId}?code=direct_api_integration&api_integration=true`
           });
