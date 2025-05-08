@@ -91,9 +91,53 @@ export default function AppConnections() {
     const searchParams = new URLSearchParams(window.location.search);
     const success = searchParams.get('success');
     const error = searchParams.get('error');
+    const code = searchParams.get('code');
+    const state = searchParams.get('state');
     
+    // Handle direct Instagram OAuth callback (Instagram redirects directly to /app-connections)
+    if (code && state) {
+      console.log("Instagram OAuth callback detected with code and state", { code, state });
+      
+      // Process Instagram callback by sending the code to our backend
+      const processInstagramCallback = async () => {
+        try {
+          // Call our callback endpoint with the code and state
+          const response = await fetch(`/api/callback/instagram?code=${code}&state=${state}`);
+          
+          if (response.ok) {
+            const data = await response.json();
+            toast({
+              title: "Instagram Connected",
+              description: `Your Instagram account (${data.profile?.username || 'unknown'}) has been connected successfully!`,
+            });
+            
+            // Refresh connections data
+            queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+          } else {
+            const errorData = await response.json();
+            toast({
+              title: "Instagram Connection Failed",
+              description: errorData.error || "Failed to connect Instagram account. Please try again.",
+              variant: "destructive",
+            });
+          }
+        } catch (error) {
+          console.error("Error processing Instagram callback:", error);
+          toast({
+            title: "Connection Error",
+            description: "There was a problem processing your Instagram connection",
+            variant: "destructive",
+          });
+        }
+        
+        // Clean up the URL regardless of result
+        window.history.replaceState({}, document.title, window.location.pathname);
+      };
+      
+      processInstagramCallback();
+    }
     // Handle success/error parameters (from our internal redirects)
-    if (success) {
+    else if (success) {
       // Clean up the URL
       window.history.replaceState({}, document.title, window.location.pathname);
       
