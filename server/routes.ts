@@ -911,8 +911,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Save the connection to the database
         if (req.isAuthenticated()) {
           await saveConnection(req, service, profile, credentials);
-          // Redirect to the app connections page
-          res.redirect('/app-connections?success=' + service);
+          
+          // Return HTML that will close the popup and send a message to the opener window
+          renderSuccessPage(res, service, profile);
         } else {
           // Not logged in, redirect to auth page
           res.redirect('/auth?error=not_authenticated');
@@ -1364,14 +1365,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
               profile: JSON.stringify(profileData)
             });
             
-            res.status(200).json({ 
-              success: true, 
-              message: "Successfully connected to Instagram",
-              profile: {
-                username: profileData.username,
-                name: profileData.name
-              }
-            });
+            // Return HTML that will close the popup and send a message to the opener window
+            res.setHeader('Content-Type', 'text/html');
+            res.send(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>Instagram Connected</title>
+                <style>
+                  body {
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                    text-align: center;
+                    padding: 40px;
+                    background-color: #f5f5f5;
+                  }
+                  .success-card {
+                    background: white;
+                    border-radius: 8px;
+                    padding: 20px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    margin: 0 auto;
+                    max-width: 500px;
+                  }
+                  h2 {
+                    color: #0070f3;
+                    margin-bottom: 10px;
+                  }
+                  p {
+                    color: #333;
+                    margin-bottom: 20px;
+                  }
+                  .connected-account {
+                    font-weight: bold;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="success-card">
+                  <h2>Instagram Connected Successfully!</h2>
+                  <p>Your Instagram account <span class="connected-account">@${profileData.username}</span> has been connected.</p>
+                  <p>This window will close automatically in 3 seconds...</p>
+                </div>
+                <script>
+                  // Send message to the opener window
+                  if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                      type: 'oauth-success',
+                      service: 'instagram',
+                      profile: {
+                        username: "${profileData.username}",
+                        name: "${profileData.name || 'Instagram User'}"
+                      }
+                    }, '*');
+                  }
+                  
+                  // Close this popup after a short delay
+                  setTimeout(() => {
+                    window.close();
+                  }, 3000);
+                </script>
+              </body>
+              </html>
+            `);
           } else {
             res.status(401).json({ error: "You must be logged in to connect apps" });
           }
@@ -1422,14 +1477,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
               profile: JSON.stringify(profileData)
             });
             
-            res.status(200).json({ 
-              success: true, 
-              message: "Successfully connected to Facebook Ads",
-              profile: {
-                name: profileData.name,
-                email: profileData.email
-              }
-            });
+            // Return HTML that will close the popup and send a message to the opener window
+            res.setHeader('Content-Type', 'text/html');
+            res.send(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>Facebook Ads Connected</title>
+                <style>
+                  body {
+                    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+                    text-align: center;
+                    padding: 40px;
+                    background-color: #f5f5f5;
+                  }
+                  .success-card {
+                    background: white;
+                    border-radius: 8px;
+                    padding: 20px;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+                    margin: 0 auto;
+                    max-width: 500px;
+                  }
+                  h2 {
+                    color: #0070f3;
+                    margin-bottom: 10px;
+                  }
+                  p {
+                    color: #333;
+                    margin-bottom: 20px;
+                  }
+                  .connected-account {
+                    font-weight: bold;
+                  }
+                </style>
+              </head>
+              <body>
+                <div class="success-card">
+                  <h2>Facebook Ads Connected Successfully!</h2>
+                  <p>Your account <span class="connected-account">${profileData.name}</span> has been connected.</p>
+                  <p>This window will close automatically in 3 seconds...</p>
+                </div>
+                <script>
+                  // Send message to the opener window
+                  if (window.opener && !window.opener.closed) {
+                    window.opener.postMessage({
+                      type: 'oauth-success',
+                      service: 'facebook-ads',
+                      profile: {
+                        name: "${profileData.name || 'Facebook User'}",
+                        email: "${profileData.email || ''}"
+                      }
+                    }, '*');
+                  }
+                  
+                  // Close this popup after a short delay
+                  setTimeout(() => {
+                    window.close();
+                  }, 3000);
+                </script>
+              </body>
+              </html>
+            `);
           } else {
             res.status(401).json({ error: "You must be logged in to connect apps" });
           }
