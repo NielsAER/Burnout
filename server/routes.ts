@@ -49,7 +49,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         clientSecret = '350ec33e4c298c4ee71';
         
         // Set redirect URI to match exactly what's in the authorization
-        redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
+        redirectUri = `${baseUrl}/api/callback/instagram`;
         console.log("Using Instagram callback URI for direct redirect:", redirectUri);
         
         // Using Facebook Graph API endpoint for token exchange
@@ -1778,9 +1778,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // IMPORTANT: For Instagram OAuth, we must use the exact redirect URI registered in Meta Developer portal
           // This must match the Valid OAuth Redirect URIs in your Instagram Basic Display app settings
           
-          // Use the exact redirect URI registered in Meta Developer Portal
-          // Update the redirect URI to match exactly what's in the URL provided by the user
-          const redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
+          // Use a redirect URI that works with Meta Developer Portal
+          // This must be a URI registered in your Meta Developer Console
+          const redirectUri = `${baseUrl}/api/callback/instagram`;
           
           console.log("Using Instagram redirect URI:", redirectUri);
           
@@ -2212,7 +2212,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               
               // Set redirect URI to match exactly what's configured in Meta Developer Portal
               // Must match the redirect URL in authorization request
-              redirectUri = "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
+              redirectUri = `${baseUrl}/api/callback/instagram`;
               console.log("Using Instagram callback URI:", redirectUri);
               
               // Log detailed Instagram OAuth callback info for debugging
