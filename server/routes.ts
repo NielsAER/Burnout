@@ -927,9 +927,217 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error(`Error in ${service} OAuth callback:`, error);
       console.error(error);
-      res.redirect('/app-connections?error=true');
+      // Even in case of error, return a nice HTML page that will close itself
+      renderErrorPage(res, service as string, error);
     }
   });
+  
+  // Helper function to render success page with auto-close for popup windows
+  function renderSuccessPage(res: Response, service: string, profile: any) {
+    // Get a readable display name for the service
+    const serviceName = service.charAt(0).toUpperCase() + service.slice(1).replace(/-/g, ' ');
+    
+    // Get a username or display name from the profile (different services have different structures)
+    let username = 'Connected account';
+    
+    if (profile) {
+      // Try to extract username based on common profile structures
+      if (profile.username) {
+        username = profile.username;
+      } else if (profile.name) {
+        username = profile.name;
+      } else if (profile.displayName) {
+        username = profile.displayName;
+      } else if (profile.localizedFirstName) {
+        username = `${profile.localizedFirstName} ${profile.localizedLastName || ''}`;
+      } else if (profile.email) {
+        username = profile.email;
+      } else if (profile.id) {
+        username = `${serviceName} user`;
+      }
+    }
+    
+    // Customize the brand color based on service
+    let brandColor = '#0070f3'; // Default blue
+    switch (service) {
+      case 'linkedin':
+        brandColor = '#0077b5';
+        break;
+      case 'twitter':
+        brandColor = '#1DA1F2';
+        break;
+      case 'instagram':
+        brandColor = '#E1306C';
+        break;
+      case 'facebook-ads':
+        brandColor = '#4267B2';
+        break;
+      case 'google':
+      case 'gmail':
+      case 'google-drive':
+      case 'google-sheets':
+      case 'google-calendar':
+        brandColor = '#4285F4';
+        break;
+      case 'microsoft':
+        brandColor = '#00a4ef';
+        break;
+      case 'slack':
+        brandColor = '#4A154B';
+        break;
+      case 'trello':
+        brandColor = '#0079BF';
+        break;
+      case 'notion':
+        brandColor = '#000000';
+        break;
+    }
+    
+    // Extract any additional profile data to show
+    const profileDetails: any = {};
+    if (profile.email) profileDetails['email'] = profile.email;
+    
+    // Set content type to HTML
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${serviceName} Connected</title>
+        <style>
+          body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            text-align: center;
+            padding: 40px;
+            background-color: #f5f5f5;
+            margin: 0;
+          }
+          .success-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            max-width: 500px;
+          }
+          h2 {
+            color: ${brandColor};
+            margin-bottom: 10px;
+          }
+          p {
+            color: #333;
+            margin-bottom: 20px;
+          }
+          .connected-account {
+            font-weight: bold;
+          }
+          .countdown {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="success-card">
+          <h2>${serviceName} Connected Successfully!</h2>
+          <p>Your account <span class="connected-account">${username}</span> has been connected.</p>
+          <p class="countdown">This window will close automatically in 3 seconds...</p>
+        </div>
+        <script>
+          // Send message to the opener window
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({
+              type: 'oauth-success',
+              service: '${service}',
+              profile: ${JSON.stringify({ username, ...profileDetails })}
+            }, '*');
+          }
+          
+          // Close this popup after a short delay
+          setTimeout(() => {
+            window.close();
+          }, 3000);
+        </script>
+      </body>
+      </html>
+    `);
+  }
+  
+  // Helper function to render error page with auto-close for popup windows
+  function renderErrorPage(res: Response, service: string, error: any) {
+    // Get a readable display name for the service
+    const serviceName = service.charAt(0).toUpperCase() + service.slice(1).replace(/-/g, ' ');
+    
+    // Set content type to HTML
+    res.setHeader('Content-Type', 'text/html');
+    res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>${serviceName} Connection Failed</title>
+        <style>
+          body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            text-align: center;
+            padding: 40px;
+            background-color: #f5f5f5;
+            margin: 0;
+          }
+          .error-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            max-width: 500px;
+          }
+          h2 {
+            color: #e53e3e;
+            margin-bottom: 10px;
+          }
+          p {
+            color: #333;
+            margin-bottom: 20px;
+          }
+          .error-message {
+            color: #e53e3e;
+            font-size: 14px;
+            margin-top: 10px;
+          }
+          .countdown {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="error-card">
+          <h2>${serviceName} Connection Failed</h2>
+          <p>There was a problem connecting your ${serviceName} account.</p>
+          <p class="error-message">${error?.message?.toString().replace(/'/g, "\\'") || 'An unknown error occurred'}</p>
+          <p class="countdown">This window will close automatically in 5 seconds...</p>
+        </div>
+        <script>
+          // Send message to the opener window
+          if (window.opener && !window.opener.closed) {
+            window.opener.postMessage({
+              type: 'oauth-error',
+              service: '${service}',
+              error: '${(error?.message || 'Connection failed').toString().replace(/'/g, "\\'")}'
+            }, '*');
+          }
+          
+          // Close this popup after a short delay
+          setTimeout(() => {
+            window.close();
+          }, 5000);
+        </script>
+      </body>
+      </html>
+    `);
+  }
 
   // Get connected apps for the current user
   app.get('/api/connections', (req, res) => {
@@ -1017,11 +1225,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.isAuthenticated()) {
       saveConnection(req, service as string, profile, credentials)
         .then(() => {
-          res.redirect('/app-connections?success=' + service);
+          // Return HTML with auto-close script for a better UX
+          renderSuccessPage(res, service as string, profile);
         })
         .catch(error => {
           console.error('Error in simulated login:', error);
-          res.redirect('/app-connections?error=true');
+          renderErrorPage(res, service as string, error);
         });
     } else {
       res.redirect('/auth');
@@ -1136,11 +1345,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     if (req.isAuthenticated()) {
       saveConnection(req, service, profile, credentials)
         .then(() => {
-          res.redirect('/app-connections?success=' + service);
+          // Return HTML with auto-close script for a better UX
+          renderSuccessPage(res, service, profile);
         })
         .catch(error => {
           console.error('Error in simulated login:', error);
-          res.redirect('/app-connections?error=true');
+          renderErrorPage(res, service, error);
         });
     } else {
       res.redirect('/auth');
@@ -1365,68 +1575,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               profile: JSON.stringify(profileData)
             });
             
-            // Return HTML that will close the popup and send a message to the opener window
-            res.setHeader('Content-Type', 'text/html');
-            res.send(`
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <title>Instagram Connected</title>
-                <style>
-                  body {
-                    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                    text-align: center;
-                    padding: 40px;
-                    background-color: #f5f5f5;
-                  }
-                  .success-card {
-                    background: white;
-                    border-radius: 8px;
-                    padding: 20px;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-                    margin: 0 auto;
-                    max-width: 500px;
-                  }
-                  h2 {
-                    color: #0070f3;
-                    margin-bottom: 10px;
-                  }
-                  p {
-                    color: #333;
-                    margin-bottom: 20px;
-                  }
-                  .connected-account {
-                    font-weight: bold;
-                  }
-                </style>
-              </head>
-              <body>
-                <div class="success-card">
-                  <h2>Instagram Connected Successfully!</h2>
-                  <p>Your Instagram account <span class="connected-account">@${profileData.username}</span> has been connected.</p>
-                  <p>This window will close automatically in 3 seconds...</p>
-                </div>
-                <script>
-                  // Send message to the opener window
-                  if (window.opener && !window.opener.closed) {
-                    window.opener.postMessage({
-                      type: 'oauth-success',
-                      service: 'instagram',
-                      profile: {
-                        username: "${profileData.username}",
-                        name: "${profileData.name || 'Instagram User'}"
-                      }
-                    }, '*');
-                  }
-                  
-                  // Close this popup after a short delay
-                  setTimeout(() => {
-                    window.close();
-                  }, 3000);
-                </script>
-              </body>
-              </html>
-            `);
+            // Use the common renderSuccessPage function for consistent UX
+            renderSuccessPage(res, 'instagram', profileData);
           } else {
             res.status(401).json({ error: "You must be logged in to connect apps" });
           }
