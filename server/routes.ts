@@ -2443,6 +2443,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               clientId = process.env.TRELLO_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.TRELLO_CLIENT_SECRET || 'YOUR_APP_SECRET';
               
+              // Set Trello redirect URI to match the one used in authorization request
+              const trelloHost = req.headers.host || 'localhost:5000';
+              const trelloProtocol = req.secure ? 'https' : 'http';
+              const trelloBaseUrl = `${trelloProtocol}://${trelloHost}`;
+              redirectUri = `${trelloBaseUrl}/api/callback/trello`;
+              
               // Trello token exchange
               tokenUrl = 'https://trello.com/1/OAuthGetAccessToken';
               
@@ -2463,6 +2469,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             case 'microsoft':
               clientId = process.env.MICROSOFT_CLIENT_ID || 'YOUR_APP_ID';
               clientSecret = process.env.MICROSOFT_CLIENT_SECRET || 'YOUR_APP_SECRET';
+              
+              // Set Microsoft redirect URI to match the one used in authorization request
+              const msHost = req.headers.host || 'localhost:5000';
+              const msProtocol = req.secure ? 'https' : 'http';
+              const msBaseUrl = `${msProtocol}://${msHost}`;
+              redirectUri = `${msBaseUrl}/api/callback/microsoft`;
               
               // Microsoft token exchange
               tokenUrl = 'https://login.microsoftonline.com/common/oauth2/v2.0/token';
@@ -2615,7 +2627,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
                     };
                     break;
                   case 'trello':
-                    userEndpoint = 'https://api.trello.com/1/members/me?key=${clientId}&token=${accessToken}';
+                    userEndpoint = `https://api.trello.com/1/members/me?key=${clientId}&token=${accessToken}`;
                     break;
                   case 'microsoft':
                     userEndpoint = 'https://graph.microsoft.com/v1.0/me';
