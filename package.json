@@ -54,6 +54,7 @@
     "cmdk": "^1.0.0",
     "connect-pg-simple": "^10.0.0",
     "date-fns": "^3.6.0",
+    "dotenv": "^16.5.0",
     "drizzle-orm": "^0.39.1",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.3.0",
@@ -84,8 +85,7 @@
     "wouter": "^3.3.5",
     "ws": "^8.18.0",
     "zod": "^3.23.8",
-    "zod-validation-error": "^3.4.0",
-    "dotenv": "^16.4.5"
+    "zod-validation-error": "^3.4.0"
   },
   "devDependencies": {
     "@replit/vite-plugin-cartographer": "^0.0.11",
