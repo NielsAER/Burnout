@@ -27,6 +27,11 @@ import * as googleDocsService from "./services/google-docs";
 import * as workflowSuggestionService from "./services/workflowSuggestions";
 import { setupAuth } from "./auth";
 
+// Add this near the top of the file, after imports
+const LINKEDIN_REDIRECT_URI = process.env.NODE_ENV === 'production' 
+  ? "https://brnout.replit.app/api/callback/linkedin"  // Production URL
+  : "http://localhost:5000/api/callback/linkedin";     // Development URL
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
   setupAuth(app);
@@ -793,7 +798,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.isAuthenticated()) {
         try {
           await saveConnection(req, service, profile, credentials);
-          return res.redirect('/app-connections?success=' + service);
+          // return res.redirect('/app-connections?success=' + service);
         } catch (error) {
           console.error(`Error in API integration for ${service}:`, error);
           return res.redirect('/app-connections?error=true');
@@ -804,39 +809,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     // For development/testing, if the code starts with "fake_code", use simulated login
-    if (code && code.toString().startsWith('fake_code')) {
-      console.log(`Processing simulated login for ${service}`);
+    // if (code && code.toString().startsWith('fake_code')) {
+    //   console.log(`Processing simulated login for ${service}`);
       
-      // Create a fake profile and credentials for simulated login
-      const profile = {
-        id: `${service}_123456`,
-        username: `${service}_user`,
-        name: `${service.charAt(0).toUpperCase() + service.slice(1)} User`
-      };
+    //   // Create a fake profile and credentials for simulated login
+    //   const profile = {
+    //     id: `${service}_123456`,
+    //     username: `${service}_user`,
+    //     name: `${service.charAt(0).toUpperCase() + service.slice(1)} User`
+    //   };
       
-      const credentials = {
-        access_token: `fake_token_${service}_${Date.now()}`,
-        refresh_token: `fake_refresh_${service}_${Date.now()}`,
-        expires_in: 3600,
-        created_at: new Date()
-      };
+    //   const credentials = {
+    //     access_token: `fake_token_${service}_${Date.now()}`,
+    //     refresh_token: `fake_refresh_${service}_${Date.now()}`,
+    //     expires_in: 3600,
+    //     created_at: new Date()
+    //   };
       
-      // Store the credentials in the session
-      storeOAuthCredentials(req, service, credentials);
+    //   // Store the credentials in the session
+    //   storeOAuthCredentials(req, service, credentials);
       
-      // Save the connection if the user is authenticated
-      if (req.isAuthenticated()) {
-        try {
-          await saveConnection(req, service, profile, credentials);
-          return res.redirect('/app-connections?success=' + service);
-        } catch (error) {
-          console.error('Error in simulated login:', error);
-          return res.redirect('/app-connections?error=true');
-        }
-      } else {
-        return res.redirect('/auth');
-      }
-    }
+    //   // Save the connection if the user is authenticated
+    //   if (req.isAuthenticated()) {
+    //     try {
+    //       await saveConnection(req, service, profile, credentials);
+    //       return res.redirect('/app-connections?success=' + service);
+    //     } catch (error) {
+    //       console.error('Error in simulated login:', error);
+    //       return res.redirect('/app-connections?error=true');
+    //     }
+    //   } else {
+    //     return res.redirect('/auth');
+    //   }
+    // }
     
     // For real OAuth, verify the state parameter to prevent CSRF
     // For Instagram, we're being more lenient due to session handling issues
@@ -869,13 +874,73 @@ export async function registerRoutes(app: Express): Promise<Server> {
           formData.append('redirect_uri', redirect_uri);
           formData.append('grant_type', 'authorization_code');
           
-          console.log(`LinkedIn token request with redirect_uri: ${redirect_uri}`);
+          // Add detailed logging for debugging
+          console.log('LinkedIn token exchange request details:', {
+            url: config.tokenURL,
+            redirect_uri,
+            client_id_length: config.clientID?.length,
+            client_secret_length: config.clientSecret?.length,
+            code_length: (code as string).length,
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Accept': 'application/json'
+            }
+          });
           
           tokenResponse = await axios.post(config.tokenURL, formData.toString(), {
             headers: {
               'Content-Type': 'application/x-www-form-urlencoded',
               'Accept': 'application/json'
             }
+          }).catch(error => {
+            // Add detailed error logging
+            console.error('LinkedIn token exchange error:', {
+              status: error.response?.status,
+              statusText: error.response?.statusText,
+              data: error.response?.data,
+              message: error.message,
+              request: {
+                url: config.tokenURL,
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/x-www-form-urlencoded',
+                  'Accept': 'application/json'
+                },
+                data: {
+                  client_id_length: config.clientID?.length,
+                  client_secret_length: config.clientSecret?.length,
+                  code_length: (code as string).length,
+                  redirect_uri,
+                  grant_type: 'authorization_code'
+                }
+              }
+            });
+            throw error;
+          });
+
+          // Add detailed logging for token response
+          console.log('LinkedIn token response:', {
+            status: tokenResponse.status,
+            statusText: tokenResponse.statusText,
+            data: tokenResponse.data,
+            headers: tokenResponse.headers
+          });
+
+          // Add error handling for missing tokens
+          if (!tokenResponse.data.access_token) {
+            console.error('LinkedIn token response missing access_token:', tokenResponse.data);
+            throw new Error('LinkedIn OAuth failed: No access token received');
+          }
+
+          const { access_token, refresh_token, expires_in } = tokenResponse.data;
+          
+          // Log token details (safely)
+          console.log('LinkedIn tokens received:', {
+            hasAccessToken: !!access_token,
+            accessTokenLength: access_token?.length,
+            hasRefreshToken: !!refresh_token,
+            refreshTokenLength: refresh_token?.length,
+            expiresIn: expires_in
           });
         } else {
           // Default JSON request for most services
@@ -1362,7 +1427,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // GET /api/app-connections - Get all app connections
   app.get("/api/app-connections", async (req, res) => {
     try {
-      const connections = await storage.getAllAppConnections();
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "You must be logged in to view connections" });
+      }
+      const connections = await storage.getAppConnectionsByUser(req.user.id);
       res.json(connections);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch app connections" });
@@ -1844,18 +1912,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const state = generateState();
             storeOAuthState(req, 'linkedin', state);
             
-            // For LinkedIn OAuth, we need to use a VERY simple redirect URI without any special characters
-            // LinkedIn can be extremely picky about redirect URIs
+            console.log("Using LinkedIn redirect URI:", LINKEDIN_REDIRECT_URI);
             
-            // Try a VERY simple callback URL without complex subdomains
-            // Make sure this exact string is registered in your LinkedIn developer settings
-            const linkedInRedirectUri = "https://brnout.replit.app/api/callback/linkedin";
-            
-            console.log("Using simplified LinkedIn redirect URI:", linkedInRedirectUri);
-            
-            // LinkedIn OAuth URL with proper CSRF protection
-            // LinkedIn uses space-separated scopes but URL-encoded
-            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(linkedInRedirectUri)}&scope=r_liteprofile%20r_emailaddress%20w_member_social&response_type=code&state=${state}`;
+            // LinkedIn OAuth URL with authorized scopes only
+            oauthUrl = `https://www.linkedin.com/oauth/v2/authorization?client_id=${process.env.LINKEDIN_CLIENT_ID}&redirect_uri=${encodeURIComponent(LINKEDIN_REDIRECT_URI)}&scope=openid%20profile%20email&response_type=code&state=${state}`;
           }
           break;
           
@@ -2286,10 +2346,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // LinkedIn token exchange
               tokenUrl = 'https://www.linkedin.com/oauth/v2/accessToken';
               
-              // Must use the EXACT same simplified redirect URI that was used in the authorization request
-              // This must match what was registered in LinkedIn's developer portal
-              // Use a very simple URL structure that's easier to register and verify
-              redirectUri = "https://brnout.replit.app/api/callback/linkedin";
+              // Use the environment-based redirect URI
+              redirectUri = LINKEDIN_REDIRECT_URI;
               console.log("Using LinkedIn callback redirect URI:", redirectUri);
               
               // LinkedIn also requires form-urlencoded

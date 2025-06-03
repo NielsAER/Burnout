@@ -2,10 +2,17 @@ import OpenAI from "openai";
 import { storage } from "../storage";
 import { Automation, AppConnection, WorkflowSuggestion as DbWorkflowSuggestion, InsertWorkflowSuggestion, User } from "@shared/schema";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI client only if API key is available
+let openai: OpenAI | null = null;
+try {
+  if (process.env.OPENAI_API_KEY) {
+    openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+    });
+  }
+} catch (error) {
+  console.warn("OpenAI client initialization failed:", error);
+}
 
 /**
  * Types for suggestion system
@@ -106,13 +113,19 @@ async function getUserContext(userId: number): Promise<UserContext> {
 }
 
 /**
- * Generate workflow suggestions using OpenAI's API
+ * Generate workflow suggestions using OpenAI's API or fallback to predefined suggestions
  */
 async function generateSuggestionsWithAI(
   userContext: UserContext,
   count: number,
   category?: string
 ): Promise<WorkflowSuggestionResponse[]> {
+  // If OpenAI is not available, use predefined suggestions
+  if (!openai) {
+    console.log("OpenAI not available, using predefined suggestions");
+    return getPredefinedSuggestions(count, category);
+  }
+
   try {
     // Create the prompt for OpenAI
     const systemMessage = `You are an expert workflow automation assistant that provides highly personalized automation suggestions. 
@@ -140,8 +153,8 @@ For each suggestion, provide the following in JSON format:
 
 Only include suggestions that involve apps the user has connected.`;
 
-    // Call OpenAI API
-    const response = await openai.chat.completions.create({
+    // At this point, we know openai is not null due to the early return above
+    const response = await openai!.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemMessage },
@@ -156,7 +169,7 @@ Only include suggestions that involve apps the user has connected.`;
     const suggestionsData = JSON.parse(content || "{}");
     
     if (!suggestionsData.suggestions || !Array.isArray(suggestionsData.suggestions)) {
-      return [];
+      return getPredefinedSuggestions(count, category);
     }
     
     // Add template configurations
@@ -169,8 +182,64 @@ Only include suggestions that involve apps the user has connected.`;
     return completeSuggestions;
   } catch (error: any) {
     console.error("OpenAI suggestion generation error:", error);
-    throw new Error(`Failed to generate suggestions with AI: ${error.message}`);
+    // Fallback to predefined suggestions on error
+    return getPredefinedSuggestions(count, category);
   }
+}
+
+/**
+ * Get predefined workflow suggestions as fallback
+ */
+function getPredefinedSuggestions(count: number, category?: string): WorkflowSuggestionResponse[] {
+  const allSuggestions: WorkflowSuggestionResponse[] = [
+    {
+      name: "Daily Social Media Summary",
+      description: "Get a daily summary of your social media posts and engagement",
+      triggerAppId: "schedule",
+      actionAppId: "openai",
+      complexity: 2,
+      triggerConfigTemplate: { schedule: "0 18 * * *" },
+      actionConfigTemplate: { prompt: "Summarize my social media activities for today" },
+      matchScore: 85,
+      category: "social",
+      tags: ["social media", "summary", "daily"],
+      benefits: ["Stay informed", "Track engagement", "Save time"]
+    },
+    {
+      name: "Tweet When Blog Published",
+      description: "Automatically create a tweet when you publish a new blog post",
+      triggerAppId: "rss",
+      actionAppId: "twitter",
+      complexity: 3,
+      triggerConfigTemplate: { url: "https://yourblog.com/feed" },
+      actionConfigTemplate: { message: "New blog post: {{title}} {{url}}" },
+      matchScore: 75,
+      category: "social",
+      tags: ["blog", "twitter", "automation"],
+      benefits: ["Save time", "Increase reach", "Consistent posting"]
+    },
+    {
+      name: "Meeting Notes to Notion",
+      description: "Automatically save meeting notes to Notion after each calendar event",
+      triggerAppId: "google_calendar",
+      actionAppId: "notion",
+      complexity: 4,
+      triggerConfigTemplate: { eventType: "meeting" },
+      actionConfigTemplate: { database: "Meetings", template: "Meeting Notes" },
+      matchScore: 90,
+      category: "productivity",
+      tags: ["meetings", "notes", "organization"],
+      benefits: ["Stay organized", "Save time", "Never lose notes"]
+    }
+  ];
+
+  // Filter by category if specified
+  const filteredSuggestions = category 
+    ? allSuggestions.filter(s => s.category === category)
+    : allSuggestions;
+
+  // Return requested number of suggestions
+  return filteredSuggestions.slice(0, count);
 }
 
 /**
@@ -196,7 +265,7 @@ Provide a complete JSON configuration including:
 - Reasonable default values for all fields`;
 
     // Call OpenAI API
-    const response = await openai.chat.completions.create({
+    const response = await openai!.chat.completions.create({
       model: "gpt-4o",
       messages: [
         { role: "system", content: systemMessage },

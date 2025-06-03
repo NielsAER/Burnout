@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import axios from "axios";
 import { storage } from "./storage";
 import { randomBytes } from "crypto";
+import { AppConnection } from "@shared/schema";
 
 // OAuth configs for different services
 export const oauthConfigs = {
@@ -21,7 +22,7 @@ export const oauthConfigs = {
     clientID: process.env.LINKEDIN_CLIENT_ID,
     clientSecret: process.env.LINKEDIN_CLIENT_SECRET,
     callbackURL: "/api/callback/linkedin", // Updated to use consistent path format
-    scope: ["r_liteprofile", "r_emailaddress", "w_member_social"],
+    scope: ["openid", "profile", "email"],
     apiBaseURL: "https://api.linkedin.com/v2",
     profile: (accessToken: string) => getLinkedInProfile(accessToken),
   },
@@ -125,7 +126,7 @@ async function getInstagramProfile(accessToken: string) {
 
 async function getLinkedInProfile(accessToken: string) {
   try {
-    const response = await axios.get('https://api.linkedin.com/v2/me', {
+    const response = await axios.get('https://api.linkedin.com/v2/userinfo', {
       headers: {
         'Authorization': `Bearer ${accessToken}`,
         'cache-control': 'no-cache',
@@ -178,27 +179,66 @@ export async function saveConnection(req: Request, service: string, profile: any
       throw new Error("User not authenticated");
     }
 
+    console.log(`Saving ${service} connection:`, {
+      userId: req.user!.id,
+      profile: {
+        username: profile.username,
+        name: profile.name,
+        email: profile.email,
+        sub: profile.sub
+      },
+      hasCredentials: !!credentials,
+      credentialKeys: Object.keys(credentials || {})
+    });
+
     // Check if connection already exists
     const connections = await storage.getAllAppConnections();
     const existingConnection = connections.find(conn => 
       conn.appId === service && req.user && conn.userId === req.user.id
     );
 
+    console.log(`Existing ${service} connection:`, existingConnection ? {
+      id: existingConnection.id,
+      username: existingConnection.username,
+      hasCredentials: !!existingConnection.credentials
+    } : 'None');
+
     const connectionData = {
       appId: service,
       userId: req.user!.id,
-      username: profile.username || profile.name || profile.email || `${service}_user`,
+      username: profile.username || profile.name || profile.email || profile.sub || `${service}_user`,
       permissions: ["read", "write"],
       credentials: credentials
     };
 
+    let savedConnection: AppConnection;
     if (existingConnection) {
       // Update existing connection
-      await storage.updateAppConnection(existingConnection.id, connectionData);
+      console.log(`Updating existing ${service} connection:`, {
+        id: existingConnection.id,
+        newUsername: connectionData.username
+      });
+      const updated = await storage.updateAppConnection(existingConnection.id, connectionData);
+      if (!updated) {
+        throw new Error(`Failed to update ${service} connection`);
+      }
+      savedConnection = updated;
     } else {
       // Create new connection
-      await storage.createAppConnection(connectionData);
+      console.log(`Creating new ${service} connection:`, {
+        appId: connectionData.appId,
+        username: connectionData.username
+      });
+      savedConnection = await storage.createAppConnection(connectionData);
     }
+
+    console.log(`Successfully saved ${service} connection:`, {
+      id: savedConnection.id,
+      username: savedConnection.username,
+      hasCredentials: !!savedConnection.credentials
+    });
+
+    return savedConnection;
   } catch (error) {
     console.error(`Failed to save ${service} connection:`, error);
     throw error;
