@@ -229,6 +229,30 @@ export default function AppConnections() {
     }
   });
 
+  // Mutation for reconnecting an app (refreshing tokens)
+  const reconnectMutation = useMutation({
+    mutationFn: async (appId: string) => {
+      return await apiRequest({
+        method: "POST",
+        url: `/api/app-connections/${appId}/reconnect`,
+      });
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ['/api/app-connections'] });
+      toast({
+        title: "Connection refreshed",
+        description: "Your access token has been refreshed successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Reconnection failed",
+        description: `${error}`,
+        variant: "destructive",
+      });
+    }
+  });
+
   // Event listener for OAuth popup messages
   useEffect(() => {
     // Create message event handler
