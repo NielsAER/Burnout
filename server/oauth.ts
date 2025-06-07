@@ -203,12 +203,22 @@ export async function saveConnection(req: Request, service: string, profile: any
       hasCredentials: !!existingConnection.credentials
     } : 'None');
 
+    // Structure credentials to include refresh token and expiration
+    const structuredCredentials = {
+      accessToken: credentials.access_token,
+      refreshToken: credentials.refresh_token || null,
+      expiresAt: credentials.expires_in ? new Date(Date.now() + credentials.expires_in * 1000) : null,
+      createdAt: new Date(),
+      userId: profile.id || profile.sub,
+      ...credentials // Include any additional service-specific data
+    };
+
     const connectionData = {
       appId: service,
       userId: req.user!.id,
       username: profile.username || profile.name || profile.email || profile.sub || `${service}_user`,
       permissions: ["read", "write"],
-      credentials: credentials
+      credentials: structuredCredentials
     };
 
     let savedConnection: AppConnection;

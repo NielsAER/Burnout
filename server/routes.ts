@@ -1449,7 +1449,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           username: username.trim(),
           credentials: {
             accessToken: token,
+            refreshToken: null, // Direct token endpoint doesn't provide refresh token
+            expiresAt: null, // Direct token endpoint doesn't provide expiration
             userId: userData.id,
+            createdAt: new Date(),
           },
           permissions: ["basic_profile"],
         });
@@ -3184,6 +3187,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("App disconnection error:", error);
       res.status(500).json({ message: "Failed to disconnect app" });
+    }
+  });
+
+  // POST /api/app-connections/:appId/reconnect - Reconnect app connection with fresh token
+  app.post("/api/app-connections/:appId/reconnect", async (req, res) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res
+          .status(401)
+          .json({ message: "You must be logged in to reconnect" });
+      }
+
+      const { appId } = req.params;
+      const connection = await storage.getAppConnectionByUserAndApp(req.user.id, appId);
+      
+      if (!connection) {
+        return res.status(404).json({ message: "Connection not found" });
+      }
+
+      // Check if we have a refresh token to use
+      const credentials = connection.credentials as any;
+      if (!credentials?.refreshToken) {
+        return res.status(400).json({ 
+          message: "No refresh token available. Please reconnect through OAuth." 
+        });
+      }
+
+      // Attempt to refresh the access token
+      try {
+        let newTokenData;
+
+        if (appId === 'linkedin') {
+          // LinkedIn refresh token flow
+          const response = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              grant_type: 'refresh_token',
+              refresh_token: credentials.refreshToken,
+              client_id: process.env.LINKEDIN_CLIENT_ID!,
+              client_secret: process.env.LINKEDIN_CLIENT_SECRET!,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`LinkedIn refresh failed: ${response.statusText}`);
+          }
+
+          newTokenData = await response.json();
+        } else if (appId.includes('google')) {
+          // Google refresh token flow
+          const response = await fetch('https://oauth2.googleapis.com/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              grant_type: 'refresh_token',
+              refresh_token: credentials.refreshToken,
+              client_id: process.env.GOOGLE_CLIENT_ID!,
+              client_secret: process.env.GOOGLE_CLIENT_SECRET!,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Google refresh failed: ${response.statusText}`);
+          }
+
+          newTokenData = await response.json();
+        } else if (appId === 'twitter') {
+          // Twitter refresh token flow
+          const response = await fetch('https://api.twitter.com/2/oauth2/token', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              'Authorization': `Basic ${Buffer.from(`${process.env.TWITTER_CLIENT_ID}:${process.env.TWITTER_CLIENT_SECRET}`).toString('base64')}`,
+            },
+            body: new URLSearchParams({
+              grant_type: 'refresh_token',
+              refresh_token: credentials.refreshToken,
+            }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Twitter refresh failed: ${response.statusText}`);
+          }
+
+          newTokenData = await response.json();
+        } else {
+          return res.status(400).json({ 
+            message: `Token refresh not supported for ${appId}` 
+          });
+        }
+
+        // Update the connection with new credentials
+        const updatedCredentials = {
+          ...credentials,
+          accessToken: newTokenData.access_token,
+          refreshToken: newTokenData.refresh_token || credentials.refreshToken,
+          expiresAt: newTokenData.expires_in ? new Date(Date.now() + newTokenData.expires_in * 1000) : null,
+          refreshedAt: new Date(),
+        };
+
+        const updatedConnection = await storage.updateAppConnection(connection.id, {
+          credentials: updatedCredentials
+        });
+
+        console.log(`Successfully refreshed ${appId} token for connection ${connection.id}`);
+
+        res.json({
+          message: "Connection refreshed successfully",
+          connection: {
+            id: updatedConnection!.id,
+            appId: updatedConnection!.appId,
+            username: updatedConnection!.username,
+            refreshedAt: updatedCredentials.refreshedAt,
+          }
+        });
+
+      } catch (tokenError) {
+        console.error(`Token refresh failed for ${appId}:`, tokenError);
+        res.status(400).json({ 
+          message: "Failed to refresh token. Please reconnect through OAuth.",
+          error: (tokenError as Error).message
+        });
+      }
+
+    } catch (error) {
+      console.error("Reconnect error:", error);
+      res.status(500).json({ message: "Failed to reconnect" });
     }
   });
 
