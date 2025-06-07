@@ -13,7 +13,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useLocation } from "wouter";
-import { useLinkedInDirectToken } from "@/lib/useLinkedInDirectToken";
+
 import { 
   Dialog,
   DialogContent,
@@ -66,6 +66,9 @@ interface ConnectionStatus {
   username?: string;
   lastConnected?: string;
   permissions?: string[];
+  hasRefreshToken?: boolean;
+  tokenExpired?: boolean;
+  expiresAt?: string;
 }
 
 export default function AppConnections() {
@@ -74,8 +77,6 @@ export default function AppConnections() {
   const [, navigate] = useLocation();
   const [activeCategory, setActiveCategory] = useState<AppCategory>("social");
   const [connectingApp, setConnectingApp] = useState<string | null>(null);
-  const [linkedInToken, setLinkedInToken] = useState<string>("AQUHxDdRo_UARMzpDENsl8OeX_RZ1cSVvra-reQNrUX4pR3YNyMUtQAI8y-3EKm_2iiGvkoaC-k-jF3KtlXRJU0VGWsojM_trWLzzmaf6e31sV4CTSGxlhArPfsWrkkKlpRHn-GzryVWBtrfMWtSqta1XYtcETU2BQEvFU6c2c3bbmnZN1Yj0Vs08eXMJ5eHQfptTzJCkiwju7uwos4-rM7GL3d7WBYcR_f6UWiNtQN82-6YL_CJbX2k_xsPott1rHWyy13ubS1l1zzm5pkbsjcbWluoErONQOnGksTh7E-iid0nxH3_pJTTpT-mNZT-HZyBqAWmXuSMvwDUbd2oooXMUN5FKQ");
-  const { connectWithToken, isConnecting: isConnectingLinkedIn } = useLinkedInDirectToken();
 
   // Fetch connection statuses
   const { data: connections, isLoading } = useQuery<any[]>({
@@ -166,11 +167,19 @@ export default function AppConnections() {
     // If data is available, process it
     if (Array.isArray(connections)) {
       connections.forEach((connection: any) => {
+        const credentials = connection.credentials || {};
+        const expiresAt = credentials.expiresAt ? new Date(credentials.expiresAt) : null;
+        const now = new Date();
+        const tokenExpired = expiresAt ? expiresAt <= now : false;
+        
         formatted[connection.appId] = {
           connected: true,
           username: connection.username || 'Connected account',
           lastConnected: new Date(connection.createdAt).toLocaleDateString(),
-          permissions: connection.permissions || []
+          permissions: connection.permissions || [],
+          hasRefreshToken: !!credentials.refreshToken,
+          tokenExpired,
+          expiresAt: expiresAt?.toISOString()
         };
       });
     }
@@ -435,10 +444,30 @@ export default function AppConnections() {
     }
 
     if (isConnected(appId)) {
+      const connection = connectionMap[appId];
+      const isExpired = connection?.tokenExpired;
+      const hasRefreshToken = connection?.hasRefreshToken;
+      
       return (
-        <div className="flex items-center">
-          <Check className="h-4 w-4 text-green-500 mr-2" />
-          <span className="text-sm">{connectionMap[appId]?.username || 'Connected'}</span>
+        <div className="space-y-1">
+          <div className="flex items-center">
+            {isExpired ? (
+              <AlertCircle className="h-4 w-4 text-amber-500 mr-2" />
+            ) : (
+              <Check className="h-4 w-4 text-green-500 mr-2" />
+            )}
+            <span className="text-sm">{connection?.username || 'Connected'}</span>
+          </div>
+          {isExpired && (
+            <div className="text-xs text-amber-600">
+              {hasRefreshToken ? "Token expired - can refresh" : "Token expired - reconnect needed"}
+            </div>
+          )}
+          {!isExpired && connection?.expiresAt && (
+            <div className="text-xs text-gray-500">
+              Expires: {new Date(connection.expiresAt).toLocaleDateString()}
+            </div>
+          )}
         </div>
       );
     }
@@ -505,49 +534,65 @@ export default function AppConnections() {
                     </CardContent>
                     <CardFooter className="pt-2">
                       {isConnected(appId) ? (
-                        <Button
-                          variant="outline"
-                          onClick={() => handleDisconnect(appId)}
-                          className="w-full"
-                        >
-                          Disconnect
-                        </Button>
+                        <div className="w-full space-y-2">
+                          {connectionMap[appId]?.tokenExpired && connectionMap[appId]?.hasRefreshToken && (
+                            <Button
+                              variant="default"
+                              onClick={() => reconnectMutation.mutate(appId)}
+                              className="w-full"
+                              disabled={reconnectMutation.isPending}
+                            >
+                              {reconnectMutation.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Refreshing...
+                                </>
+                              ) : (
+                                "Refresh Connection"
+                              )}
+                            </Button>
+                          )}
+                          {connectionMap[appId]?.hasRefreshToken && !connectionMap[appId]?.tokenExpired && (
+                            <Button
+                              variant="secondary"
+                              onClick={() => reconnectMutation.mutate(appId)}
+                              className="w-full"
+                              disabled={reconnectMutation.isPending}
+                            >
+                              {reconnectMutation.isPending ? (
+                                <>
+                                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                                  Refreshing...
+                                </>
+                              ) : (
+                                "Refresh Token"
+                              )}
+                            </Button>
+                          )}
+                          <Button
+                            variant="outline"
+                            onClick={() => handleDisconnect(appId)}
+                            className="w-full"
+                          >
+                            Disconnect
+                          </Button>
+                        </div>
                       ) : (
-                        // For LinkedIn, just use standard OAuth connection
-                        appId === 'linkedin' ? (
-                          <Button
-                            variant="default"
-                            onClick={() => handleConnect(appId)}
-                            className="w-full"
-                            disabled={connectingApp === appId}
-                          >
-                            {connectingApp === appId ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Connecting...
-                              </>
-                            ) : (
-                              <>Connect <ChevronRight className="ml-2 h-4 w-4" /></>
-                            )}
-                          </Button>
-                        ) : (
-                          // For other services, use standard OAuth approach
-                          <Button
-                            variant="default"
-                            onClick={() => handleConnect(appId)}
-                            className="w-full"
-                            disabled={connectingApp === appId}
-                          >
-                            {connectingApp === appId ? (
-                              <>
-                                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                                Connecting...
-                              </>
-                            ) : (
-                              <>Connect <ChevronRight className="ml-2 h-4 w-4" /></>
-                            )}
-                          </Button>
-                        )
+                        <Button
+                          variant="default"
+                          onClick={() => handleConnect(appId)}
+                          className="w-full"
+                          disabled={connectingApp === appId}
+                        >
+                          {connectingApp === appId ? (
+                            <>
+                              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                              Connecting...
+                            </>
+                          ) : (
+                            <>Connect <ChevronRight className="ml-2 h-4 w-4" /></>
+                          )}
+                        </Button>
                       )}
                     </CardFooter>
                   </Card>
