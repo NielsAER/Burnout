@@ -1307,11 +1307,26 @@ export class DatabaseStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    // Initialize the PostgreSQL session store
-    this.sessionStore = new PostgresSessionStore({
-      pool,
-      createTableIfMissing: true
-    });
+    // Initialize the PostgreSQL session store with proper error handling
+    try {
+      this.sessionStore = new PostgresSessionStore({
+        pool,
+        createTableIfMissing: true,
+        tableName: 'session',
+        pruneSessionInterval: 60
+      });
+      
+      // Log successful initialization
+      console.log('PostgreSQL session store initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize PostgreSQL session store:', error);
+      // Fallback to memory store if PostgreSQL fails
+      const MemoryStore = createMemoryStore(session);
+      this.sessionStore = new MemoryStore({
+        checkPeriod: 86400000 // prune expired entries every 24h
+      });
+      console.log('Falling back to memory session store');
+    }
   }
   
   // Password reset methods

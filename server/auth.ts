@@ -39,14 +39,19 @@ export function setupAuth(app: Express) {
   
   const sessionSettings: session.SessionOptions = {
     secret: sessionSecret,
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       maxAge: 7 * 24 * 60 * 60 * 1000, // 1 week
-    }
+      sameSite: 'lax',
+      path: '/',
+      domain: process.env.NODE_ENV === "production" ? '.replit.com' : undefined // Allow cookie to work across subdomains in production
+    },
+    name: 'connect.sid',
+    rolling: true
   };
 
   app.set("trust proxy", 1);

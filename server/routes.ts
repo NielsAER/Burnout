@@ -34,7 +34,7 @@ import { setupAuth } from "./auth";
 const LINKEDIN_REDIRECT_URI =
   process.env.NODE_ENV === "production"
     ? "https://brnout.replit.app/api/callback/linkedin" // Production URL
-    : "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/api/callback/linkedin"; // Development URL
+    : process.env.LINKEDIN_REDIRECT_URI; // Development URL
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication
@@ -2048,7 +2048,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Use the redirect URI that's registered in the Meta Developer Portal
           // This must match exactly what's configured in the Portal for Instagram OAuth
           const redirectUri =
-            "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
+            `${process.env.BASE_URL}/app-connections`;
 
           console.log("Using Instagram redirect URI:", redirectUri);
 
@@ -2542,7 +2542,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               // Set redirect URI to match what we used in the authorization request
               // Must match the redirect URL in authorization request exactly
               redirectUri =
-                "https://0fcb63a8-dd05-4412-a625-acdf344e5c37-00-gy4e1ti0ba0r.picard.replit.dev/app-connections";
+                `${process.env.BASE_URL}/app-connections`;
               console.log("Using Instagram callback URI:", redirectUri);
 
               // Log detailed Instagram OAuth callback info for debugging
